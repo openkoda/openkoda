@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+<div th:fragment="notifications(readNotificationsList, unreadNotificationsList, userEntityId)">
+    <form id="markNotificationsAsRead"
+          th:action="${@url.markNotificationsAsRead(userEntityId, organizationEntityId, unreadNotificationsIdListString)}"
+          method="POST">
+    </form>
+
+    <li class="nav-item dropdown no-arrow mx-1">
+        <a class="nav-link dropdown-toggle" id="alertsDropdown"
+           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="javascript:;"
+           onclick="app.submitAndCallback($('#markNotificationsAsRead').get(0), {}); this.onclick=null;">
+            <i class="fas fa-bell fa-fw"></i>
+            <span class="badge badge-danger badge-counter" th:if="${unreadNotificationsList != null}"
+                  th:text="${unreadNotificationsNumber}">0</span>
+        </a>
+        <!-- Dropdown - Alerts -->
+
+        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in text-center"
+             aria-labelledby="alertsDropdown">
+            <h6 class="dropdown-header">
+                Alerts Center
+            </h6>
+            <form th:each="n : ${unreadNotificationsList}">
+                <div th:replace="~{notification-dropdown :: generateUnreadNotification(${n})}"></div>
+            </form>
+
+            <a class="dropdown-item text-center bg-primary text-white" th:href="${@url.notificationsAll(userEntityId, organizationEntityId)}">
+                Show All Alerts
+            </a>
+        </div>
+    </li>
+
+</div>
+
+<div th:fragment="generateUnreadNotification(unreadNotification)">
+    <div class="dropdown-item d-flex align-items-center flex-column text-left" th:data-url="${unreadNotification.attachmentURL}" onclick="fans.openUrlFromNotification(this);">
+
+
+        <div class="small text-gray-500 text-left w-100" th:if="${unreadNotification.createdOn != null}"
+             th:text="${#temporals.format(unreadNotification.createdOn, 'dd-MM-yyyy HH:mm:ss')}">
+            December12, 2019
+        </div>
+        <div class="d-flex text-left gap-10">
+            <div class="w-10" th:switch="${unreadNotification.type}">
+                <div th:case="${unreadNotification.type.PRIMARY}">
+                    <i class="fas fa-file-alt text-primary"></i>
+                </div>
+                <div th:case="${unreadNotification.type.SUCCESS}">
+                    <i class="fas fa-check text-success"></i>
+                </div>
+                <div th:case="${unreadNotification.type.WARNING}">
+                    <i class="fas fa-exclamation text-warning"></i>
+                </div>
+                <div th:case="${unreadNotification.type.FAILURE}">
+                    <i class="fas fa-exclamation text-danger"></i>
+                </div>
+                <div th:case="${unreadNotification.type.ERROR}">
+                    <i class="fas fa-exclamation text-danger"></i>
+                </div>
+                <div th:case="${unreadNotification.type.INFO}">
+                    <i class="fas fa-info text-info"></i>
+                </div>
+            </div>
+            <span class="font-weight-bold text-break" th:utext="${unreadNotification.message}">A new monthly report is ready to download!</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

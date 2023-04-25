@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div class="row" layout:fragment="content">
+        <div class="col-lg-8">
+            <form th:if="${@auth.canEditUserData() || @auth.isItYou(userEntity.id)}"
+                  th:replace="~{entity-forms::user-settings-form-new}"/>
+        </div>
+        <th:block th:each="additionalSettings : ${additionalSettingsForms}">
+            <form th:if="${@auth.canEditUserData() || @auth.isItYou(userEntity.id)}"
+                  th:replace="~{${additionalSettings.getT4()} :: ${additionalSettings.getT5()}}"/>
+        </th:block>
+        <div class="col-lg-4">
+            <div class="card shadow mb-4 form-parent">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold" th:text="#{template.resetPassword}">Reset password</h6>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <p th:text="#{template.resetPassword.description}">Send link to reset your password on your e-mail address</p>
+                    </div>
+                    <div>
+                        <form method="post" th:action="@{/password/user/recovery}" class="form-parent text-right">
+                            <div class="form-group">
+                                <input type="hidden" class="form-control form-control-user" name="email" th:value="${userEntity.email}">
+                            </div>
+                            <div class="col text-center">
+                                <button th:replace="~{forms::button-submit-and-callback(#{template.resetPassword}, 'app.replaceByElemId(\'post-callback-alert\')')}"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="post-callback-alert"></div>
+            </div>
+            <th:block th:if="${@auth.isItYou(userEntity.id)}">
+                <div>
+                    <div class="card shadow mb-4 form-parent">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold" th:text="#{template.APIAccess}">API Access</h6>
+                        </div>
+                        <div class="card-body">
+                            <div>
+                                <p th:text="#{template.APIAccess.description.line1}">Get a new API Key below to programmatically execute and access your functionality.</p>
+                                <p th:text="#{template.APIAccess.description.line2}">API Key will be displayed only once and any previous key will be invalidated and replaced.</p>
+                            </div>
+                            <div>
+                                <form method="post" th:action="${@url.resetApiKey(userEntity.id)}" class="form-parent text-right text-nowrap">
+                                    <div class="col text-center">
+                                        <button th:replace="~{forms::button-submit(#{template.APIKey.getNew})}"/>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

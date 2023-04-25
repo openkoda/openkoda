@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+</head>
+<body>
+
+
+
+<form th:fragment="single-link-post-form-with-callback(url, label, callback)" method="POST" style="display: inline-flex" th:action="${url}">
+    <button class="btn btn-sm btn-link" th:text="${label}"
+            th:onclick="app.submitToUrlAndCallback(this.form, [[${url}]], [[${callback}]])" type="button"/>
+</form>
+
+<form th:fragment="single-link-post-form-to-new-tab-with-confirm(url, label, confirmation)" method="POST" style="display: inline-flex" th:action="${url}">
+    <button class="btn btn-sm btn-link" th:text="${label}"
+            th:onclick="app.submitToUrlToNewTab(this.form, [[${url}]])" type="button"/>
+</form>
+
+<form th:fragment="single-link-post-form-with-confirm-callback(url, label, confirmationText, callback)" style="display: inline-flex" method="POST" th:action="${url}">
+    <button class="btn btn-sm btn-link" th:text="${label}"
+            th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button"/></form>
+
+
+<form th:fragment="single-link-post-form-with-confirm(url, label, confirmationText)" style="display: inline-flex" method="POST" th:action="${url}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button class="btn btn-sm btn-link" th:text="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
+
+<form th:fragment="single-button-post-form(url, label, addedClass)" th:action="${url}"><button
+        th:class="${'btn btn-primary inline ' + addedClass}" type="submit"
+        th:text="${label}">
+    Submit</button></form>
+
+<form th:fragment="single-button-post-form-with-confirm(url, label, confirmationText)" method="POST"
+      th:action="${url}">
+    <button class="btn btn-sm btn-primary" th:text="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
+<form th:fragment="single-icon-post-form-with-confirm(url, iconClass, confirmationText)" method="POST"
+      th:action="${url}">
+    <button class="bg-transparent p-0 border-0" th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button">
+        <i th:class="${iconClass} + ' form-icon'"></i>
+    </button>
+</form>
+
+<form th:fragment="single-button-post-form-with-confirm-class(url, label, confirmationText, aclass)" method="POST"
+      th:action="${url}" th:class="${aclass}">
+    <button th:class="${'btn btn-sm btn-primary ' + aclass}" th:text="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
+<form th:fragment="single-button-danger-post-form-with-confirm(url, label, confirmationText)" method="POST"
+      th:action="${url}">
+    <button class="btn btn-sm btn-danger" th:text="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
+<form th:fragment="single-button-danger-post-form-with-confirm-with-class(url, label, confirmationText, addedClass)" method="POST"
+      th:action="${url}">
+    <button th:class="'btn ' + ${addedClass}" th:text="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
+<form th:fragment="single-button-post-form-with-callback(url, label, callback)" method="POST"
+      th:action="${url}">
+    <button class="btn btn-sm btn-primary" th:text="${label}"
+            th:onclick="app.submitToUrlAndCallback(this.form, [[${url}]], [[${callback}]])" type="button"/>
+</form>
+
+<form th:fragment="single-button-medium-post-form-with-callback(url, label, callback)" method="POST"
+      th:action="${url}">
+    <button class="btn btn-primary" th:text="${label}"
+            th:onclick="app.submitToUrlAndCallback(this.form, [[${url}]], [[${callback}]])" type="button"/>
+</form>
+
+<form th:fragment="single-button-post-form-with-confirm-callback(url, label, confirmationText, callback)" method="POST" class="btn-form"
+      th:action="${url}">
+    <button class="btn btn-sm btn-primary" th:text="${label}"
+            th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button"/></form>
+
+<form th:fragment="single-button-post-form-with-confirm-prompt-callback(url, label, confirmationPromptText, textToConfirm, callback, failureCallback, addedClass)" method="POST"
+      th:action="${url}">
+    <button th:class="'btn btn-sm ' + ${addedClass}" th:text="${label}"
+            th:onclick="app.confirmThenSubmitAsyncAndCallback(this.form, app.confirmPrompt( [[${confirmationPromptText}]] , [[${textToConfirm}]] ), [[${callback}]], [[${failureCallback}]])" type="button"/></form>
+
+<form th:fragment="single-button-post-form-with-confirm-callback-class(url, label, confirmationText, callback, addedClass)" method="POST" th:action="${url}" th:class="'btn-form '">
+    <button th:class="'btn ' + ${addedClass}" th:text="${label}"
+            th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button"/></form>
+
+
+<form th:fragment="single-button-post-form-with-replace(url, label)" method="POST"
+      th:action="${url}">
+    <button class="btn btn-sm btn-primary" th:text="${label}"
+            th:onclick="app.submitAndReplace(this.form, [[${url}]])" type="button"/>
+</form>
+
+<form th:fragment="single-dropdown-post-form-class(fieldId, fieldName, selectValue, datalistId, url, callback, addedClass)" method="POST"
+      th:action="${url}">
+    <select th:id="${fieldId}" th:name="${fieldName}" th:class="${'selectpicker type1 form-control ' + addedClass}"
+            th:onchange="app.submitAndCallback(this.form,[[${callback}]])" >
+    </select>
+
+    <script th:inline="javascript">
+        (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+            let fieldId = /*[[${fieldId}]]*/ '_none_';
+            let fieldValue = /*[[ ${selectValue} ?: *{__${ '' + fieldName + '' }__}]]*/ '';
+                fieldValue = fieldValue + "";
+            let fieldName = /*[[${ fieldName }]]*/ '';
+            let showDefault = /*[[${ showDefault }]]*/ false;
+            app.populateSelect(fieldId, fieldName, fieldValue, datalistId, showDefault, null, false);
+        })();
+    </script>
+</form>
+
+<form th:fragment="fontawesome-post-form-with-icon-replace(url, icon, addedClass)" style="display: inline-block; cursor: pointer;" method="POST" th:action="${url}">
+    <i th:class="'fa fa-' + ${icon} + ' ' + ${addedClass}" aria-hidden="true" onclick="app.submitParentFormAndReplace(this)"> </i>
+</form>
+
+<form>
+
+    <button th:fragment="button-submit(label)" class="btn btn-primary btn-submit" onclick="app.submitAndReplace(this.form)" type="button" th:text="${label}">Submit</button>
+    <div th:fragment="button-submit-centered(label)" class="col text-center">
+        <div th:replace="forms::button-submit(${label})"/>
+    </div>
+    <div th:fragment="button-submit-centered-with-disable(label, isDisabled)" class="col text-center">
+        <button th:disabled="${isDisabled}" class="btn btn-primary btn-submit" onclick="app.submitAndReplace(this.form)" type="button" th:text="${label}">Submit</button>
+    </div>
+
+    <button th:fragment="button-submit-to-url-inline(url, label)" class="btn btn-primary inline" th:onclick="app.submitToUrlAndReplace(this.form, [[${url}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-submit-to-url-inline-and-callback(url, label, callback)" class="btn btn-primary inline" th:onclick="app.submitToUrlAndCallback(this.form, [[${url}]], [[${callback}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-submit-to-url-inline-and-callback-with-class(url, label, callback, addedClass)" th:class="'btn btn-primary inline ' + ${addedClass}" th:onclick="app.submitToUrlAndCallback(this.form, [[${url}]], [[${callback}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-submit-to-url-to-new-tab(url, label, addedClass)" th:class="'btn btn-primary inline ' + ${addedClass}" th:onclick="app.submitToUrlToNewTab(this.form, [[${url}]])" type="button" th:text="${label}">Submit</button>
+
+    <button th:fragment="button-submit-inline(label)" class="btn btn-primary inline btn-submit" onclick="app.submitAndReplace(this.form)" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-submit-and-callback(label, callback)" class="btn btn-primary btn-submit" th:onclick="app.submitAndCallback(this.form, [[${callback}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-submit-and-callback-inline(label, callback)" class="btn btn-primary inline btn-sm btn-submit"
+            th:onclick="app.submitAndCallback(this.form,[[${callback}]])" type="button" th:text="${label}">Submit</button>
+
+    <button th:fragment="button-select-and-replace(label, selector, url)" class="btn btn-primary inline" th:onclick="app.selectAndReplace([[${selector}]],[[${url}]])" type="button" th:text="${label}">Submit</button>
+
+    <th:block th:fragment="hidden-base(moduleName, name, value)" >
+        <input th:if="${value == null}" th:fragment="hidden(name)" type="hidden" th:name="${name}" th:field="*{__${name}__}" />
+        <input th:if="${value != null}" th:fragment="hidden-with-value(name, value)" type="hidden" th:name="${name}" th:value="${value}" />
+    </th:block>
+
+    <input th:fragment="csrf" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div th:fragment="text-simple(name, label, placeholder)"
+         th:replace="~{forms::text-base('', ${name}, null, ${label}, ${placeholder}, false, false, '', '')}" />
+    <div th:fragment="text-simple-with-disable(name, label, placeholder, isDisabled)"
+         th:replace="~{forms::text-base('', ${name}, null, ${label}, ${placeholder}, ${isDisabled}, ${isDisabled}, '', '')}" />
+    <div th:fragment="text-simple-with-class(name, label, placeholder, addedOuterClass)"
+         th:replace="~{forms::text-base('', ${name}, null, ${label}, ${placeholder}, false, false, '', ${addedOuterClass})}" />
+    <div th:fragment="text-simple-with-value(name, value, label, placeholder)"
+         th:replace="~{forms::text-base('', ${name}, ${value}, ${label}, ${placeholder}, false, false, '', '')}" />
+    <div th:fragment="text-simple-with-value-with-class(name, value, label, placeholder, addedOuterClass)"
+         th:replace="~{forms::text-base('', ${name}, ${value}, ${label}, ${placeholder}, false, false, '', ${addedOuterClass})}" />
+    <div th:fragment="text-simple-inline(name, label, placeholder)" th:replace="~{forms::text-base('', ${name}, null, ${label}, ${placeholder}, false, false, 'inline', '')}" />
+    <div th:fragment="text-readonly(name, label)" th:replace="~{forms::text-base('', ${name}, null, ${label}, '', true, true, '', '')}" />
+    <div th:fragment="text-readonly-with-class(name, label, addedOuterClass)" th:replace="~{forms::text-base('', ${name}, null, ${label}, '', true, true, '', ${addedOuterClass})}" />
+
+    <div th:fragment="password-simple(name, label)" th:replace="~{forms::password-base('', ${name}, ${label}, false, false, '', '')}" />
+    <div th:fragment="password-simple-with-class(name, label, addedOuterClass)" th:replace="~{forms::password-base('', ${name}, ${label}, false, false, '', ${addedOuterClass})}" />
+    <div th:fragment="password-simple-inline(name, label)" th:replace="~{forms::password-base('', ${name}, ${label}, false, false, 'inline', '')}" />
+    <div th:fragment="password-readonly(name, label)" th:replace="~{forms::password-base('', ${name}, ${label}, true, true, '', '')}" />
+    <div th:fragment="password-readonly-with-class(name, label, addedOuterClass)" th:replace="~{forms::password-base('', ${name}, ${label}, true, true, '', ${addedOuterClass})}" />
+
+    <div th:fragment="number-simple(name, label, placeholder)" th:replace="~{forms::number-base('', ${name}, ${label}, ${placeholder}, false, false, '', '', '0')}" />
+    <div th:fragment="number-simple-with-step(name, label, placeholder, step, additionalCss)" th:replace="~{forms::number-base('', ${name}, ${label}, ${placeholder}, false, false, ${additionalCss}, ${step},'0')}" />
+
+    <div th:fragment="text-base(moduleName, name, value, label, placeholder, isDisabled, isReadonly, addedClass, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
+        <th:block th:if="${value == null}">
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+                   th:field="*{__${name}__}" type="text" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
+            <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+        </th:block>
+        <th:block th:if="${value != null}">
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+                   th:value="${value}" type="text" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
+        </th:block>
+    </div>
+
+    <div th:fragment="text-base-nofield(moduleName, name, value, label, placeholder, isDisabled, isReadonly, addedClass, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
+        <th:block th:if="${value == null}">
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+                   type="text" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
+            <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+        </th:block>
+        <th:block th:if="${value != null}">
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+                   th:value="${value}" type="text" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
+        </th:block>
+    </div>
+
+    <div th:fragment="number-base(moduleName, name, label, placeholder, isDisabled, isReadonly, addedClass,step, value)" class="form-group">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
+        <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+               th:field="*{__${name}__}" type="number" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}" th:step="${step}" th:value="${value}"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="password-base(moduleName, name, label, isDisabled, isReadonly, addedClass, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
+        <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+               th:field="*{__${name}__}" type="password" th:id="${name}" th:name="${name}" autocomplete="new-password"
+               placeholder="**********"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="show-value(value, label)" class="row">
+        <div class="col-md-4 text-md-right"><strong th:text="${label + ':'}"></strong> </div>
+        <div class="col-md-8 text-md-left" th:text="${value}"/>
+    </div>
+
+    <div th:fragment="select-simple-datalist(moduleName, fieldName, label, datalistId)" class="form-group ">
+        <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, '', false, '', false, false, false, '', null, '')}"> </div>
+    </div>
+
+    <div th:fragment="select-simple-datalist-with-disable-with-class(moduleName, fieldName, label, datalistId, allowNull, isDisabled, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, ${allowNull}, #{template.dropdown.select}, '', ${isDisabled}, '', false, false, false, '', null, '')}"> </div>
+    </div>
+
+    <!--    fragment to allow disabling options in dropdown on the basis of user's privileges -->
+    <div th:fragment="select-datalist-options-with-disable-with-class(moduleName, fieldName, label, datalistId, isDisabled, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, '', ${isDisabled}, '', false, true, false, '', null, '')}"> </div>
+    </div>
+
+    <div th:fragment="radiobutton-table-with-disable-with-class(moduleName, fieldName, label, description, datalistId, isDisabled, addedClass, isDisabled, addedOuterClass, hasLabel)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::radiobutton-table-base(${moduleName}, ${fieldName}, ${label}, ${description}, ${datalistId}, ${addedClass}, ${isDisabled}, '', ${hasLabel})}"> </div>
+    </div>
+
+    <div th:fragment="select-simple-datalist-inline(moduleName, fieldName, label, datalistId)" class="form-group ">
+        <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, 'inline', false, '', false, false, false, '', null, '')}"> </div>
+    </div>
+
+    <div th:fragment="select-simple(fieldName, label, values)" class="form-group ">
+        <div th:replace="~{forms::select-base('', ${fieldName}, ${label}, ${values}, true, #{template.dropdown.select}, '', false, '', false)}"> </div>
+    </div>
+
+    <div th:fragment="select-with-help(moduleName, name, label, values, help)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, true, #{template.dropdown.select}, '', false, ${help}, false)}"></div>
+    </div>
+
+    <div th:fragment="select-with-disable(moduleName, name, label, values, isDisabled)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, true, #{template.dropdown.select}, '', ${isDisabled}, '', false)}"></div>
+    </div>
+
+    <div th:fragment="select-no-default(moduleName, name, label, values)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, false, '', '', false, '', false)}"></div>
+    </div>
+
+    <div th:fragment="select-with-custom-default(moduleName, name, label, values, defaultText)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, true, ${defaultText}, '', false, '', false)}"></div>
+    </div>
+
+    <div th:fragment="select-with-class(moduleName, name, label, values, addedClass)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, true, #{template.dropdown.select}, ${addedClass}, false, '', false)}"></div>
+    </div>
+
+    <div th:fragment="select-with-group(moduleName, name, label, values)" class="form-group ">
+        <div th:replace="~{forms::select-base(${moduleName}, ${name}, ${label}, ${values}, true, #{template.dropdown.select}, '', false, '', true)}"></div>
+    </div>
+
+    <div th:fragment="select-base(moduleName, fieldName, label, values, showDefault, defaultText, addedClass, isDisabled, help, hasGroup)" class="form-group ">
+        <label th:if="${label != null}" th:for="${fieldName}">
+            <th:block th:text="${label}" />&nbsp;
+            <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
+				<i class="fa fa-question-circle"></i>
+			</span>
+        </label>
+        <select th:id="${fieldName}" th:disabled="${isDisabled}" th:field="*{__${ '' + fieldName + '' }__}" th:name="${fieldName}" th:class="${'selectpicker type1 form-control ' + addedClass}">
+            <option th:if="${showDefault}" value="" th:text="${defaultText}">Select...</option>
+            <option th:each="entry : ${values}" th:value="${entry.key}" th:text="${entry.value}" th:attr="data-group=${hasGroup AND entry.group != null ? entry.group : entry.key}"></option>
+        </select>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+    </div>
+
+    <form th:fragment="single-post-dropdown(url, fieldName, value, label, datalistId, callback, isMapDto)" method="POST"
+          th:action="${url}">
+        <input th:replace="~{forms::select-base-datalist(${#strings.randomAlphanumeric(8)}, ${isMapDto ? 'dto[' + fieldName + ']' : 'dto.' + fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, '', false, '', false, false, true, ${callback}, ${value}, '')}"> </input>
+        <input type="hidden" class="form-control"
+               name="singleFieldToUpdate" th:value="${fieldName}"/>
+    </form>
+
+    <div th:fragment="select-base-datalist(moduleName, fieldName, label, datalistId, showDefault, defaultText, addedClass, isDisabled, help, hasGroup, disableOptions, onChangeSubmit, onChangeCallback, value, addedOuterClass)" th:class="${'form-group ' + addedOuterClass}">
+        <label th:if="${label != null}" th:for="${fieldName}" th:class="${addedClass}">
+            <th:block th:text="${label}" />&nbsp;
+            <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
+				<i class="fa fa-question-circle"></i>
+			</span>
+        </label>
+        <select th:id="${moduleName + '_' + fieldName}" th:disabled="${isDisabled}" th:name="${fieldName}" th:class="${'selectpicker type1 form-control ' + addedClass}"
+                th:with="changeCallback=${onChangeCallback ?: 'a => null'}"
+                th:onchange="'${onChangeSubmit ? 'app.submitAndCallback(this.form, [[${changeCallback}]])' : 'a => null'}'" >
+            <option th:if="${showDefault}" value="" th:text="${defaultText}">Select...</option>
+        </select>
+
+        <script th:inline="javascript">
+            (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+                let selectId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
+                let fieldValue = /*[[ ${value} ?: *{__${ '' + fieldName + '' }__}]]*/ '';
+                fieldValue = fieldValue + "";
+                let fieldName = /*[[${ fieldName }]]*/ '';
+                let showDefault = /*[[${ showDefault }]]*/ false;
+                let disableOptions = /*[[${ disableOptions }]]*/ false;
+                let defaultText = /*[[${ defaultText }]]*/ 'Select';
+                app.populateSelect(selectId, fieldName, fieldValue, datalistId, showDefault, defaultText, disableOptions);
+            })();
+        </script>
+        <em th:if="${value == null}" class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+    </div>
+
+    <div th:fragment="radiobutton-table-base(moduleName, fieldName, label, description, datalistId, addedClass, isDisabled, help, hasLabel)" class="form-group ">
+        <label th:if="${label != null && hasLabel}" th:for="${fieldName}" th:class="${addedClass}">
+            <th:block th:text="${label}" />&nbsp;
+            <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
+				<i class="fa fa-question-circle"></i>
+			</span>
+        </label>
+        <table th:class="${'table table-responsive table-radio ' + addedClass}">
+            <tbody th:id="${moduleName + '_' + fieldName}">
+            </tbody>
+        </table>
+        <script th:inline="javascript">
+            (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+                let selectId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
+                let fieldValue = /*[[*{__${ '' + fieldName + '' }__}]]*/ '';
+                let fieldName = /*[[${ fieldName }]]*/ '';
+                app.populateRadiobuttonTable(selectId, fieldName, fieldValue, datalistId);
+            })();
+        </script>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+    </div>
+
+    <div th:fragment="checkbox-table(moduleName, fieldName, label, description, datalistId, addedClass, isDisabled, help)" th:class="${addedClass} + ' form-group'">
+        <label th:if="${label != null && label != ''}" th:for="${fieldName}">
+            <th:block th:text="${label}" />&nbsp;
+            <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
+				<i class="fa fa-question-circle"></i>
+			</span>
+        </label>
+        <table th:class="${'form-control table table-responsive table-checkbox ' + addedClass}">
+            <tbody th:id="${moduleName + '_' + fieldName}">
+            </tbody>
+        </table>
+        <script th:inline="javascript">
+            (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+                let selectId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
+                let fieldValues = /*[[*{__${ '' + fieldName + '' }__}]]*/ [];
+                let fieldName = /*[[${ fieldName }]]*/ '';
+                app.populateCheckboxTable(selectId, fieldName, fieldValues, datalistId);
+            })();
+        </script>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+    </div>
+
+    <div th:fragment="file-gallery(generatedFormId, fieldName, label, description, datalistId, addedClass, isDisabled, multipleSelection, entityRelated, allowedContentType, help)" th:class="${addedClass} + ' form-group'">
+        <label th:if="${label != null}" th:for="${fieldName}">
+            <th:block th:text="${label}" />&nbsp;
+            <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
+				<i class="fa fa-question-circle"></i>
+			</span>
+        </label>
+        <th:block th:if="${!isDisabled}" th:replace="~{forms::file-upload-base(${generatedFormId}, ${fieldName}, ${label}, ${allowedContentType}, ${multipleSelection}, ${entityRelated}, ${additionalClass}, false)}"/>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em><br/>
+        <div class="d-flex flex-wrap" th:id="${generatedFormId + '_' + fieldName}">
+        </div>
+        <script th:inline="javascript">
+            (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+                let selectId = /*[[${generatedFormId + '_' + fieldName}]]*/ '_none_';
+                let fieldValues = /*[[*{__${ '' + fieldName + '' }__}]]*/ [];
+                let fieldName = /*[[${ fieldName }]]*/ '';
+                let multipleSelection = /*[[${ multipleSelection }]]*/ false;
+                let allowedContentType = /*[[${ allowedContentType }]]*/ '*/*';
+                let entityRelatedFileGallery = /*[[${entityRelated}]]*/;
+                app.populateFileGallery(selectId, fieldName, fieldValues, datalistId, allowedContentType, multipleSelection, entityRelatedFileGallery);
+            })();
+        </script>
+    </div>
+
+    <div th:fragment="single-image(generatedFormId, fieldName, fieldLabel, addedClass, isDisabled)" th:class="${addedClass} + ' form-group'"
+         th:with="fileId=*{__${fieldName}__},
+            src=(${fileId == null OR organizationEntity == null} ? 'https://static.thenounproject.com/png/18307-200.png' :  ${@url.fileContent(organizationEntity.id, fileId)})">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${fieldLabel})}"></div>
+        <div>
+            <img class="img-fluid" style="max-width:200px" th:id="${generatedFormId + '_' + fieldName}" th:src="${src}" />
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}"
+                   th:field="*{__${fieldName}__}" type="hidden" th:id="${fieldName}" th:name="${fieldName}"/>
+            <th:block th:if="${isDisabled}" th:replace="~{forms::single-image-upload-base(${generatedFormId}, ${fieldName}, ${fieldLabel}, ${additionalClass})}"/>
+        </div>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em><br/>
+    </div>
+
+    <div  th:fragment="textarea-code-with-class(formId, moduleName, name, label, placeholder, mode, addedClass, canWrite)" th:class="'form-group ' + ${!canWrite ? 'bg-gray-200 ' : ''} + ${addedClass}">
+        <div th:id="${formId + '-toast'}" class="toast fixed-top" role="alert" aria-live="assertive" aria-atomic="true"><div class="toast-body">Saved</div></div>
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, false, '', 'codemirror')}" />
+        <script th:inline="javascript">
+            (function(){
+                let fieldName = /*[[${ '' + name + '' }]]*/ '';
+                let formId = /*[[${ '' + formId + '' }]]*/ '';
+                let canWrite = /*[[${ '' + canWrite + '' }]]*/ '';
+                let config = {
+	                readOnly: canWrite === 'false',
+                    lineNumbers: true,
+                    mode: /*[[${ '' + mode + '' }]]*/ '',
+                    indentWithTabs: true,
+                    schemaInfo: CodeMirror.htmlSchema,
+                    extraKeys: {"Ctrl-Space": "autocomplete",
+                        "F11": function(cm) {
+                            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                        },
+	                    "Ctrl-Enter": function(cm) {
+		                    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+	                    },
+                        "Esc": function(cm) {
+                            if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                        },
+                        "Ctrl-S": function(cm) {
+                            app.submitAndCallback( $('#'+formId).get(0), a => $('#' + formId + '-toast').toast('show'));
+                        },
+	                    "Ctrl-/": function(cm) {
+						    cm.execCommand('toggleComment')
+	                    }
+                    }
+                }
+                let editor = CodeMirror.fromTextArea(document.getElementById('-' + fieldName), config);
+                function updateTextArea() {
+                    editor.save();
+                };
+                editor.on('change', updateTextArea);
+            })();
+        </script>
+
+    </div>
+    <div  th:fragment="textarea-code-with-autocomplete-with-class(formId, moduleName, name, label, placeholder, mode, addedClass, canWrite)" th:class="'form-group ' + ${!canWrite ? 'bg-gray-200 ' : ''} + ${addedClass}">
+        <div th:id="${formId + '-toast'}" class="toast fixed-top" role="alert" aria-live="assertive" aria-atomic="true"><div class="toast-body">Saved</div></div>
+        <div th:replace="forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, false, '', 'codemirror')" />
+        <script th:inline="javascript">
+            (function(){
+                let fieldName = /*[[${ '' + name + '' }]]*/ '';
+                let formId = /*[[${ '' + formId + '' }]]*/ '';
+                let canWrite = /*[[${ '' + canWrite + '' }]]*/ '';
+                let config = {
+	                readOnly: canWrite === 'false',
+                    lineNumbers: true,
+                    mode: /*[[${ '' + mode + '' }]]*/ '',
+                    indentWithTabs: true,
+                    schemaInfo: CodeMirror.htmlSchema,
+                    extraKeys: {"Ctrl-Space": "autocomplete",
+                        "F11": function(cm) {
+                            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                        },
+	                    "Ctrl-Enter": function(cm) {
+		                    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+	                    },
+                        "Esc": function(cm) {
+                            if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                        },
+                        "Ctrl-S": function(cm) {
+                            app.submitAndCallback( $('#'+formId).get(0), a => $('#' + formId + '-toast').toast('show'));
+                        },
+	                    "Ctrl-/": function(cm) {
+						    cm.execCommand('toggleComment')
+	                    }
+                    }
+                }
+                let textAreaId = '-' + fieldName;
+                let editor = CodeMirror.fromTextArea(document.getElementById(textAreaId), config);
+                if(canWrite === 'true'){
+                  let textAreaSelector = getSelectorFromId(textAreaId);
+                  $(textAreaSelector).data('CodeMirrorEditor', editor);
+                  $("#controller-endpoints " + textAreaSelector).next(".CodeMirror").find("textarea").on('focus', () => {
+                     activateEditor(textAreaSelector);
+                  })
+                }
+            })();
+        </script>
+
+    </div>
+    <div th:fragment="simple-map(moduleName, name, value, label, placeholder, isDisabled, isReadonly, addedClass)" class="form-group">
+        <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
+        <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+               th:field="*{__${name}__}" type="hidden" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
+        <div th:id="'mapid'+${name}" style="height: 500px" th:class="form-control"></div>
+        <script th:inline="javascript">
+            (function(){
+                let mapid = /*[[${ 'mapid' + name + '' }]]*/ '';
+                let fieldName = /*[[${ '' + name + '' }]]*/ '';
+                app.initializeMap(mapid,fieldName);
+            })();
+        </script>
+    </div>
+    <div th:fragment="textarea-simple(moduleName, name, label, placeholder)" class="form-group">
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, false, '', '')}" />
+    </div>
+
+    <div th:fragment="textarea-with-class(moduleName, name, label, placeholder, readonly, addedClass)" class="form-group">
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, ${readonly}, '', ${addedClass})}" />
+    </div>
+
+    <div th:fragment="textarea-with-help(moduleName, name, label, placeholder, help)" class="form-group">
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, false, ${help}, '')}" />
+    </div>
+
+    <div th:fragment="textarea-readonly(moduleName, name, label, placeholder)" class="form-group">
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, true, '', '')}" />
+    </div>
+
+    <div th:fragment="textarea-readonly-defined(moduleName, name, label, placeholder, readonly)" class="form-group">
+        <div th:replace="~{forms::textarea-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, ${readonly}, '', '')}" />
+    </div>
+
+    <div th:fragment="textarea-base(moduleName, name, label, placeholder, disabled, readonly, help, addedClass)" th:class="'form-group ' + ${addedClass}">
+        <label th:if="${label != ''}" th:for="${moduleName + '-' + name}">
+            <th:block th:text="${label}"/>&nbsp;<span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" ><i class="fa fa-question-circle"></i></span>
+        </label>
+        <textarea rows="5" th:field="*{__${name}__}" th:disabled="${disabled}" th:readonly="${readonly}"
+                  th:class="'form-control ' + ${addedClass}"  th:id="${moduleName + '-' + name}" th:name="${moduleName + '-' + name}" th:placeholder="${placeholder}"> </textarea>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="datepicker-simple(moduleName, name, label)" class="form-group">
+        <div th:replace="~{forms::datepicker-base(${moduleName}, ${name}, ${label}, 'false', '')}"></div>
+    </div>
+
+    <div th:fragment="datepicker-with-help(moduleName, name, label, help)" class="form-group">
+        <div th:replace="~{forms::datepicker-base(${moduleName}, ${name}, ${label}, 'false', ${help})}"></div>
+    </div>
+
+    <div th:fragment="datepicker-readonly(moduleName, name, label, readonly)" class="form-group">
+        <div th:replace="~{forms::datepicker-base(${moduleName}, ${name}, ${label}, ${readonly}, '')}"></div>
+    </div>
+
+    <div th:fragment="datetimepicker-simple(moduleName, name, label)" class="form-group">
+        <div th:replace="~{forms::datetimepicker-base(${moduleName}, ${name}, ${label}, 'false', '')}"></div>
+    </div>
+
+    <div th:fragment="datetimepicker-with-help(moduleName, name, label, help)" class="form-group">
+        <div th:replace="~{forms::datetimepicker-base(${moduleName}, ${name}, ${label}, 'false', ${help})}"></div>
+    </div>
+
+    <div th:fragment="datetimepicker-readonly(moduleName, name, label, readonly)" class="form-group">
+        <div th:replace="~{forms::datetimepicker-base(${moduleName}, ${name}, ${label}, ${readonly}, '')}"></div>
+    </div>
+
+    <div th:fragment="datepicker-base(moduleName, name, label, readonly, help)" class="form-group">
+        <label th:if="${label != ''}" class="datepicker-label" th:for="${moduleName + '-' + name}" th:text="${label}">Label</label>
+        <input th:field="*{__${name}__}" th:id="${moduleName + '-' + name}" th:name="${name}" class="form-control datepicker" type="date" th:readonly="${readonly}"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="datetimepicker-base(moduleName, name, label, readonly, help)" class="form-group">
+        <label th:if="${label != ''}" class="datepicker-label" th:for="${moduleName + '-' + name}" th:text="${label}">Label</label>
+        <input th:field="*{__${name}__}" th:id="${moduleName + '-' + name}" th:name="${name}" class="form-control datepicker" type="datetime-local" th:readonly="${readonly}"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="text-no-label(moduleName, name, placeholder)" class="form-group">
+        <input class="form-control"  th:field="*{__${name}__}" type="text" th:id="${moduleName + '-' + name}" th:name="${moduleName + '-' + name}" th:placeholder="${placeholder}"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="text-with-class(moduleName, name, label, placeholder, addedClass)" class="form-group">
+        <div th:replace="~{forms::text-base(${moduleName}, ${name}, null, ${label}, ${placeholder}, false, false, ${addedClass}, '')}"></div>
+    </div>
+
+    <div th:fragment="text-with-class-readonly(moduleName, name, label, placeholder, addedClass)" class="form-group">
+        <div th:replace="~{forms::text-base(${moduleName}, ${name}, null, ${label}, ${placeholder}, false, true, ${addedClass}, '')}"></div>
+    </div>
+
+    <div th:fragment="text-with-tooltip(moduleName, name, label, placeholder, tooltipText)" class="form-group">
+        <label data-toggle='tooltip' th:title="${tooltipText}" data-placement="auto top" th:for="${moduleName + '-' + name}" th:text="${label}">Label</label>
+        <input class="form-control" th:field="*{__${name}__}" type="text" th:id="${moduleName + '-' + name}" th:name="${moduleName + '-' + name}" th:placeholder="${placeholder}"/>
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="email-simple(moduleName, name, label, placeholder)" class="form-group">
+        <div th:replace="~{forms::email-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, false, '')}"></div>
+    </div>
+
+    <div th:fragment="email-readonly(moduleName, name, label, placeholder, isReadonly)" class="form-group">
+        <div th:replace="~{forms::email-base(${moduleName}, ${name}, ${label}, ${placeholder}, false, ${isReadonly}, '')}"></div>
+    </div>
+
+    <div th:fragment="email-base(moduleName, name, label, placeholder, isDisabled, isReadonly, addedClass)">
+        <div style="padding-right: 36px;" class="form-group">
+            <div th:replace="~{forms::label-simple('', ${label})}"></div>
+            <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
+                   th:field="*{__${name}__}" type="text" th:id="${moduleName + '-' + name}" th:name="${moduleName + '-' + name}" th:placeholder="${placeholder}"/>
+            <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+        </div>
+        <a th:href="'mailto:' + *{__${name}__}" style="margin-top:-33px;margin-right:8px" class="ico ico-email pull-right">Send email</a>
+    </div>
+
+    <div th:fragment="checkbox-simple(moduleName, name, label)">
+        <div th:replace="~{forms::checkbox-base(${moduleName}, ${name}, ${label}, false, '')}"></div>
+    </div>
+
+    <div th:fragment="checkbox-disabled(moduleName, name, label, disabled)">
+        <div th:replace="~{forms::checkbox-base(${moduleName}, ${name}, ${label}, ${disabled}, '')}"></div>
+    </div>
+
+    <div th:fragment="checkbox-with-class(moduleName, name, label, disabled, addedClass)">
+        <div th:replace="~{forms::checkbox-base(${moduleName}, ${name}, ${label}, ${disabled}, ${addedClass})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-with-warning-with-class(moduleName, name, label, disabled, warningClass, warningMsg, alertMsg, addedClass)" th:class="${addedClass}">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+               th:ischecked="*{__${ '' + name + '' }__}"
+               th:onclick="|app.showCheckboxAlert('${moduleName + '-' + name}', '${alertMsg}')|"/>
+        <div th:replace="~{forms::label-for-checkbox-with-warning('checkbox-label', ${label}, ${warningClass}, ${warningMsg})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-disabled-with-top-label(moduleName, name, label, disabled, specifiedCheckboxClass)">
+        <div th:replace="~{forms::label-for-checkbox('', ${label})}"></div>
+        <div th:replace="~{forms::checkbox-base(${moduleName}, ${name}, '', ${disabled}, ${specifiedCheckboxClass})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-base-value-with-class(moduleName, name, value, label, disabled, addedOuterClass)" th:class="${addedOuterClass}">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:name="${name}" value="true" th:checked="${value}" type="checkbox"/>
+        <div th:replace="~{forms::label-for-checkbox('checkbox-label', ${label})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-base(moduleName, name, label, disabled, addedClass)">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:class="${addedClass + ' savills-checkbox'}" th:ischecked="*{__${ '' + name + '' }__}"  th:field="*{__${name}__}" type="checkbox"/>
+        <div th:replace="~{forms::label-for-checkbox('checkbox-label', ${label})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-base-with-class(moduleName, name, label, disabled, addedOuterClass)" th:class="${addedOuterClass}">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:ischecked="*{__${ '' + name + '' }__}" th:field="*{__${name}__}" type="checkbox"/>
+        <div th:replace="~{forms::label-for-checkbox('checkbox-label', ${label})}"></div>
+    </div>
+
+    <div th:fragment="checkbox-with-collapse(moduleName, name, label, disabled, addedClass, collapseTarget, elementSelector)">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:class="${addedClass}" th:ischecked="*{__${ '' + name + '' }__}" th:field="*{__${name}__}" type="checkbox"
+               data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"/>
+        <div th:replace="~{forms::label-for-checkbox('checkbox-label', ${label})}"></div>
+        <script th:inline="javascript">
+            (function(){
+                let elementSelector = /*[[${elementSelector}]]*/ '_none_';
+                let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
+                let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
+                app.wrapCheckboxSection(elementSelector, collapseTarget, isVisible);
+            })();
+        </script>
+    </div>
+
+    <div th:fragment="checkbox-with-collapse-with-warning-with-class(moduleName, name, label, disabled, addedClass, collapseTarget, elementSelector, warningClass, warningMsg, alertMsg)">
+        <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:field="*{__${name}__}" type="checkbox" th:class="${addedClass}"
+               th:ischecked="*{__${ '' + name + '' }__}"
+               th:onclick="|app.showCheckboxAlert('${moduleName + '-' + name}', '${alertMsg}')|"
+               data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"/>
+        <div th:replace="~{forms::label-for-checkbox-with-warning('checkbox-label', ${label}, ${warningClass}, ${warningMsg})}"></div>
+        <script th:inline="javascript">
+            (function(){                let elementSelector = /*[[${elementSelector}]]*/ '_none_';
+                let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
+                let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
+                app.wrapCheckboxSection(elementSelector, collapseTarget, isVisible);
+            })();
+        </script>
+    </div>
+
+    <div th:fragment="checkbox-no-field(moduleName, name, label)">
+        <input th:id="${moduleName + '-' + name}" type="checkbox" class="savills-checkbox"/>
+        <div th:replace="~{forms::label-for-checkbox('', ${label})}"></div>
+    </div>
+
+    <div th:fragment="switch-values-with-class(moduleName, name, firstValueLabel, secondValueLabel, disabled, addedClass)" th:class="'d-table ' + ${addedClass}">
+        <div class="d-table-cell align-middle">
+            <div th:replace="~{forms::label-simple('', ${firstValueLabel})}"></div>
+        </div>
+        <div class="custom-control custom-switch pl-4 d-table-cell align-middle">
+            <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+                   class="custom-control-input"
+                   th:ischecked="*{__${ '' + name + '' }__}"/>
+            <div th:replace="~{forms::label-for-switch(${moduleName + '-' + name}, ${secondValueLabel})}"></div>
+        </div>
+    </div>
+
+    <div th:fragment="switch-values-with-warning-with-class(moduleName, name, firstValueLabel, secondValueLabel, disabled, warningClass, warningMsg, alertMsg, addedClass)" th:class="'d-table ' + ${addedClass}">
+        <div class="d-table-cell align-middle">
+            <div th:replace="~{forms::label-simple('', ${firstValueLabel})}"></div>
+        </div>
+        <div class="custom-control custom-switch pl-4 d-table-cell align-middle">
+            <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+                   class="custom-control-input"
+                   th:ischecked="*{__${ '' + name + '' }__}"
+                   th:onclick="app.showCheckboxAlert([[${moduleName + '-' + name}]], [[${alertMsg}]])"/>
+            <div th:replace="~{forms::label-for-switch-with-warning(${moduleName + '-' + name}, ${secondValueLabel}, ${warningClass}, ${warningMsg})}"></div>
+        </div>
+    </div>
+
+    <div th:fragment="switch-values-with-collapse(moduleName, name, firstValueLabel, secondValueLabel, disabled, addedClass, collapseTarget)" th:class="${addedClass}">
+        <div class="d-table-cell align-middle">
+            <div th:replace="~{forms::label-simple('', ${firstValueLabel})}"></div>
+        </div>
+        <div class="custom-control custom-switch pl-4 d-table-cell align-middle">
+            <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+                   class="custom-control-input" data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"
+                   th:ischecked="*{__${ '' + name + '' }__}"/>
+            <div th:replace="~{forms::label-for-switch(${moduleName + '-' + name}, ${secondValueLabel})}"></div>
+        </div>
+        <script th:inline="javascript">
+			(function(){
+				let elementSelector = /*[[${collapseTarget} ]]*/ '_none_';
+				let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
+				let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
+				app.wrapCheckboxSection(elementSelector, collapseTarget, isVisible);
+			})();
+        </script>
+    </div>
+
+    <div th:fragment="switch-collapse-content(moduleName, name, firstValueLabel, secondValueLabel, disabled, addedClass, collapseTarget)" th:class="${addedClass}">
+        <div class="d-table-cell align-middle">
+            <div th:replace="~{forms::label-simple('', ${firstValueLabel})}"></div>
+        </div>
+        <div class="custom-control custom-switch pl-4 d-table-cell align-middle">
+            <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+                   class="custom-control-input" data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"
+                   th:ischecked="*{__${ '' + name + '' }__}"/>
+            <div th:replace="~{forms::label-for-switch(${moduleName + '-' + name}, ${secondValueLabel})}"></div>
+        </div>
+        <script th:inline="javascript">
+			(function(){
+				let elementSelector1 = /*[[${collapseTarget + '1'} ]]*/ '_none_';
+				let elementSelector2 = /*[[${collapseTarget + '2'} ]]*/ '_none_';
+				let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
+				let addedClass = /*[[${addedClass}]]*/ '_none_';
+				let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
+				app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector1, collapseTarget, !isVisible);
+				app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector2, collapseTarget, isVisible);
+			})();
+        </script>
+    </div>
+
+    <ul th:fragment="select-with-filter(moduleName, values, name)" th:id="${moduleName + '-' + name}" role="menu" class="dropdown-menu">
+        <li class="selected-filter"><a href="#">Show all</a><input type="hidden" value="" /></li>
+        <li th:each="entry, rid : ${values}"><input type="hidden" th:value="${entry.key}" /><a href="#" th:text="${entry.value}">text</a></li>
+    </ul>
+
+    <div th:fragment="multiselect(moduleName, name, label, selectedTagList, allSelected, values)" class="form-group ">
+        <div th:replace="~{forms::multiselect-base(${moduleName}, ${name}, ${label}, ${selectedTagList}, ${allSelected} , ${values}, '', false)}"></div>
+    </div>
+    <div th:fragment="multiselect-base(moduleName, name, label, selectedTagList, allSelected, values, addedClass, isDisabled)" class="form-group ">
+        <div th:replace="~{forms::label-simple('', ${label})}"></div>
+        <select th:id="${moduleName + '-' + name}" th:disabled="${isDisabled}" th:name="${name}" th:class="${addedClass + (allSelected ? 'allSelected ' : ' ')}" multiple="multiple">
+            <option th:each="entry : ${values}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${selectedTagList.contains(entry.key)}"></option>
+        </select> <br />
+        <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
+    </div>
+
+    <div th:fragment="global-file-upload(allowedContentType, multipleSelection, addedClass)">
+        <th:block th:replace="~{forms::file-upload-prerequisites}"/>
+        <div id="global-file-upload" ></div>
+        <script th:inline="javascript">
+            (function(){
+                let csrfParamName = /*[[${ '' + _csrf.parameterName + '' }]]*/ '';
+                let csrfParamValue = /*[[${ '' + _csrf.token + '' }]]*/ '';
+                let allowedContentType = /*[[${ allowedContentType }]]*/ '*/*';
+                let multipleSelection = /*[[${ multipleSelection }]]*/ false;
+                let uploadEndpoint = /*[[${ @url.operation('file', '/new/upload') }]]*/ '//';
+                let fuParams = {
+                    element: document.getElementById("global-file-upload"),
+                    callbacks: {
+                        onComplete: function(id,name,responseJSON,xhr) {
+                            if (responseJSON.success) {
+                                app.refreshView();
+                            }
+                        }
+                    },
+                    multiple: multipleSelection,
+                    validation: {
+                        acceptFiles: allowedContentType,
+                        sizeLimit: 25242880
+                    },
+                    request: {
+                        endpoint: uploadEndpoint,
+                        params: {}
+                    },
+                    retry: {
+                        enableAuto: false,
+                        showButton: false
+                    },
+                    chunking: {
+                        enabled: false
+                    }
+                };
+                fuParams.request.params[csrfParamName] = csrfParamValue;
+                document['global-file-upload__uploader'] = new qq.FineUploader(fuParams);
+            })();
+        </script>
+    </div>
+
+    <div th:fragment="file-upload-base(moduleName, name, label, allowedContentType, multipleSelection, entityRelated, addedClass, singleImagePost)">
+        <div th:id="${moduleName + '-files-' + name}" th:name="${name}"></div>
+        <script th:inline="javascript">
+            (function(){
+                let filesDivId = /*[[${moduleName + '-files-' + name}]]*/ '';
+                let csrfParamName = /*[[${ '' + _csrf.parameterName + '' }]]*/ '';
+                let csrfParamValue = /*[[${ '' + _csrf.token + '' }]]*/ '';
+                let selectId = /*[[${generatedFormId + '_' + fieldName}]]*/ '_none_';
+                let fieldName = /*[[${ fieldName }]]*/ '';
+                let allowedContentType = /*[[${ allowedContentType }]]*/ '*/*';
+                let multipleSelection = /*[[${ multipleSelection }]]*/ false;
+                let entityRelatedGallery = /*[[${entityRelated}]]*/ false;
+                let singleImagePost = /*[[${singleImagePost}]]*/ false;
+                let uploadEndpoint = /*[[${ @url.operation(organizationEntity == null ? null : organizationEntity.id, 'file', '/upload') }]]*/ '//';
+                let fuParams = {
+                    element: document.getElementById(filesDivId),
+                    callbacks: {
+                        onComplete: function(id,name,responseJSON,xhr) {
+                            if (responseJSON.success) {
+                                if(singleImagePost) {
+                                    let file = responseJSON.file;
+                                    let inputElem = document.getElementById(fieldName);
+                                    inputElem.setAttribute("value", file.id);
+                                    let imageElem = document.getElementById(selectId);
+                                    imageElem.setAttribute("src", file.downloadUrl);
+                                }
+                                else {
+                                    let id = responseJSON.fileId;
+                                    let file = responseJSON.file;
+                                    let card = app.createFileGalleryCard(fieldName, file, false, multipleSelection, entityRelatedGallery);
+                                    let elem = document.getElementById(selectId);
+                                    elem.innerHTML = elem.innerHTML + card;
+                                }
+                            }
+                        }
+                    },
+                    multiple: (!singleImagePost),
+                    validation: {
+                        acceptFiles: allowedContentType,
+                        sizeLimit: /*[[${@file.maxUploadSizeInBytes}]]*/ 1048576
+                    },
+                    request: {
+                        endpoint: uploadEndpoint,
+                        params: {}
+                    },
+                    retry: {
+                        enableAuto: false,
+                        showButton: false
+                    },
+                    chunking: {
+                        enabled: false
+                    }
+                };
+                fuParams.request.params[csrfParamName] = csrfParamValue;
+                document[filesDivId + '__uploader'] = new qq.FineUploader(fuParams);
+            })();
+        </script>
+    </div>
+
+    <div th:fragment="single-image-upload-base(generatedFormId, fieldName, fieldLabel, addedClass)"
+         th:replace="~{forms::file-upload-base(${generatedFormId}, ${fieldName}, ${fieldLabel}, '', false, false, ${addedClass}, true)}"/>
+
+    <th:block th:fragment="label-simple(aclass, label)" th:if="${label != null && label != ''}">
+        <label th:class="${aclass}" th:for="${name}" th:text="${label}">Label</label>
+    </th:block>
+
+    <th:block th:fragment="label-for-checkbox(aclass, label)" th:if="${label != null}">
+        <label th:class="${aclass}" th:for="${name}" th:text="${label}">Label</label>
+    </th:block>
+
+    <th:block th:fragment="label-for-checkbox-with-warning(aclass, label, warningClass, warningMsg)" th:if="${label != null}">
+        <label th:class="${aclass}" th:for="${name}"><span th:text="${label}">Label</span> <span th:class="${warningClass}" th:text="${warningMsg}"></span></label>
+    </th:block>
+
+    <th:block th:fragment="label-for-switch-with-warning(id, label, warningClass, warningMsg)" th:if="${label != null}">
+        <label class="checkbox-label custom-control-label align-text-top" th:for="${id}"><span th:text="${label}">Label</span> <span th:class="${warningClass}" th:text="${warningMsg}"></span></label>
+    </th:block>
+
+    <th:block th:fragment="label-for-switch(id, label)" th:if="${label != null}">
+        <label class="checkbox-label custom-control-label align-text-top" th:for="${id}"><span th:text="${label}">Label</span></label>
+    </th:block>
+
+    <th:block th:fragment="map-prerequisites">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+              integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+              crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+                integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+                crossorigin=""> </script>
+    </th:block>
+    <th:block th:fragment="code-editor-prerequisites">
+        <!--CodeMirror-->
+        <!--CSS-->
+        <link href="/vendor/codemirror/codemirror.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/display/fullscreen.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/hint/show-hint.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/dialog/dialog.css" rel="stylesheet" type="text/css">
+        <!--JS-->
+        <script type="text/javascript" src="/vendor/codemirror/codemirror.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/comment/comment.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/display/fullscreen.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/display/placeholder.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/javascript/javascript.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/css/css.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/xml/xml.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/html-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/xml-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/show-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/css-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/javascript-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/search.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/searchcursor.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/jump-to-line.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/dialog/dialog.js"></script>
+    </th:block>
+    <th:block th:fragment="code-editor-with-autocomplete-prerequisites">
+        <script th:inline="javascript">
+          if($("#root").length == 0){
+            $("body").append('<div id="root" style="height:0px; overflow:hidden;"></div>');
+          }
+        </script>
+        <script>!function(e){function t(t){for(var n,a,i=t[0],c=t[1],l=t[2],p=0,s=[];p<i.length;p++)a=i[p],Object.prototype.hasOwnProperty.call(o,a)&&o[a]&&s.push(o[a][0]),o[a]=0;for(n in c)Object.prototype.hasOwnProperty.call(c,n)&&(e[n]=c[n]);for(f&&f(t);s.length;)s.shift()();return u.push.apply(u,l||[]),r()}function r(){for(var e,t=0;t<u.length;t++){for(var r=u[t],n=!0,i=1;i<r.length;i++){var c=r[i];0!==o[c]&&(n=!1)}n&&(u.splice(t--,1),e=a(a.s=r[0]))}return e}var n={},o={1:0},u=[];function a(t){if(n[t])return n[t].exports;var r=n[t]={i:t,l:!1,exports:{}};return e[t].call(r.exports,r,r.exports,a),r.l=!0,r.exports}a.e=function(e){var t=[],r=o[e];if(0!==r)if(r)t.push(r[2]);else{var n=new Promise((function(t,n){r=o[e]=[t,n]}));t.push(r[2]=n);var u,i=document.createElement("script");i.charset="utf-8",i.timeout=120,a.nc&&i.setAttribute("nonce",a.nc),i.src=function(e){return a.p+"static/js/"+({}[e]||e)+"."+{3:"594de08a"}[e]+".chunk.js"}(e);var c=new Error;u=function(t){i.onerror=i.onload=null,clearTimeout(l);var r=o[e];if(0!==r){if(r){var n=t&&("load"===t.type?"missing":t.type),u=t&&t.target&&t.target.src;c.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",c.name="ChunkLoadError",c.type=n,c.request=u,r[1](c)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:i})}),12e4);i.onerror=i.onload=u,document.head.appendChild(i)}return Promise.all(t)},a.m=e,a.c=n,a.d=function(e,t,r){a.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},a.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},a.t=function(e,t){if(1&t&&(e=a(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(a.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var n in e)a.d(r,n,function(t){return e[t]}.bind(null,n));return r},a.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return a.d(t,"a",t),t},a.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},a.p="/",a.oe=function(e){throw console.error(e),e};var i=this.webpackJsonpautocomplete=this.webpackJsonpautocomplete||[],c=i.push.bind(i);i.push=t,i=i.slice();for(var l=0;l<i.length;l++)t(i[l]);var f=c;r()}([])</script>
+        <script type="text/javascript" src="/vendor/autocomplete/chunk2.min.js"></script>
+        <script type="text/javascript" src="/vendor/autocomplete/main.min.js"></script>
+        <script th:inline="javascript">
+        var autocompleteEditor = null;
+        var activeTextareaSelector = null;
+	    $(document).ready(function() {
+		    autocompleteEditor = document.querySelector('.react-codemirror2 .CodeMirror').CodeMirror;
+		    autocompleteEditor.on('change', () => {
+                getActiveEditor().setValue(autocompleteEditor.getValue());
+                getActiveEditor().save();
+		    })
+	    });
+	    function getActiveEditor(){
+	        return $(activeTextareaSelector).data('CodeMirrorEditor');
+	    }
+	    function getActiveEditorDiv(){
+	        return $(activeTextareaSelector).next(".CodeMirror");
+	    }
+	    function getAutocompleteDiv(){
+	        return $("#root");
+	    }
+	    function activateEditor(textAreaSelector){
+	        $(".CodeMirror-focused").removeClass("CodeMirror-focused");
+	        console.log("active: " + activeTextareaSelector);
+	        if(activeTextareaSelector != null){
+                 getActiveEditorDiv().show();
+                 getActiveEditor().refresh();
+                 removeFocusFromActiveEditor();
+            }
+            activeTextareaSelector = textAreaSelector;
+            console.log("active after update: " + activeTextareaSelector);
+            var line = getActiveEditor().getCursor().line;
+            var ch = getActiveEditor().getCursor().ch;
+            getAutocompleteDiv().show();
+            getAutocompleteDiv().height("auto");
+            //console.log("autocomplete div: " + getAutocompleteDiv().parent().children("textarea")[0].id);
+            var aDiv = getAutocompleteDiv().detach();
+            aDiv.insertAfter(getActiveEditorDiv());
+            removeFocusFromActiveEditor();
+            getActiveEditorDiv().hide();
+            autocompleteEditor.setValue(getActiveEditor().getValue());
+            autocompleteEditor.setCursor({line:line, ch:ch});
+            autocompleteEditor.setOption("mode", getActiveEditor().getOption("mode"));
+            autocompleteEditor.focus();
+	   }
+	   function getSelectorFromId(id){
+	       return "#" + id.replaceAll(".", "\\.").replaceAll("[", "\\[").replaceAll("]","\\]");
+	   }
+	   function removeFocusFromActiveEditor(){
+	        getActiveEditor().display.input.blur();
+	   }
+      </script>
+    </th:block>
+    <th:block th:fragment="recaptcha-prerequisites">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    </th:block>
+    <th:block th:fragment="file-upload-prerequisites">
+        <link href="/vendor/fine-uploader/fine-uploader-gallery.min.css" rel="stylesheet">
+        <script src="/vendor/fine-uploader/fine-uploader.min.js"></script>
+        <script type="text/template" id="qq-template">
+            <div class="qq-uploader-selector qq-uploader qq-gallery border form-neutral mb-4" style="min-height:auto" th:qq-drop-area-text="#{files.drop}">
+                <div class="qq-total-progress-bar-container-selector qq-total-progress-bar-container">
+                    <div role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                         class="qq-total-progress-bar-selector qq-progress-bar qq-total-progress-bar"></div>
+                </div>
+                <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                    <span class="qq-upload-drop-area-text-selector"></span>
+                </div>
+                <div class="qq-upload-button-selector qq-upload-button qq-btn">
+                    <div class="btn btn-primary"><th:block th:text="#{template.upload}">Upload a file</th:block></div>
+                </div>
+                <span class="qq-drop-processing-selector qq-drop-processing">
+                <span><th:block th:text="#{files.processing}">Processing dropped files...</th:block></span>
+                <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+            </span>
+                <ul class="qq-upload-list-selector qq-upload-list" role="region" aria-live="polite" aria-relevant="additions removals">
+                    <li style="display:none"> </li>
+                </ul>
+
+                <dialog class="qq-alert-dialog-selector">
+                    <div class="qq-dialog-message-selector"></div>
+                    <div class="qq-dialog-buttons">
+                        <button type="button" class="qq-cancel-button-selector" th:text="#{template.close}">Close</button>
+                    </div>
+                </dialog>
+
+                <dialog class="qq-confirm-dialog-selector">
+                    <div class="qq-dialog-message-selector"></div>
+                    <div class="qq-dialog-buttons">
+                        <button type="button" class="qq-cancel-button-selector" th:text="#{template.no}">No</button>
+                        <button type="button" class="qq-ok-button-selector" th:text="#{template.yes}">Yes</button>
+                    </div>
+                </dialog>
+
+                <dialog class="qq-prompt-dialog-selector">
+                    <div class="qq-dialog-message-selector"></div>
+                    <input type="text">
+                    <div class="qq-dialog-buttons">
+                        <button type="button" class="qq-cancel-button-selector" th:text="#{template.cancel}">Cancel</button>
+                        <button type="button" class="qq-ok-button-selector" th:text="#{template.ok}">Ok</button>
+                    </div>
+                </dialog>
+            </div>
+        </script>
+    </th:block>
+
+</form>
+
+<form th:fragment="single-post-text-form(url, name, value, callback, isMapDto)" method="POST" th:action="${url}">
+    <th:block th:replace="~{forms::single-post-text-form-placeholder(${url}, ${name}, ${value}, ${callback}, ${name}, ${isMapDto})}" />
+</form>
+
+<form th:fragment="single-post-text-form-placeholder(url, name, value, callback, placeholder, isMapDto)" method="POST" th:action="${url}">
+    <input type="text" class="form-control"
+           th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${value}" th:placeholder="${placeholder}"
+           th:onchange="app.submitAndCallback(this.form, [[${callback}]])" />
+    <input type="hidden" class="form-control"
+           name="singleFieldToUpdate" th:value="${name}"/>
+</form>
+
+<form th:fragment="single-value-checkbox(url, isChecked, formId, alertId)" th:id="${'form-' + formId}" method="post" th:action="${url}">
+    <input type="checkbox" th:name="enabled" th:value="${isChecked}" th:checked="${isChecked}"
+           th:onchange="app.submitCheckboxAndReplaceByElemId(this, [[${'form-' + formId}]], [[${alertId}]])" >
+    <input type="hidden" name="id" th:value="${formId}">
+</form>
+
+<form th:fragment="single-post-checkbox-with-callback(url, name, isChecked, formId, callback, isMapDto)" th:id="${'form-' + formId}" method="post" th:action="${url}">
+    <input type="checkbox" th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${isChecked}" th:checked="${isChecked}"
+           th:onchange="app.submitCheckboxAndCallback(this, [[${'form-' + formId}]],[[${callback}]])" >
+    <input type="hidden" name="singleFieldToUpdate" th:value="${name}">
+</form>
+
+<th:block th:fragment="color-picker-prerequisites">
+    <link href="/vendor/color-picker/color-picker.min.css" rel="stylesheet">
+    <script src="/vendor/color-picker/color-picker.min.js"></script>
+</th:block>
+
+<div th:fragment="color-picker(fieldName, fieldLabel)" th:with="value=*{__${fieldName}__}">
+    <label th:for="${fieldName}" th:text="${fieldLabel}"></label>
+    <div class="form-group"><input id="color-picker" class="form-control" type="text" th:name="${fieldName}" th:value="${value == '' || value == null ? '#ffffff' : value}"/></div>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var picker = new CP(document.querySelector('#color-picker'));
+        picker.on('change', function(r, g, b, a) {
+            updateStyles.apply(this, [r, g, b, a]);
+            updateValue(this, this.color(r,g,b,a));
+        });
+
+        function updateStyles(r,g,b,a) {
+          this.source.style.backgroundColor = this.color(r, g, b, a);
+          var br = (1 - a) * 255;
+          this.source.style.color = ((br + a*r)*0.299 + (br + a*g)*0.587 + (br + a*b)*0.114) > 186 ? '#000000' : '#ffffff';
+        }
+
+          function updateValue(obj, value) {
+          obj.source.value = value;
+          obj.source.defaultValue = value;
+        }
+
+         function onChange() {
+            updateStyles.apply(picker, CP.HEX(this.value));
+            updateValue(picker, this.value);
+            picker.set.apply(picker, CP.HEX(this.value)).enter();
+        }
+
+        ['cut', 'paste', 'keyup', 'input'].forEach(function(name) {
+            picker.source.addEventListener(name, onChange, false);
+        });
+    });
+    </script>
+</div>
+
+<div th:fragment="default-entity-tile(object)">
+    <div th:text="${object.id + ' ' + object.toString() }"/>
+</div>
+
+<div th:fragment="one-to-many(formName, fieldName, fieldLabel, fieldPlaceholder, canWrite, values, urlToAdd, tileFragmentName)">
+    <div th:replace="~{forms::button-submit-to-url-inline(${urlToAdd}, 'Add')}"></div>
+    <div th:text="${values.toString()}"></div>
+</div>
+
+<div th:fragment="rule-constructor(formName, name, key, datalistId, disabled, addedClass, enableElseSection, url, advanced, indexForKey, indexToDisplay, indexForImgUrl, indexForUrl)"
+     th:with="key=${#strings.substringBefore(key, '[')},
+     indexForKey=${indexForKey != null ? indexForKey : valueIndexForKey},
+     indexToDisplay=${indexToDisplay != null ? indexToDisplay : valueIndexToDisplay},
+     indexForImgUrl=${indexForImgUrl != null ? indexForImgUrl : valueIndexForImgUrl},
+     indexForUrl=${indexForUrl != null ? indexForUrl : valueIndexForUrl},
+     isNewRule=*{__${name}__.allValues().size() == 0}" th:id="${name}" class="rule pb-2 bg-gray-500 border-left-primary">
+    <div class="rules-if d-table w-100 align-middle pb-2">
+        <div class="w-100">
+            <div th:text="#{__${key}__.if.label.__${advanced ? 'advanced' : 'simple'}__}" class="font-weight-bolder d-inline">IF</div>
+            <th:block th:if="${!isNewRule}">
+                <button class="btn btn-sm btn-info float-right edit-rule" type="button" th:onclick="|app.switchCssClass('${name}', '.search-box', 'd-none', 'd-table');app.switchCssClass('${name}', '.quit-edit-rule', 'd-none', '');app.switchCssClass('${name}', '.edit-rule', '', 'd-none')|">Edit</button>
+                <button class="btn btn-sm btn-info float-right d-none quit-edit-rule" type="button" th:onclick="|app.switchCssClass('${name}', '.search-box', 'd-table', 'd-none');app.switchCssClass('${name}', '.edit-rule', 'd-none', '');app.switchCssClass('${name}', '.quit-edit-rule', '', 'd-none')|">Quit Edit</button>
+            </th:block>
+            <button class="btn btn-sm btn-danger float-right remove-rule mr-1" type="button" th:onclick="|document.getElementById('${name}').remove()|" th:text="#{__${key}__.remove.label}">Remove</button>
+        </div>
+        <th:block th:each="entry : ${__${formName}__.__${name}__.getIfStatements()}">
+            <div th:replace="~{forms::rule-part(${entry.key}, 'if', ${entry.value}, ${name}, ${key}, ${datalistId}, ${url}, ${disabled}, false, ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
+        </th:block>
+    </div>
+    <div class="rules-then d-table w-100 align-middle pb-2">
+        <div th:text="#{__${key}__.then.label.__${advanced ? 'advanced' : 'simple'}__}" class="font-weight-bolder">THEN</div>
+        <th:block th:each="entry : ${__${formName}__.__${name}__.getThenStatements()}">
+            <div th:replace="~{forms::rule-part(${entry.key}, 'then', ${entry.value}, ${name}, ${key}, ${datalistId}, ${url}, ${disabled}, false, ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
+        </th:block>
+    </div>
+    <div class="rules-else d-table w-100 align-middle pb-2" th:if="${enableElseSection}">
+        <div th:text="#{__${key}__.else.label.__${advanced ? 'advanced' : 'simple'}__}" class="font-weight-bolder">ELSE</div>
+        <th:block th:each="entry : ${__${formName}__.__${name}__.getElseStatements()}">
+            <div th:replace="~{forms::rule-part(${entry.key}, 'else', ${entry.value}, ${name}, ${key}, ${datalistId}, ${url}, ${disabled}, false, ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
+        </th:block>
+    </div>
+</div>
+
+<th:block th:fragment="rule-part(index, type, rule, name, key, datalistId, url, disabled, advanced, indexForKey, indexToDisplay, indexForImgUrl, indexForUrl)">
+    <th:block th:if="${advanced}">
+        <div th:replace="~{forms::rule-statement-advanced(${index}, ${rule}, ${type}, ${name}, ${key}, ${datalistId}, ${disabled})}"/>
+    </th:block>
+    <th:block th:unless="${advanced}">
+        <div th:replace="~{forms::rule-statement-simple(${index}, ${rule}, ${type}, ${name}, ${key}, ${url}, ${datalistId}, ${disabled}, ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
+    </th:block>
+</th:block>
+
+<div th:fragment="rule-statement-advanced(index, rule, type, name, key, datalistId, disabled)" th:with="indexFormatted=${'[' + index + ']'}"
+     th:id="${name + '.' + type + '[' + index + ']'}" th:class="'rule-' + ${type}" th:data-id="${index}" >
+    <th:block th:if="${index > 0}">
+        <input th:replace="~{forms::select-base-datalist('', ${name + '.' + type + 'Statements[' + index + '][LogicalOperator]'}, null,  'logicalOperators', false, #{__${key}__.logicalOperator.default}, 'd-inline font-weight-bold', ${disabled}, '', false, false, false, '', ${rule!=null?rule[T(com.openkoda.dto.RuleDto.StatementKey).LogicalOperator]:''}, 'd-table-cell pr-2 w-7')}"/>
+    </th:block>
+    <th:block th:unless="${index > 0}">
+        <div class="d-table-cell pr-2 w-7"></div>
+    </th:block>
+    <input th:replace="~{forms::select-base-datalist('', ${name + '.' + type + 'Statements[' + index + '][Field]'}, null, ${datalistId}, true, #{__${key}__.field.default}, 'd-inline', ${disabled}, '', false, false, false, '', ${rule!=null?rule[T(com.openkoda.dto.RuleDto.StatementKey).Field]:''}, 'd-table-cell pr-2')}"/>
+    <input th:replace="~{forms::select-base-datalist('', ${name + '.' + type + 'Statements[' + index + '][Operator]'}, null, 'operators', true, #{__${key}__.operator.default}, 'd-inline', ${disabled}, '', false, false, false, '', ${rule!=null?rule[T(com.openkoda.dto.RuleDto.StatementKey).Operator]:''}, 'd-table-cell pr-2')}"/>
+    <input th:replace="~{forms::text-base-nofield('', ${name + '.' + type + 'Statements[' + index + '][Value]'}, ${rule!=null?rule[T(com.openkoda.dto.RuleDto.StatementKey).Value]:''}, '', #{__${key}__.value.placeholder}, false, false, 'd-inline', 'd-table-cell')}"/>
+    <script th:inline="javascript">
+        app.setupInputFilter(/*[[${ '' + name + '.' + type + 'Statements[' + index + '][Value]' + '' }]]*/ '', app.allowDigitsLettersSpaceDash)
+        app.setupInputFilter(/*[[${ '' + name + '.' + type + 'Statements[' + index + '][Value]' + '' }]]*/ '', app.allowDigitsLettersSpaceDash)
+    </script>
+    <div class="d-table-cell pl-2">
+        <i class="fas fa-fw fa-plus-circle text-primary" type="button" th:if="${index == 0}" th:onclick="|app.getNextRuleLine(${organizationEntity.id}, '${name}', '${type}', '${key}', '${datalistId}', '${disabled}', '${advanced}')|"></i>
+        <i class="fas fa-fw fa-minus-circle text-danger" type="button" th:if="${index > 0}" th:onclick="|document.getElementById('${name + '.' + type + '[' + index + ']'}').remove()|"></i>
+    </div>
+</div>
+
+<div th:fragment="rule-statement-simple(index, rule, type, name, key, url, datalistId, disabled, indexForKey, indexToDisplay, indexForImgUrl, indexForUrl)"
+     th:with="fieldName=${name + '.' + type + 'Statements[' + index + ']'},valueFieldName=${fieldName + '[Value]'},id=${name + '.' + type + '[' + index + ']'}"
+     th:id="${id}" th:class="'d-table rule-' + ${type}" th:data-id="${index}">
+    <div th:class="*{(__${valueFieldName}__ == null ? 'd-table' : 'd-none') + ' search-box'}">
+        <input th:replace="~{forms::select-base-searchable('', ${fieldName}, null, ${url}, 'd-inline', ${disabled}, 'd-table-cell pr-2', ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
+        <button type="button" class="btn btn-sm btn-primary d-table-cell" th:text="#{__${key}__.search.add.label}"
+                th:onclick="app.appendSelectedFromSearch([[${organizationEntityId}]], [[${valueFieldName + '_selected'}]], [[${'_' + name + '.' + type + 'Statements[' + index + ']'}]], [[${name + '.' + type + 'Statements[' + index + '][Value]'}]])">Add</button>
+    </div>
+    <input type="hidden" th:name="${valueFieldName}" th:id="${valueFieldName}" th:value="*{__${valueFieldName}__}">
+    <div th:id="${valueFieldName + '_selected'}" class="p-3" th:with="selectedElements=*{__${valueFieldName}__}">
+        <th:block th:each="elem : ${#strings.arraySplit(selectedElements, ',')}">
+            <th:block th:if="${rulesSelectedElements == null || #maps.isEmpty(rulesSelectedElements)}">
+                <th:block th:replace="~{forms::selected-searchable(${elem}, ${valueFieldName}, null, ${elem}, null)}"/>
+            </th:block>
+            <th:block th:if="${rulesSelectedElements != null && !#maps.isEmpty(rulesSelectedElements) && elem != '0'}">
+                <th:block th:replace="~{forms::selected-searchable(${elem}, ${valueFieldName}, ${rulesSelectedElements['__${elem}__'][__${indexForImgUrl}__]}, ${rulesSelectedElements['__${elem}__'][__${indexToDisplay}__]}, ${rulesSelectedElements['__${elem}__'][__${indexForUrl}__]})}"/>
+            </th:block>
+        </th:block>
+    </div>
+</div>
+
+<div th:fragment="select-base-searchable(moduleName, fieldName, label, searchUrl, addedClass, isDisabled, addedOuterClass, indexForKey, indexToDisplay, indexForImgUrl, indexForUrl)"
+     th:class="${'form-group ' + addedOuterClass}" th:with="datalistId=${'datalist_' + fieldName}">
+    <label th:for="${fieldName}" th:class="${addedClass}" th:text="${label != null ? label : ''}"></label>
+    <div class="d-table">
+        <input th:id="${moduleName + '_' + fieldName}" th:list="${datalistId}" th:disabled="${isDisabled}" type="text"
+               th:class="${'selectpicker type1 form-control d-table-cell ' + addedClass}">
+        <i class="fas fa-fw fa-search d-table-cell"></i>
+    </div>
+    <datalist th:id="${datalistId}"></datalist>
+
+    <script th:inline="javascript">
+			(function(){
+				let datalistId = /*[[${datalistId}]]*/ '_none_';
+				let searchUrl = /*[[${searchUrl}]]*/ '_none_';
+				let searchInputId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
+				let indexForKey = /*[[${indexForKey}]]*/ -1;
+				let indexToDisplay = /*[[${indexToDisplay}]]*/ -1;
+				let indexForImgUrl = /*[[${indexForImgUrl}]]*/ -1;
+				let indexForUrl = /*[[${indexForUrl}]]*/ -1;
+				$(document).ready(function() {
+					$('#' + $.escapeSelector(searchInputId)).on('keyup', (function (event) {
+						$.get(searchUrl + ' ' + $('#' + $.escapeSelector(searchInputId)).val(), {},  function ( data ) {
+							app.populateDatalistOptions(datalistId, data, indexForKey, indexToDisplay, indexForImgUrl, indexForUrl);
+						});
+					}));
+				});
+			})();
+    </script>
+</div>
+
+<th:block th:fragment="selected-searchable(selectedId, fieldName, imgUrl, label, url)" th:with="id=${fieldName + '_' + selectedId + '_' + #dates.createNow().getTime()}">
+    <div th:id="${id}" class="selected-box d-inline-block text-center bg-white border-400 rounded mb-3" th:data-value="${selectedId}">
+        <i class="fas fa-fw fa-times w-100 text-right" type="button"
+           th:onclick="document.getElementById([[${id}]]).remove(); app.updateSelectedFromSearch([[${fieldName + '_selected'}]], [[${fieldName}]], null);"></i>
+        <div>
+            <th:block th:if="${url == null}">
+                <img th:if="${imgUrl != null}" th:src="${imgUrl}"/>
+            </th:block>
+            <th:block th:unless="${url == null}">
+                <a th:href="${url}" target="_blank"><img th:if="${imgUrl != null}" th:src="${imgUrl}"/></a>
+            </th:block>
+        </div>
+        <th:block th:if="${url == null}">
+            <div th:text="${label}" class="text-center label"/>
+        </th:block>
+        <th:block th:unless="${url == null}">
+            <a th:href="${url}" target="_blank"><div th:text="${label}" class="text-center label"/></a>
+        </th:block>
+    </div>
+</th:block>
+
+<div th:fragment="section-with-dropdown(fieldName, fieldLabel, datalistId, isDisabled, additionalClass)" class="form-group " th:id="${'dropdown-switch'}">
+    <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${field.allowNull}, ${isDisabled}, ${additionalClass})}"/>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            let additionalClass = /*[[${additionalClass}]]*/ '' ;
+            var dropdown = $('#dropdown-switch').find("select");
+            let fieldValue = /*[[*{__${ '' + fieldName + '' }__}]]*/ '';
+            app.manageDropdownSwitch(additionalClass + 'Node', fieldValue);
+            dropdown.on('change', function() {
+                var selected = dropdown.find(":selected").val();
+                app.manageDropdownSwitch(additionalClass + 'Node', selected);
+            });
+        });
+    </script>
+</div>
+
+<div th:fragment="post-alert(messageSource, formClass)" id="post-callback-alert">
+    <div th:unless="${#strings.isEmpty(messageSource)}" th:class="${'form-alert alert ' + formClass}" role="alert" th:text="#{${messageSource}}"></div>
+</div>
+
+<th:block th:fragment="timepicker-prerequisites">
+    <link href="/vendor/jquery-timepicker/jquery.timepicker.min.css" rel="stylesheet">
+    <script src="/vendor/jquery-timepicker/jquery.timepicker.min.js"></script>
+</th:block>
+
+<div th:fragment="timepicker-readonly(fieldName, fieldLabel, placeholder, additionalClass, readonly)" th:class="${additionalClass}">
+    <label th:for="${fieldName}" th:text="${fieldLabel}"></label>
+    <div class="form-group timepicker-container">
+        <input class="timepicker text-left form-control" th:name="${fieldName}" th:field="*{__${fieldName}__}" th:placeholder="${placeholder}" th:readonly="${readonly}"/>
+        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+    </div>
+    <script th:inline="javascript">
+	    $(document).ready(function() {
+		    let timepickerElem = $('input.timepicker');
+		    if(!timepickerElem.prop('readonly')) {
+			    timepickerElem.timepicker({
+				        timeFormat: 'H:i',
+				        step: 30,
+				        show2400: true,
+				        startTime: '10:00',
+				        appendTo: '.timepicker-container'
+				    });
+		    }
+	    });
+    </script>
+</div>
+
+<div th:fragment="recaptcha(fieldName, fieldLabel, siteKey)" th:class="g-recaptcha" th:data-sitekey="${siteKey}"></div>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+</head>
+<body>
+<div class="mb-4 centered" th:fragment="gitHub-form()">
+    <div class="card shadow mb-4"
+         th:if="${(@auth.hasGlobalPrivilege('canIntegrateWithGitHub') || @auth.hasOrgPrivilege('canIntegrateWithGitHub', organizationEntityId)) && @integrationCheck.isGitHubConfiguredGlobally()}">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="GitHub">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isGitHubIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.gitHubDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="card-body pb-0">
+            <label for="connect-with-github-btn">Connect with GitHub</label>
+            <div>
+                <a class="btn-success btn btn-sm" id="connect-with-github-btn"
+                   th:href="${@integrationService.gitHubOAuthUrl(organizationEntityId)}"
+                   th:text="${!@integrationCheck.isGitHubConnected(organizationEntityId) ? 'Connect' : 'Reconnect'}">Connect</a>
+            </div>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationGitHubForm}, 'integrationGitHubForm', ${@integrationUrl.gitHubFormUrl(organizationEntityId)}, '', '',  #{template.save}, ${!@integrationCheck.isGitHubConnected(organizationEntityId)})}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="gitHub-form-error()"
+          th:replace="~{generic-forms::form-card-body(${integrationGitHubForm}, 'integrationGitHubForm', ${@integrationUrl.gitHubFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="gitHub-form-success()"
+          th:replace="~{generic-forms::form-card-body(${integrationGitHubForm}, 'integrationGitHubForm', ${@integrationUrl.gitHubFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+<div class="mb-4 centered" th:fragment="trello-form()">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="Trello">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isTrelloIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.trelloDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationTrelloForm}, 'integrationTrelloForm', ${@integrationUrl.trelloFormUrl(organizationEntityId)}, '', '', #{template.save}, false)}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="trello-form-error()"
+          th:replace="~{generic-forms::form-card-body(${integrationTrelloForm}, 'integrationTrelloForm', ${@integrationUrl.trelloFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="trello-form-success()"
+          th:replace="~{generic-forms::form-card-body(${integrationTrelloForm}, 'integrationTrelloForm', ${@integrationUrl.trelloFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+<div class="mb-4 centered" th:fragment="slack-form">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="Slack">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isSlackIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.slackDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationSlackForm}, 'integrationSlackForm', ${@integrationUrl.slackFormUrl(organizationEntityId)}, '', '', #{template.save}, false)}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="slack-form-error"
+          th:replace="~{generic-forms::form-card-body(${integrationSlackForm}, 'integrationSlackForm', ${@integrationUrl.slackFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="slack-form-success"
+          th:replace="~{generic-forms::form-card-body(${integrationSlackForm}, 'integrationSlackForm', ${@integrationUrl.slackFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+<div class="mb-4 centered" th:fragment="msteams-form">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="'Microsoft Teams'">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isMsTeamsIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.msTeamsDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationMsTeamsForm}, 'integrationMsTeamsForm', ${@integrationUrl.msTeamsFormUrl(organizationEntityId)}, '', '', #{template.save}, false)}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="msteams-form-error"
+          th:replace="~{generic-forms::form-card-body(${integrationMsTeamsForm}, 'integrationMsTeamsForm', ${@integrationUrl.msTeamsFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="msteams-form-success"
+          th:replace="~{generic-forms::form-card-body(${integrationMsTeamsForm}, 'integrationMsTeamsForm', ${@integrationUrl.msTeamsFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+<div class="mb-4 centered" th:fragment="jira-form()">
+    <div class="card shadow mb-4"
+         th:if="${@integrationCheck.isJiraConfiguredGlobally()}">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="JIRA">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isJiraIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.jiraDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="card-body pb-0">
+            <label for="connect-with-jira-btn">Connect with Jira</label>
+            <div>
+                <a class="btn-success btn btn-sm" id="connect-with-jira-btn"
+                   th:href="${@integrationService.jiraOAuthUrl(organizationEntityId)}"
+                   th:text="${!@integrationCheck.isJiraConnected(organizationEntityId) ? 'Connect' : 'Reconnect'}">Connect</a>
+            </div>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationJiraForm}, 'integrationJiraForm', ${@integrationUrl.jiraFormUrl(organizationEntityId)}, '', '',  #{template.save}, ${!@integrationCheck.isJiraConnected(organizationEntityId)})}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="jira-form-error()"
+          th:replace="~{generic-forms::form-card-body(${integrationJiraForm}, 'integrationJiraForm', ${@integrationUrl.jiraFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="jira-form-success()"
+          th:replace="~{generic-forms::form-card-body(${integrationJiraForm}, 'integrationJiraForm', ${@integrationUrl.jiraFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+</body>
+
+<div class="mb-4 centered" th:fragment="basecamp-form()">
+    <div class="card shadow mb-4"
+         th:if="${@integrationCheck.isBasecampConfiguredGlobally()}">
+        <div class="card-header py-3 d-flex flex-row align-items-center">
+            <h6 class="m-0 font-weight-bold" th:text="Basecamp">Main data</h6>
+            <a class="btn-danger btn btn-sm ml-4"
+               th:if="${@integrationCheck.isBasecampIntegrated(organizationEntityId)}"
+               th:href="${@integrationUrl.basecampDisableUrl(organizationEntityId)}"
+               th:text="Disconnect">Disconnect</a>
+        </div>
+        <div class="card-body pb-0">
+            <label for="connect-with-basecamp-btn">Connect with Basecamp</label>
+            <div>
+                <a class="btn-success btn btn-sm" id="connect-with-basecamp-btn"
+                   th:href="${@integrationService.basecampOAuthUrl(organizationEntityId)}"
+                   th:text="${!@integrationCheck.isBasecampConnected(organizationEntityId) ? 'Connect' : 'Reconnect'}">Connect</a>
+            </div>
+        </div>
+        <div class="form-parent">
+            <div th:replace="~{generic-forms::form-card-body(${integrationBasecampForm}, 'integrationBasecampForm', ${@integrationUrl.basecampFormUrl(organizationEntityId)}, '', '',  #{template.save}, ${!@integrationCheck.isBasecampConnected(organizationEntityId)})}"/>
+        </div>
+    </div>
+</div>
+<th:block th:fragment="basecamp-form-error()"
+          th:replace="~{generic-forms::form-card-body(${integrationBasecampForm}, 'integrationBasecampForm', ${@integrationUrl.basecampFormUrl(organizationEntityId)}, #{template.forms.containsErrors}, 'alert-danger', #{template.save}, false)}"/>
+<th:block th:fragment="basecamp-form-success()"
+          th:replace="~{generic-forms::form-card-body(${integrationBasecampForm}, 'integrationBasecampForm', ${@integrationUrl.basecampFormUrl(organizationEntityId)}, 'Configuration Saved', 'alert-success', #{template.save}, false)}"/>
+
+</html>

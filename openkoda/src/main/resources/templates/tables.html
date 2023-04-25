@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="../public/app.css"/>
+</head>
+<body>
+
+<div th:fragment="search(qualifier, page)">
+    <form method="get" class="form-inline search-form d-block">
+        <input type="hidden" th:name="${qualifier + '_page'}"
+               th:value="${page.number}"/>
+        <input type="hidden" th:name="${qualifier + '_size'}"
+               th:value="${page.size}"/>
+        <input type="hidden" th:name="${qualifier + '_sort'}"
+               th:value="${param.get(qualifier + '_sort')}"/>
+        <div class="input-group mt-1 mb-3 float-right">
+            <input type="text" class="form-control simple-control form-neutral border-0" th:name="${qualifier + '_search'}"
+                       th:value="${param.get(qualifier + '_search')}" th:placeholder="#{search.placeholder}"/>
+            <div class="input-group-append">
+                <button type="submit" class="input-group-text form-neutral border-0"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<nav th:fragment="tablenav(qualifier, page)" th:if="${page.hasNext() || page.hasPrevious()}">
+    <div class="row justify-content-center pagination-wrapper mt-3">
+        <ul class="pagination justify-content-center">
+            <li th:if="${!page.isFirst()}" class="page-item">
+                <a class="page-link" href="#"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&lsaquo;</span>
+                    <span class="sr-only">Previous</span>
+                </a>
+            </li>
+
+            <th:block th:if="${page.number == 1}">
+                <li th:if="${page.hasPrevious()}" class="page-item"><a class="page-link"
+                                                                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__"
+                                                                       th:text="${page.number}">1</a></li>
+            </th:block>
+
+            <th:block th:if="${page.number != 1}">
+                <li th:if="${page.hasPrevious()}" class="page-item"><a class="page-link"
+                                                                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__"
+                                                                       th:text="${page.number - 1}">1</a></li>
+            </th:block>
+
+
+            <li class="page-item active"><a class="page-link" href="#" th:text="${page.number + 1}">3</a></li>
+
+            <li th:if="${page.hasNext() && page.getTotalPages() - 1 - page.number > 0}" class="page-item"><a
+                    class="page-link" href="#"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__"
+                    th:text="${page.number + 2}">4</a></li>
+
+            <li th:if="${page.hasNext() && page.getTotalPages() - 2 - page.number > 0}" class="page-item"><a
+                    class="page-link" href="#"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 2}')}__"
+                    th:text="${page.number + 3}">5</a></li>
+
+            <li th:if="${page.hasNext() && page.getTotalPages() - 3 - page.number > 0}" class="page-item"><a
+                    class="page-link" href="#"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 3}')}__"
+                    th:text="${page.number + 4}">6</a></li>
+
+            <li th:if="${page.hasNext() && page.getTotalPages() - 4 - page.number > 0}" class="page-item d-none d-sm-block"><a
+                    class="page-link" href="#"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 4}')}__"
+                    th:text="${page.number + 5}">7</a></li>
+
+            <li th:if="${page.hasNext() && page.getTotalPages() - 5 - page.number > 0}" class="page-item d-none d-sm-block"><a
+                    class="page-link" href="#"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 5}')}__"
+                    th:text="${page.number + 6}">8</a></li>
+    <!--LAST PAGE-->
+    <!--        <li th:if="${page.hasNext()}" class="page-item"><a class="page-link" href="#"-->
+    <!--                                                           th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.getTotalPages() - 1}')}__"-->
+    <!--                                                           th:text="${page.getTotalPages()}">8</a></li>-->
+            <li th:if="${!page.isLast()}" class="page-item">
+                <a class="page-link" href="#"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__"
+                   aria-label="Next">
+                    <span aria-hidden="true">&rsaquo;</span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </li>
+        </ul>
+        <th:block th:if="${page.getTotalPages() > 3}">
+            <div class=" col-6 col-lg-2">
+                <form method="get" class="form-inline search-form d-block">
+                    <div class="input-group float-left">
+                        <input type="hidden" th:name="${qualifier + '_search'}"
+                               th:value="${searchTerm}"/>
+                        <input type="hidden" th:name="${qualifier + '_size'}"
+                               th:value="${page.size}"/>
+                        <input type="hidden" th:name="${qualifier + '_sort'}"
+                               th:value="${#strings.replace(page.sort, ': ', ',')}"/>
+                        <input type="hidden" th:name="${qualifier + '_page'}"
+                               th:value="${page.number}"/>
+                        <div class="input-group float-right">
+                            <input id="goto" type="text" class="form-control simple-control bg-gray-200 border-0"
+                                   th:placeholder="${'1-' + (page.getTotalPages())}" th:min="1" th:max="${page.getTotalPages()}"/>
+                            <div class="input-group-append">
+                                <button type="submit" class="input-group-text  bg-gray-200 border-0" th:text="#{pagination.goto.page}"></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </th:block>
+    </div>
+</nav>
+
+<th th:fragment="asort(property, label, qualifier, page)" th:classappend="${property}">
+    <a th:href="${ @url.pageableParams(property, qualifier, page, searchTerm) }"
+       th:id="|sort_${property}|">
+        <th:block th:text="${label}"></th:block>
+        <i th:if="${@url.isOrder(page, property)}" class="fa"
+           th:classappend="${@url.isAsc(page, property)} ? 'fa-sort-up' : 'fa-sort-down'" aria-hidden="true">
+        </i>
+    </a>
+</th>
+
+<div th:fragment="users(usersPage, organizationEntity, title, modulesLinkOn, organizationView)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Users</h6>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('user', ${userPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover"
+                   th:with="isOrgAdmin = ${@auth.isOrgAdmin(organizationEntity)}, canSpoof = ${@auth.canImpersonate()},isGlobalAdmin=${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('name', #{template.name}, 'user', ${userPage})}"></th>
+                    <th th:text="#{template.role}">Role</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${userPage.content}">
+                    <td>
+                        <div class="w-15-ch">
+                            <a th:href="${@url.userProfile(a.id)}" th:text="${#strings.isEmpty(a.name) ? a.email : a.name}">John Smith</a>
+                        </div>
+                    </td>
+                    <td class="p-0">
+                        <th:block th:with="rolesToDisplay=${organizationView ? a.projectRolesVisibleForOrg(organizationEntityId) : a.projectRolesVisibleTo(@auth.getLoggedOrganizationUser())}">
+                            <div th:each="ur : ${rolesToDisplay}" class="d-flex align-items-center gap-10">
+                                <a class="w-10-ch d-inline-flex" th:if="${!organizationView}" th:href="${@url.organizationSettings(ur.organizationId)}"
+                                       th:text="${ur.organizationName}"></a>
+                                <th:block th:if="${isGlobalAdmin || (isOrgAdmin && !@auth.isItYou(a.id))}">
+                                    <block th:replace="~{forms::single-dropdown-post-form-class('userRole_'+${ur.id}, 'userRoleName', ${ur.roleName} , 'organizationRoles', ${@url.organizationModifyMemberRole(ur.organizationId, ur.userId)}, 'app.refreshView', 'd-inline simple-control w-auto mt-1 mb-1')}" />
+                                </th:block>
+                                <th:block th:unless="${isGlobalAdmin || (isOrgAdmin && !@auth.isItYou(a.id))}">
+                                    <th:block th:text="${ '( '+ @messages.get('label.role.' + ur.roleName) +' )'}"/>
+                                </th:block>
+                               <th:block th:if="${@auth.hasGlobalPrivilege('manageUserRoles')}">
+                                   <form th:replace="~{forms::single-button-post-form-with-confirm-callback-class('/html/organization/' +
+                                   ${ur.organizationId} + '/remove?userRoleId=' + ${ur.id}, #{template.removeRole}, #{template.confirmationPrompt}, 'app.removeThisTableRow', 'btn-sm btn-primary btn-simple text-nowrap')}" />
+                               </th:block>
+                            </div>
+                        </th:block>
+                    </td>
+                    <td th:if="${modulesLinkOn}">
+                        <a th:href="${@url.allUserOrgModules(organizationEntity.id, a.id)}"
+                           class="btn btn-primary btn-sm">Modules
+                        </a>
+                    </td>
+                    <td>
+                        <div class="tbuttons d-flex">
+                            <th:block th:if="${canSpoof}">
+                                <a th:if="${@user.getUserId() != a.id}" th:href="${@url.spoof(a.id)}"
+                                   th:text="#{template.spoof}" class="btn btn-primary btn-sm btn-simple text-nowrap">Spoof
+                                </a>
+                            </th:block>
+                            <th:block th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}">
+                                <a class="btn btn-sm btn-primary btn-simple text-nowrap" th:href="${@url.allAudit('user:' + a.id)}" th:text="#{template.audit}">Audit</a>
+                                <a class="btn btn-sm btn-primary btn-simple text-nowrap" th:href="${@url.allAudit('modifiedby:' + a.id)}" th:text="#{template.actions}">Actions</a>
+                            </th:block>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('user', ${userPage})}"></nav>
+</div>
+
+<div th:fragment="roles(rolePage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Roles</h6>
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newRole()}" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('role', ${rolePage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'role', ${rolePage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'role', ${rolePage})}">Message</th>
+                    <th>Type</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${rolePage.content}">
+                    <td><a th:href="${@url.roleSettings(a.id)}" th:text="${a.id}">1</a></td>
+                    <td><a th:href="${@url.roleSettings(a.id)}" th:text="${a.name}">Coca-Cola</a></td>
+                    <td><a th:text="${a.getType()}">Coca-Cola</a></td>
+                    <td>
+                        <form th:if="${a.removable && @auth.hasGlobalPrivilege('canManageBackend')}" method="POST" th:action="${a.id} + '/remove'">
+                            <button
+                                    th:replace="~{forms::button-submit-and-callback-inline(#{template.remove}, 'app.showMessage(\'Removing role ' + ${a.name} + '.\')')}"/>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('role', ${rolePage})}"></nav>
+</div>
+
+<div th:fragment="organizations(organizationPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Organizations</h6>
+        <div class="card-header-buttons">
+            <a class="btn-primary btn btn-sm" th:if="${@auth.hasGlobalPrivilege('manageOrgData')}" th:href="${@url.newOrganization()}" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('organization', ${organizationPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'organization', ${organizationPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'organization', ${organizationPage})}">Message</th>
+                    <th th:replace="~{tables::asort('createdOn', 'Created on', 'organization', ${organizationPage})}"></th>
+                    <th th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}"> </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${organizationPage.content}">
+                    <td><a th:href="${@url.organizationSettings(a.id)}" th:text="${a.referenceString}">1</a></td>
+                    <td><a th:href="${@url.organizationSettings(a.id)}" th:text="${a.name}">Coca-Cola</a></td>
+                    <td th:text="${@dates.formatDateTimeLocaleEN(a.createdOn)}"></td>
+                    <td>
+                        <div class="tbuttons d-flex">
+                            <th:block th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}">
+                                <a class="btn btn-sm btn-primary btn-simple" th:href="${@url.allAudit('organization:' + a.id)}">Audit</a>
+                            </th:block>
+                            <th:block th:if="${@auth.hasGlobalPrivilege('manageOrgData')}">
+                                <form th:replace="forms::single-button-post-form-with-confirm-prompt-callback(${@url.removeOrganization(a.id)}, #{template.remove}, #{organization.remove} + ' ' + ${a.name}, ${a.name}, '() => {app.showMessage(\'' + #{organization.remove.success} + '\');}', '() => app.showMessage(\'' + #{organization.remove.error} + '\') ', ' btn-sm btn-primary btn-simple')" />
+                            </th:block>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('organization', ${organizationPage})}"></nav>
+</div>
+
+<div th:fragment="modules(modulePage, title, userId, orgId)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Modules</h6>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('module', ${modulePage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'module', ${modulePage})}"></th>
+                    <th th:replace="~{tables::asort('moduleName', 'Name', 'module', ${modulePage})"}>Message</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${modulePage.content}">
+                    <td><a th:href="${@url.moduleSettings(a.moduleName, userId, orgId)}" th:text="${a.id}">1</a>
+                    </td>
+                    <td><a th:href="${@url.moduleSettings(a.moduleName, userId, orgId)}"
+                           th:text="${a.moduleName}">Coca-Cola</a></td>
+                    <td><a th:href="${@url.moduleSettings(a.moduleName, userId, orgId)}"
+                           th:text="${a.getType()}">bottle</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('module', ${modulePage})}"></nav>
+</div>
+
+<div th:fragment="frontend-resource(organizationRelatedEntityPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row justify-content-between">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Frontend Resource</h6>
+        <div class="dropdown no-arrow dropdown-sm">
+            <a class="dropdown-toggle" href="#" role="button" id="frontendResourceMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                 aria-labelledby="frontendResourceMenuLink">
+                <a class="dropdown-item" th:href="${@url.newFrontendResourceEntry()}" th:text="#{template.new}">New Frontend Resource Entry</a>
+                <a class="dropdown-item" th:href="${@url.zipFrontendResource()}" download="backup.zip" th:text="#{frontendresource.zipAll}">Zip All</a>
+                <a class="dropdown-item">
+                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
+                        ${@url.publishAllFrontendResource()},
+                        #{frontendresource.publishAll},
+                        #{template.confirmationPrompt},
+                        'a => app.showMessage(\'Published All.\')',
+                         'btn-link btn-simple p-0')}" />
+                </a>
+                <a class="dropdown-item">
+                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
+                    ${@url.clearAllFrontendResource()},
+                    #{frontendresource.clearAll},
+                    #{template.confirmationPrompt},
+                    'a => app.showMessage(\'Cleared All.\')',
+                     'btn-link btn-simple p-0')}" />
+                </a>
+            </div>
+        </div>
+        <div class="card-header-buttons">
+            <a class="btn-primary btn btn-sm" th:href="${@url.newFrontendResourceEntry()}" th:text="#{template.new}">New Frontend Resource Entry</a>
+            <a class="btn-primary btn btn-sm" th:href="${@url.zipFrontendResource()}" download="backup.zip" th:text="#{frontendresource.zipAll}">Zip All</a>
+            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.publishAllFrontendResource()}, #{frontendresource.publishAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Published All.\')' )}" />
+            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.clearAllFrontendResource()}, #{frontendresource.clearAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Cleared All.\')' )}" />
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="tables::search('obj', ${organizationRelatedEntityPage})"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
+                    <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
+                    <th th:replace="~{tables::asort('urlPath', 'URL Path', 'obj', ${organizationRelatedEntityPage})}">URL Path</th>
+                    <th>Required Privilege</th>
+                    <th>Resources</th>
+                    <th>Draft</th>
+                    <th>Live</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${organizationRelatedEntityPage.content}"
+                    th:with="draftHashSuffix=${a.draftHash},
+                     contentHashSuffix=${a.contentHash},
+                     resourceHashSuffix=${@frontendResource.resourceHash(a)}">
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.referenceString}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.name}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.type}"></a></td>
+                    <td><a target="_blank" th:href="${a.urlPath == '' ? '' : '/' + a.urlPath}" th:text="${a.urlPath}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.requiredPrivilege}"></a></td>
+                    <td class="align-left">
+                        <div class="dropdown" th:with="resourceExists=${@frontendResource.resourceExists(a)}">
+                            <a class="btn btn-sm btn-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <th:block th:if="${resourceExists}">
+                                        <th:block th:utext="${'Version: '}"></th:block>
+                                        <span class="version-hash" th:text="${resourceHashSuffix}"></span>
+                                    </th:block>
+                                    <th:block th:if="${!resourceExists}">
+                                        <th:block th:utext="${'No content'}"></th:block>
+                                    </th:block>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" th:classappend="${resourceExists} ? '' : 'href-disabled'" target="_blank"
+                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath + '?resource'}" th:text="#{template.view}">View</a>
+                                <a class="dropdown-item"  th:classappend="${resourceExists} ? '' : 'href-disabled'">
+                                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
+                                        ${@url.reloadFrontendResourceToDraft(a.id)},
+                                        #{frontendresource.pushToDraft},
+                                        #{template.confirmationPrompt},
+                                        'a => app.showMessage(\'Content reloaded from resources and pushed to draft.\')',
+                                        'btn-link btn-simple p-0' )}"/>
+                                </a>
+                                <th:block th:if="${resourceExists}">
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-item disabled" ><span class="wrap-all"><th:block th:text="${@frontendResource.getResourceURL(a)}"/></span></div>
+                                </th:block>
+
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-left">
+                        <div class="dropdown ">
+                            <a class="btn btn-sm btn-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <th:block th:if="${a.draft}">
+                                    <th:block th:utext="${'Version: '}"></th:block>
+                                    <span class="version-hash" th:text="${draftHashSuffix}"></span>
+                                </th:block>
+                                <th:block th:if="${!a.draft}">
+                                    <th:block th:utext="${'No content'}"></th:block>
+                                </th:block>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" th:classappend="${a.urlPath == '' || !a.draft} ? 'href-disabled' : ''" target="_blank"
+                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath + '?draft'}" th:text="#{template.view}">View</a>
+                                <a class="dropdown-item" th:classappend="${a.draft} ? '' : 'href-disabled'">
+                                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
+                                        ${@url.publishFrontendResource(a.id)},
+                                        #{frontendresource.pushToLive},
+                                        #{template.confirmationPrompt},
+                                        'a => app.showMessage(\'Draft content pushed to live.\')',
+                                        'btn-link p-0' )}" />
+                                </a>
+                                <a class="dropdown-item" th:href="${@url.frontendResourceSettings(a.id)}" th:text="#{template.edit}">Edit</a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-left">
+                        <div class="dropdown">
+                            <a class="btn btn-sm btn-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <th:block th:if="${a.contentExists}">
+                                    <th:block th:utext="${'Version: '}"></th:block>
+                                    <span class="version-hash" th:text="${contentHashSuffix}"></span>
+                                </th:block>
+                                <th:block th:if="${!a.contentExists}">
+                                    <th:block th:utext="${'No content'}"></th:block>
+                                </th:block>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" th:classappend="${a.urlPath == '' || !a.contentExists} ? href-disabled : ''" target="_blank"
+                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath}" th:text="#{template.view}">View</a>
+                                <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}"
+                                   th:href="${@url.allAudit('frontendResource:' + a.id)}" th:text="#{template.audit}">Audit</a>
+                                <a class="dropdown-item">
+                                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
+                                        ${@url.deleteFrontendResource(a.id)},
+                                        #{template.remove},
+                                        #{template.confirmationPrompt},
+                                        'a => app.showMessage(\'Frontend Resource entry is deleted.\')',
+                                        'btn-link p-0' )}"/>
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+</div>
+
+<div th:fragment="frontend-element(organizationRelatedEntityPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row ">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Frontend Element</h6>
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newUIComponent()}" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
+                    <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
+                    <th th:replace="~{tables::asort('urlPath', 'URL Path', 'obj', ${organizationRelatedEntityPage})}">URL Path</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${organizationRelatedEntityPage.content}">
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.referenceString}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.name}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.type}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.urlPath}"></a></td>
+                    <td th:if="${@auth.hasGlobalPrivilege('manageFrontendResource')}">
+                        <th:block th:replace="~{forms::single-button-post-form-with-confirm(${'./' + a.id + '/remove'},
+                         #{template.remove}, 'Are you sure you want to remove frontend element '+ ${a.id} + '?')}"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+</div>
+
+
+<div th:fragment="event(eventListenerPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row justify-content-between">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Event Listeners</h6>
+        <div class="dropdown no-arrow dropdown-sm">
+            <a class="dropdown-toggle" href="#" role="button" id="eventMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                 aria-labelledby="eventMenuLink">
+                <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.newEventListener()}" th:text="#{template.new}">New</a>
+                <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.sendEvent()}" th:text="#{template.sendEvent}">Send Event</a>
+            </div>
+        </div>
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newEventListener()}" th:text="#{template.new}">New</a>
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.sendEvent()}" th:text="#{template.sendEvent}">Send Event</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="tables::search('event', ${eventListenerPage})"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'event', ${eventListenerPage})}">#</th>
+                    <th th:replace="~{tables::asort('eventClassName', 'Event Class Name', 'event', ${eventListenerPage})}">
+                        name
+                    </th>
+                    <th th:replace="~{tables::asort('eventName', 'Event Name', 'event', ${eventListenerPage})}">name
+                    </th>
+                    <th th:replace="~{tables::asort('consumerClassName', 'Consumer Method Signature', 'event', ${eventListenerPage})}">
+                        name
+                    </th>
+                    <th>Consumer Method Parameters</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody class="overflow-wrap">
+                <tr th:each="a : ${eventListenerPage.content}">
+                    <td><a th:href="${@url.eventListenerSettings(a.id)}" th:text="${a.referenceString}">1</a></td>
+                    <td><a th:href="${@url.eventListenerSettings(a.id)}"
+                           th:text="${a.getEventClassName(true)}">Coca-Cola</a></td>
+                    <td>
+                        <a th:href="${@url.eventListenerSettings(a.id)}" th:text="${a.eventName}">bottle</a>
+                    </td>
+                    <td>
+                        <a th:href="${@url.eventListenerSettings(a.id)}"
+                           th:text="${@url.getEventListenerSignature(a)}"></a>
+                    </td>
+                    <td><a th:href="${@url.eventListenerSettings(a.id)}"
+                           th:text="${@url.joinStrings(a.staticData1, a.staticData2, a.staticData3, a.staticData4)}">bottle</a>
+                    </td>
+                    <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
+                        <form th:replace="~{forms::single-button-post-form-with-confirm(${a.id} + '/remove', #{template.remove}, 'Are you sure you want to delete event listener?')}" />
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('event', ${eventListenerPage})}"></nav>
+</div>
+
+<div th:fragment="scheduler(schedulerPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Schedulers</h6>
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newScheduler()}" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('scheduler', ${schedulerPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+            <thead>
+            <tr>
+                <th th:replace="~{tables::asort('id', '#', 'scheduler', ${schedulerPage})}">#</th>
+                <th th:replace="~{tables::asort('cronExpression', 'Cron Expression', 'scheduler', ${schedulerPage})}"></th>
+                <th th:replace="~{tables::asort('eventData', 'Event Data', 'scheduler', ${schedulerPage})}"></th>
+                <th th:replace="~{tables::asort('onMasterOnly', 'Master Only', 'scheduler', ${schedulerPage})}"></th>
+                <th></th>
+            </tr>
+            </thead>
+                <tbody>
+                <tr th:each="a : ${schedulerPage.content}">
+                    <td><a th:href="${@url.schedulerSettings(a.id)}" th:text="${a.referenceString}">1</a></td>
+                    <td>
+                        <a th:href="${@url.schedulerSettings(a.id)}" th:text="${a.cronExpression}">Coca-Cola</a>
+                    </td>
+                    <td>
+                        <a th:href="${@url.schedulerSettings(a.id)}" th:text="${a.eventData}">bottle</a>
+                    </td>
+                    <td>
+                        <th:block th:if="${a.onMasterOnly}">YES</th:block>
+                    </td>
+                    <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
+                        <th:block th:replace="~{forms::single-button-post-form-with-confirm(${a.id + '/remove'},
+                         #{template.remove}, 'Are you sure you want to remove scheduler '+ ${a.id} + ' ' + ${a.cronExpression} + ' ' + ${a.eventData} +'?')}"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('scheduler', ${schedulerPage})}"></nav>
+</div>
+
+<div th:fragment="searchResult(searchPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Search Result</h6>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('search', ${searchPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'search', ${searchPage})}">Name</th>
+                    <th th:replace="~{tables::asort('name', 'Description', 'search', ${searchPage})}">Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${searchPage.content}">
+                    <td><a th:href="${a.urlPath}" th:text="${a.id}">1</a></td>
+                    <td><a th:href="${a.urlPath}" th:text="${a.name}">Coca-Cola</a></td>
+                    <td><a th:href="${a.urlPath}" th:text="${a.description}">There is Coke!</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('search', ${searchPage})}"></nav>
+</div>
+</body>
+</html>

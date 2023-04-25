@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+    <div class="row" layout:fragment="content" th:attr="data-menu-item='system-health'">
+        <script src="/vendor/scripts/js.cookie.min.js"> </script>
+
+        <th:block th:replace="~{frontend-resource/main-page-fragments::system-health-custom}"/>
+
+        <div class="col-lg-8" th:if="${@environment.getProperty('spring.session.store-type') == 'hazelcast'}">
+            <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Cluster</h6>
+            </div>
+            <div class="card-body">
+                <div th:if="${!@cluster.isCluster()}">
+                    This is a standalone deployment.
+                </div>
+                <div th:if="${@cluster.isCluster()}" class="table-responsive">
+                    <table class="table table-hover">
+                        <tr>
+                            <td class="font-weight-bold">This node</td>
+                            <td th:text="${@cluster.getThisNode()}" />
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Master node</td>
+                            <td th:text="${@cluster.getMasterNode()}" />
+                        </tr>
+                        <tr th:each="nodeIp : ${@cluster.getMembers()}">
+                            <td class="font-weight-bold" th:text="${nodeIp}"></td>
+                            <td>
+                                <a href="#" th:onclick="${'Cookies.set(''upstreamoverride'', ''' + nodeIp + ''');'}">Stick to this instance</a>
+                                <a href="#" th:onclick="${'Cookies.remove(''upstreamoverride'');'}">Remove stickiness</a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Heap Memory</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tr>
+                            <td>Maximum Heap Size [MB]</td>
+                            <td th:text="${(systemHealthStatus.maxHeapMemory/1024)/1024}"></td>
+                        </tr>
+                        <tr>
+                            <td>Current Heap Size [MB]</td>
+                            <td th:text="${(systemHealthStatus.totalHeapMemory/1024)/1024}"></td>
+                        </tr>
+                        <tr>
+                            <td>Free Heap Size [MB]</td>
+                            <td th:text="${(systemHealthStatus.freeHeapMemory/1024)/1024}"></td>
+                        </tr>
+                        <tr>
+                            <td>Current Heap Size [%]</td>
+                            <td th:text="${#numbers.formatDecimal((systemHealthStatus.totalHeapMemory*1.0/systemHealthStatus.maxHeapMemory)*100,1,2)}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Partitions</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Partition [MB]</th>
+                            <th>Total Space [GB]</th>
+                            <th>Free Space [GB]</th>
+                            <th>Used Space [%]</th>
+                        </tr>
+                        </thead>
+                        <tr th:each="part : ${systemHealthStatus.getPartitions()}"
+                            th:with="totalSpace=${systemHealthStatus.getTotalSpace(part)}, freeSpace=${systemHealthStatus.getFreeSpace(part)}">
+                            <td class="font-weight-bold" th:text="${part}"></td>
+                            <td th:text="${#numbers.formatDecimal(((totalSpace/1024)/1024.0)/1024.0, 1, 2)}"></td>
+                            <td th:text="${#numbers.formatDecimal(((freeSpace/1024)/1024.0)/1024.0, 1, 2)}"></td>
+                            <td th:text="${#numbers.formatDecimal(((1.0*totalSpace-freeSpace)/totalSpace)*100,1,2)}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Others</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tr>
+                            <td>DB Log Statement</td>
+                            <td th:text="${systemHealthStatus.dbLogStatement}"></td>
+                        </tr>
+                        <tr>
+                            <td>Min DB Statement Duration</td>
+                            <td th:text="${systemHealthStatus.logMinDurationStatement}"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Task Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div th:if="${systemHealthStatus.isWindows()}">
+                    We do not support this functionality for server based on Windows.
+                </div>
+                <th:block th:unless="${systemHealthStatus.isWindows()}">
+                    <div th:unless="${systemHealthStatus.sysstatInstalled}">
+                        It seems that you do not have sysstat. To see this statistics you need to install it. This
+                        process
+                        depends on the system. One of the approaches is to put <code>apt-get install sysstat</code> in
+                        console on the server.
+                    </div>
+                    <th:block th:if="${systemHealthStatus.sysstatInstalled}">
+                        <div th:unless="${systemHealthStatus.sysstatEnabled}">
+                            It seems that you sysstat is disabled. <a
+                                href="http://www.leonardoborda.com/blog/how-to-configure-sysstatsar-on-ubuntudebian/">Here</a>
+                            you can find how to configure it.
+                        </div>
+                        <div class="table-responsive" th:if="${systemHealthStatus.sysstatEnabled}">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <td th:each="head : ${systemHealthStatus.pidstatHeader}" th:text="${head}">
+                                        PidstatHeader
+                                    </td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="line : ${systemHealthStatus.pidstatData}">
+                                    <td th:each="cell : ${line}" th:text="${cell}">Stat data cell</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </th:block>
+                </th:block>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

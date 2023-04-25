@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="/public/app.css"/>
+</head>
+<body>
+
+<div th:fragment="serverJs(organizationRelatedEntityPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row  ">
+        <h6 class="m-0 font-weight-bold" th:text="#{template.serverJs}">Server-Side Code</h6>
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" href="new/settings" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'name', 'obj', ${organizationRelatedEntityPage})}"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${organizationRelatedEntityPage.content}">
+                    <td><a th:href="${'./' + a.id + '/settings'}" th:text="${a.referenceString}">1</a></td>
+                    <td><a th:href="${'./' + a.id + '/settings'}" th:text="${a.name}">Coca-Cola</a></td>
+                    <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
+                        <th:block th:replace="~{forms::single-button-post-form-with-confirm(${'./' + a.id + '/remove'},
+                         #{template.remove}, 'Are you sure you want to remove serverJs '+ ${a.id} + '?')}"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+</div>
+
+</body>
+</html>

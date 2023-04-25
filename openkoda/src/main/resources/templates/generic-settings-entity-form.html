@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<form th:fragment="generic-settings-form-new" th:attr="data-menu-item=${menuItem}"
+      th:replace="~{generic-forms::generic-form(${organizationRelatedForm}, 'organizationRelatedForm', '', '', '', ${@messages.getFieldLabel(organizationRelatedForm.frontendMappingDefinition.formLabel, organizationRelatedForm.frontendMappingDefinition.name)}, #{template.save}, true)}" />
+<form th:fragment="generic-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${organizationRelatedForm}, 'organizationRelatedForm', '', #{template.forms.containsErrors}, 'alert-danger', ${@messages.getFieldLabel(organizationRelatedForm.frontendMappingDefinition.formLabel, organizationRelatedForm.frontendMappingDefinition.name)}, #{template.save}, false)}" />
+<form th:fragment="generic-settings-form-success" th:replace="~{generic-forms::go-back( ${'../all'} )}"/>
+<form th:fragment="generic-settings-form-reload" th:replace="~{generic-forms::reload}"/>
+<form th:fragment="generic-settings-form-success-stay"
+      th:replace="~{generic-forms::generic-form(${organizationRelatedForm}, 'organizationRelatedForm', '', '', 'alert-success', ${@messages.getFieldLabel(organizationRelatedForm.frontendMappingDefinition.formLabel, organizationRelatedForm.frontendMappingDefinition.name)}, #{template.save}, true)}" />
+</body>
+</html>
+

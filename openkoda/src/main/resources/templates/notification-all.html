@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+
+    <div layout:fragment="content">
+        <div th:fragment="allNotifications" class="card shadow mb-4">
+            <form id="markAllNotificationsAsRead"
+                  th:action="${@url.markAllNotificationsAsRead(userEntityId, organizationEntityId)}"
+                  method="POST">
+            </form>
+            <div class="card-header py-3 d-flex flex-row">
+                <h6 class="m-0 font-weight-bold">Notifications</h6>
+                <div class="card-header-buttons">
+                    <a class="btn-primary btn btn-sm"
+                       onclick="app.submitAndCallback($('#markAllNotificationsAsRead'), app.refreshView);">
+                        Mark All as Read
+                    </a>
+                </div>
+            </div>
+            <div class="card-body pt-0">
+                <nav th:replace="~{tables::search('notification', ${notificationPage})}"></nav>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>NotificationId</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="u : ${notificationPage.getContent()}">
+                            <td>
+                                <span th:if="${u.readNotificationId == null}" class="font-weight-bold"
+                                      th:text="${u.notification.id}"></span>
+                                <span th:if="${u.readNotificationId != null}" th:text="${u.notification.id}"></span>
+                            </td>
+                            <td>
+                                <span th:if="${u.readNotificationId == null}" class="font-weight-bold"
+                                      th:utext="${u.notification.message}"></span>
+                                <span th:if="${u.readNotificationId != null}"
+                                      th:utext="${u.notification.message}"></span>
+                            </td>
+                            <td>
+                                <span th:if="${u.readNotificationId == null}" class="font-weight-bold"
+                                      th:text="${#temporals.format(u.notification.createdOn, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                <span th:if="${u.readNotificationId != null}"
+                                      th:text="${#temporals.format(u.notification.createdOn, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <nav th:replace="~{tables::tablenav('notification', ${notificationPage})}"></nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

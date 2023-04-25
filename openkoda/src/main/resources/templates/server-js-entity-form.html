@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" >
+<body>
+
+<form th:fragment="server-js-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${serverJsForm}, 'serverJsForm', '', '', '', #{template.serverJs}, #{template.save}, true)}" />
+<form th:fragment="server-js-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${serverJsForm}, 'serverJsForm', '', #{template.forms.containsErrors}, 'alert-danger', 'ServerJs Data', #{template.save}, false)}" />
+<form th:fragment="server-js-settings-form-success" th:replace="~{generic-forms::go-back( ${'../all'} )}"/>
+
+</body>
+</html>

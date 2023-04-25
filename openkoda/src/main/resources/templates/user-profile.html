@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+
+    <div layout:fragment="content">
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row justify-content-between">
+                <h6 class="m-0 font-weight-bold">Profile</h6>
+                <div class="card-header-buttons">
+                    <div class="d-inline" th:if="${@auth.canEditUserData() || @auth.isItYou(userEntity.id)}">
+                        <a class="btn-primary btn btn-sm" th:href="${@url.userSettings(userEntity.id)}">Settings</a>
+                    </div>
+                    <form th:if="${@auth.canResetPassword()}" method="post" th:action="${@url.resetPassword()}"
+                          class="d-inline">
+                        <input type="hidden" th:name="email" th:value="${userEntity.email}"/>
+
+                        <button th:replace="forms::button-submit-and-callback-inline('Reset Password', 'app.showMessage(\'Sending reset password email to user.\')')"/>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <input th:if="${@auth.canSeeEmail(userForm.entity)}"
+                       th:replace="~{forms::show-value(${userEntity.email}, #{userForm.email.label})}"/>
+                <input th:replace="~{forms::show-value(${userEntity.firstName}, #{userForm.firstName.label})}"/>
+                <input th:replace="~{forms::show-value(${userEntity.lastName}, #{userForm.lastName.label})}"/>
+                <input th:replace="~{forms::show-value(${userEntity.enabled}, #{editUserForm.enabled.label})}"/>
+                <input th:replace="~{forms::show-value(${userEntity.getLoginMethods()}, #{userInfo.loginMethods.label})}"/>
+                <input th:replace="~{forms::show-value(${#messages.msg('label.globalRole.' + userEntity.getGlobalRoleName())}, #{editUserForm.globalRoleName.label})}"/>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

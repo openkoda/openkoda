@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+</head>
+<body>
+<th:block th:fragment="admin-menu" th:if="${@auth.canSeeAdminPanel()}" >
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdmin" aria-expanded="false" aria-controls="collapseAdmin">
+            <span>Admin</span>
+        </a>
+        <div id="collapseAdmin" class="collapse" aria-labelledby="headingAdmin" data-parent="#accordionSidebar" style="">
+            <div class="py-2 collapse-inner rounded">
+                <a th:attr="data-sidebar-menu-item='users'" th:if="${@auth.hasGlobalPrivilege('readUserData')}" class="collapse-item" th:href="${@url.users()}"><span th:text="#{template.users}">Users</span></a>
+                <a th:attr="data-sidebar-menu-item='organizations'" th:if="${@auth.hasGlobalPrivilege('readOrgData')}" class="collapse-item" th:href="${@url.allOrganizations()}"><span th:text="#{template.organizations}">Organizations</span></a>
+                <a th:attr="data-sidebar-menu-item='roles'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allRoles()}"><span th:text="#{template.roles}">Roles</span></a>
+                <a th:attr="data-sidebar-menu-item='frontendresource'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allFrontendResource()}"><span th:text="#{template.frontendResources}">Frontend Resources</span></a>
+                <a th:attr="data-sidebar-menu-item='files'" class="collapse-item" th:href="${@url.allFiles()}"><span th:text="#{template.files}">Files</span></a>
+                <a th:attr="data-sidebar-menu-item='frontend-elements'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allUIComponents()}"><span th:text="#{template.frontendElements}">Web Endpoints</span></a>
+                <a th:attr="data-sidebar-menu-item='serverJs'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allServerJs()}"><span th:text="#{template.serverJs}">Server-Side Code</span></a>
+                <a th:attr="data-sidebar-menu-item='event-listeners'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allEventListeners()}"><span th:text="#{template.eventListeners}">Event Listeners</span></a>
+                <a th:attr="data-sidebar-menu-item='schedulers'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allSchedulers()}"><span th:text="#{template.schedulers}">Schedulers</span></a>
+                <a th:attr="data-sidebar-menu-item='admin-dashboard'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.adminDashboard()}"><span th:text="#{template.dashboard}">Dashboard</span></a>
+                <a th:attr="data-sidebar-menu-item='system-health'" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" class="collapse-item" th:href="${@url.systemHealth()}"><span th:text="#{template.systemHealth}">System Health</span></a>
+                <a th:attr="data-sidebar-menu-item='audit'" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" class="collapse-item" th:href="${@url.allAudit()}"><span th:text="#{template.audit}">Audit</span></a>
+                <a th:attr="data-sidebar-menu-item='threads'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allThreads()}"><span th:text="#{template.threads}">Threads</span></a>
+                <a th:attr="data-sidebar-menu-item='logs'" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" class="collapse-item" th:href="${@url.allLogs()}"><span th:text="#{template.logs}">Logs</span></a>
+            </div>
+        </div>
+    </li>
+</th:block>
+
+<nav th:fragment="module-menu(moduleList, userId, orgId)" class="navbar navbar-expand-lg">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarModules"
+            aria-controls="navbarModules" aria-expanded="false" label="Toggle navigation">
+        <span class="navbar-toggler-icon fa fa-bars"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarModules">
+        <ul class="navbar-nav">
+            <li th:each="module: ${moduleList}" class="nav-item">
+                <a class="nav-link" th:href="${@url.moduleSettings(module.moduleName, userId, orgId)}" href="#"
+                   th:text="${#strings.capitalize(module.moduleName)}">ModuleName</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+</body>

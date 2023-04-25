@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html" lang="en"
+      layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content" th:attr="data-menu-item='dashboard'">
+
+        <div th:utext="#{template.dashboard.default.message(${@url.allFrontendResource()})}"></div>
+        <div class="row" id="registered-cruds">
+            <th:block th:each="entry : ${@CRUDControllerConfigurationMap.entrySet()}">
+                <div class="col-lg-3">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(entry.key, entry.key)}"></h6>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li><a th:href="${@url.all(organizationEntityId, entry.key)}">All</a></li>
+                                <li><a th:href="${@url.form(organizationEntityId, entry.key)}">New</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+</div>
+</body>
+</html>

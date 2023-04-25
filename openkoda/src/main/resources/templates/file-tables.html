@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="../public/app.css"/>
+</head>
+<body>
+
+<div th:fragment="file(filePage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center ">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">File</h6>
+    </div>
+
+    <div class="card-body pt-0">
+        <nav th:replace="tables::search('file', ${filePage})"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', '#', 'file', ${filePage})}"></th>
+                    <th th:replace="~{tables::asort('filename', #{template.file}, 'file', ${filePage})}"></th>
+                    <th th:replace="~{tables::asort('contentType', #{template.contentType}, 'file', ${filePage})}"></th>
+                    <th th:replace="~{tables::asort('size', #{template.size}, 'file', ${filePage})}"></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${filePage.content}">
+                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.referenceString}">1</a></td>
+                    
+                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.filename}">Coca-Cola</a></td>
+                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.contentType}">Coca-Cola</a></td>
+                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.size}">Coca-Cola</a></td>
+                    <td><img th:if="${a.isImage()}" style="width:100px" th:src="${a.toFileDto().downloadUrl}"/></td>
+                    <td>
+                        <div class="tbuttons d-flex">
+                            <th:block th:if="${a.isImage()}">
+                                <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=1024')},
+                                 'Rescale to width 1024', #{template.confirmationPrompt}, app.showMessage, 'btn-sm btn-primary text-nowrap')}"/>
+                                <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=400')},
+                                 'Rescale to width 400', #{template.confirmationPrompt}, app.showMessage, 'btn-sm btn-primary text-nowrap')}"/>
+                            </th:block>
+                            <a class="btn btn-sm btn-primary text-nowrap" th:href="'javascript:app.copyUrlToClipboard(\'' + ${@url.getAbsoluteFileURL(a)} + '\', \'Copied\')'">
+                                <th:block th:text="#{template.copyAbsoluteURLPath}">Copy public path</th:block>
+                            </a>
+                            <th:block th:replace="~{forms::single-button-post-form-with-confirm-class(${@url.remove(a.organizationId, 'file', a.id)},
+                             #{template.remove}, 'Are you sure you want to remove file '+ ${a.id} + '?', 'text-nowrap')}"/>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('file', ${filePage})}"></nav>
+</div>
+
+</body>
+</html>

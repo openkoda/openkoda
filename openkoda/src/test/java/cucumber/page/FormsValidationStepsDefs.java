@@ -1,0 +1,48 @@
+/*
+MIT License
+
+Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+package cucumber.page;
+
+import cucumber.common.StepsBase;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import org.junit.Assert;
+
+//@CucumberStepsDefinition
+public class FormsValidationStepsDefs extends StepsBase {
+    FormPage page = new FormPage(driver);
+
+    @And("I should see {string} alert")
+    public void i_should_see_alert(String alertMessage) {
+        Assert.assertEquals(alertMessage, page.waitFor(page.alertMessage).getText().replace("\n", ""));
+    }
+
+    @Then("I should see {string} {string} form alert")
+    public void i_should_see_form_alert(String formAlertMessage, String alertType) {
+        switch (alertType){
+            case "danger":
+                Assert.assertEquals(formAlertMessage, page.waitFor(page.dangerFormAlertMessage).getText());
+                break;
+            case "success":
+                Assert.assertEquals(formAlertMessage, page.waitFor(page.successFormAlertMessage).getText().replace("\n", ""));
+        }
+    }
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+    <div layout:fragment="content" th:attr="data-menu-item='threads'">
+        <div class="card shadow mb-4" th:fragment="threadCards" th:each="t : ${threads}">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h5 class="m-0 font-weight-bold" th:text="${'Thread: ' + t.key.id}">Cluster</h5>
+                <h6 class="m-0" th:text="${'State: ' + t.key.state}"></h6>
+            </div>
+            <div class="card-body" >
+                <p class="card-text"th:text="${t.value.toString()}"> </p>
+                <th:block th:if="${t.key.state.name() != 'TERMINATED' && @auth.hasGlobalPrivilege('canManageBackend')}"><a th:replace="~{forms::single-button-post-form-with-confirm(${@url.interruptThread(t.key.id)}, 'Interrupt', 'Are you sure to interrupt this thread?')}" href="#" class="btn btn-primary">I</a></th:block>
+                <th:block th:if="${t.key.state.name() == 'TERMINATED' && @auth.hasGlobalPrivilege('canManageBackend')}"><a th:replace="~{forms::single-button-post-form-with-confirm(${@url.removeThread(t.key.id)}, 'Remove Log', 'Are you sure to remove the log?')}" href="#" class="btn btn-primary">I</a></th:block>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

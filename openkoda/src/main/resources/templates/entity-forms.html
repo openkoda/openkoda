@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" >
+<body>
+
+<form th:fragment="user-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${editUserForm}, 'editUserForm', '', '', '', #{template.userProfile}, #{template.save}, true)}" />
+<form th:fragment="user-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${editUserForm}, 'editUserForm', '', #{template.forms.containsErrors}, 'alert-danger', #{template.userData}, #{template.save}, false)}" />
+<form th:fragment="user-settings-form-success"
+      th:replace="~{generic-forms::generic-form(${editUserForm}, 'editUserForm', '', #{template.forms.userData.saved}, 'alert-success', #{template.userData}, #{template.save}, false)}" />
+
+<form th:fragment="invite-user-form-new"
+      th:replace="~{generic-forms::generic-form(${inviteUserForm}, 'inviteUserForm', 'invite', '', '', #{template.forms.inviteTeamMembers}, #{template.forms.invite}, true)}" />
+<form th:fragment="invite-user-form-error"
+      th:replace="~{generic-forms::generic-form(${inviteUserForm}, 'inviteUserForm', 'invite', #{template.forms.containsErrors}, 'alert-danger', #{template.forms.inviteTeamMembers}, #{template.forms.invite}, false)}" />
+<form th:fragment="invite-user-form-success"
+      th:replace="~{generic-forms::generic-form(${inviteUserForm}, 'inviteUserForm', 'invite', 'User invited', 'alert-success', #{template.forms.inviteTeamMembers}, #{template.forms.invite}, false)}" />
+
+<form th:fragment="organization-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${organizationForm}, 'organizationForm', '', '', '', #{template.organization}, #{template.save}, true)}" />
+<form th:fragment="organization-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${organizationForm}, 'organizationForm', '', #{template.forms.containsErrors}, 'alert-danger', #{template.organization}, #{template.save}, false)}" />
+<form th:fragment="organization-settings-form-success"
+      th:replace="~{generic-forms::generic-form(${organizationForm}, 'organizationForm', '', #{template.forms.organizationSaved}, 'alert-success', #{template.organization}, #{template.save}, false)}"/>/>
+
+<form th:fragment="global-org-role-form"
+      th:replace="~{generic-forms::generic-form(${globalOrgRoleForm}, 'globalOrgRoleForm', 'addGlobalOrgRole', '', '', #{template.organizationRoles}, #{template.save}, true)}" />
+<form th:fragment="global-org-role-form-error"
+      th:replace="~{generic-forms::generic-form(${globalOrgRoleForm}, 'globalOrgRoleForm', 'addGlobalOrgRole', '#{template.forms.containsErrors}', 'alert-danger', #{template.organizationRoles}, #{template.save}, false)}" />
+<form th:fragment="global-org-role-form-success"
+      th:replace="~{generic-forms::generic-form(${globalOrgRoleForm}, 'globalOrgRoleForm', 'addGlobalOrgRole', #{template.forms.organizationRolesSaved}, 'alert-success', #{template.organizationRoles}, #{template.save}, false)}" />/>
+
+<form th:fragment="role-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${roleForm}, 'roleForm', '', '', '', 'Role Data', #{template.save}, true)}" />
+<form th:fragment="role-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${roleForm}, 'roleForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Role Data', #{template.save}, false)}" />
+<form th:fragment="role-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allRoles()} )}"/>
+
+<form th:fragment="frontend-resource-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', '', '', 'Frontend Resource Data', #{template.save}, true)}" />
+<form th:fragment="frontend-resource-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Frontend Resource Data', #{template.save}, false)}" />
+<form th:fragment="frontend-resource-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allFrontendResource()} )}"/>
+
+<form th:fragment="eventlistener-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', '', '', 'Event Listener Data', #{template.save}, true)}" />
+<form th:fragment="eventlistener-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Event Listener Data', #{template.save}, false)}" />
+<form th:fragment="eventlistener-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allEventListeners()} )}" />
+
+<form th:fragment="eventlistener-choose-event"
+      th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', '', '', '', 'Event List', 'Choose', true)}" />
+<form th:fragment="eventlistener-choose-event-error"
+      th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Event List', 'Choose', false)}" />
+
+<form th:fragment="eventlistener-emit-event"
+      th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', 'emit', 'Be careful while this form will not be validated.', 'alert-danger', 'Event List', 'Emit', false)}" />
+<form th:fragment="eventlistener-emit-event-success"
+      th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', 'send', 'Event emitted', 'alert-success', 'Event List', 'Choose', false)}" />
+<form th:fragment="eventlistener-emit-event-error"
+      th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', 'send', 'Error while processing event or consumers.', 'alert-danger', 'Event List', 'Choose', false)}" />
+
+<form th:fragment="scheduler-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', '', '', 'Scheduler Data', #{template.save}, true)}" />
+<form th:fragment="scheduler-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Scheduler Data', #{template.save}, false)}" />
+<form th:fragment="scheduler-settings-form-success" th:replace="generic-forms::go-back( ${@url.allSchedulers()} )"/>
+
+<form th:fragment="logger-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${loggerForm}, 'loggerForm', '', '', '', 'Logging Settings', #{template.save}, true)}"/>
+<form th:fragment="logger-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${loggerForm}, 'loggerForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Role Data', #{template.save}, false)}"/>
+<form th:fragment="logger-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allLogs()} )}"/>
+
+<form th:fragment="attribute-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${attributeDefinitionForm}, 'attributeDefinitionForm', '', '', '', 'Attribute Definition', #{template.save}, true)}"/>
+<form th:fragment="attribute-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${attributeDefinitionForm}, 'attributeDefinitionForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Attribute Definition', #{template.save}, false)}"/>
+<form th:fragment="attribute-settings-form-success"
+      th:replace="~{generic-forms::generic-form(${attributeDefinitionForm}, 'attributeDefinitionForm', '', 'Settings saved', 'alert-success', 'Attribute Definition', #{template.save}, false)}"/>
+
+
+<form th:fragment="frontend-resource-page-form-new"
+      th:replace="~{generic-forms::generic-form(${frontendResourcePageForm}, 'frontendResourcePageForm', '', '', '', 'Page', #{template.save}, true)}" />
+<form th:fragment="frontend-resource-page-form-error"
+      th:replace="~{generic-forms::generic-form(${frontendResourcePageForm}, 'frontendResourcePageForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Page', #{template.save}, false)}" />
+<form th:fragment="frontend-resource-page-form-success" th:replace="~{generic-forms::go-back( ${@url.allFrontendResource()} )}" />
+
+</body>
+</html>

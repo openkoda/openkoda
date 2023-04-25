@@ -1,0 +1,258 @@
+label.inline {
+    width: 48%;
+    text-align: right
+}
+
+button.inline {
+    width: auto;
+}
+
+select.inline, input.inline {
+    width: 50%;
+    display: inline-block;
+}
+
+table.nested-form-table {
+    background-color: transparent !important;
+    margin-bottom: 0 !important;
+}
+
+table.nested-form-table select.inline, table.nested-form-table input.inline {
+    width: 100%;
+    display: inline-block;
+}
+
+
+@media only screen and (max-width: 767px) {
+
+    .navbar-top-links .dropdown-user {
+        right: unset;
+    }
+}
+
+.CodeMirror-fullscreen {
+    z-index: 1001 !important;
+}
+
+.table-inside tbody tr:hover {
+    background-color: transparent;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.sidebar-brand-icon img {
+    width: 80%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.table-compact td {
+    padding: .25rem;
+}
+
+option:disabled {
+    background-color: lightgrey;
+}
+
+@media (max-width: 992px) {
+    .d-lg-max-inline {
+        display: inline !important;
+    }
+}
+
+.loader {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 9999;
+}
+
+.loader-container {
+    background: rgba(0,0,0,0.2);
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    position: fixed;
+}
+
+.custom-control-input:checked~.custom-control-label::before, .custom-switch .custom-control-input:checked~.custom-control-label::after,
+.custom-switch .custom-control-label::before, .custom-switch .custom-control-label::after  {
+    margin-top: -4px;
+}
+
+.overflow-wrap a {
+    overflow-wrap: anywhere;
+}
+
+.text-underline {
+    text-decoration: underline;
+}
+
+.w-7 {
+    width: 7rem!important;
+}
+
+.w-10 {
+    width: 10%;
+}
+
+div.rule:first-of-type {
+    /*border-top: 1px solid #e3e6f0;*/
+    /*padding-top: 0.5rem !important;*/
+    margin-top: 0;
+}
+
+.rule i.remove-rule:not(:first-of-type) {
+    display: none;
+}
+
+.rule {
+    padding: 0.5rem;
+    margin: 1rem 0;
+}
+
+.selected-box {
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    background-clip: padding-box;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.selected-box img {
+    height: 150px;
+    min-height: 150px;
+}
+
+.selected-box .label {
+    text-overflow: ellipsis;
+    width: 170px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.href-disabled a, .href-disabled button, a.href-disabled, button.href-disabled {
+    opacity: .4;
+    cursor: default !important;
+    pointer-events: none;
+}
+
+.table-checkbox, .table-radio {
+    margin-bottom: 0;
+}
+
+.table-checkbox td, .table-radio td {
+    padding: 0.25rem;
+    border: none;
+}
+
+.gap-10 {
+    gap: 10px;
+}
+
+.uicomponent-editor .tab-content .tab-pane {
+    display: none;
+}
+
+.uicomponent-editor .tab-content .active {
+    display: block;
+}
+
+.wrap-all {
+    word-break: break-all;
+    white-space: normal;
+}
+
+#remember {
+    opacity: 1;
+}
+
+.form-group table.form-control {
+    height: auto;
+    border-bottom: none;
+}
+
+.sidebar.toggled .nav-item .collapse {
+    z-index: 5;
+}
+
+form .form-group.codemirror label {
+    position: relative;
+}
+
+form.btn-form {
+    display: inline-block;
+}
+
+.dropdown-item form.btn-form {
+    display: flex;
+}
+
+.controller-endpoint-remove-btn {
+    min-width: 1.5rem !important;
+    padding: 0rem 1rem 0rem 0rem;
+    box-sizing: content-box;
+}
+
+.controller-endpoint-remove-btn .nav-link {
+    padding: 0;
+    padding-left: .2rem;
+    border: 0;
+    text-align: center;
+    background-color: white;
+}
+
+.qq-upload-button {
+    display: unset!important;
+    width: unset!important;
+    padding: unset!important;
+    float: unset!important;
+    text-align: unset!important;
+    background: unset!important;
+    color: unset!important;
+    border-radius: unset!important;
+    border: unset!important;
+    box-shadow: unset!important;
+}
+
+.qq-gallery.qq-uploader:before {
+    font-size: inherit!important;
+    opacity: 0.5!important;
+}
+
+.home img.logo {
+    width: 200px;
+}
+
+.version-hash {
+    font-family: Source Code Pro;
+    font-weight: 500;
+}
+
+.crud-card {
+    padding: 1.0rem;
+    margin: 0.75rem !important;
+}
+
+.crud-card-wrapper {
+    padding: 0;
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        font-size: 0.75rem;
+    }
+    .pagination-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+}

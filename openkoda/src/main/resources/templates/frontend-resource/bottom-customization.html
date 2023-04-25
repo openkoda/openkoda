@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns: lang="en">
+
+<th:block th:fragment="public">
+    <script th:src="@{/vendor/scripts/vendor.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{/vendor/scripts/main.js(v=${resourcesVersion})}"></script>
+</th:block>
+
+<th:block th:fragment="sbadmin">
+    <script th:src="@{/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
+</th:block>

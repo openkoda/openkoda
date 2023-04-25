@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content" th:attr="data-menu-item='files'">
+        <div th:replace="~{forms::global-file-upload('*/*', false, '')}"/>
+        <div th:replace="~{file-tables::file(${filePage}, 'File')}"/>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+    <div layout:fragment="content" th:attr="data-menu-item=${'organization-settings-integrations-' + organizationEntity.id}">
+        <th:block th:replace="~{module/integration/integration-fragments::trello-form()}"></th:block>
+        <th:block th:replace="~{module/integration/integration-fragments::gitHub-form()}"></th:block>
+        <th:block th:replace="~{module/integration/integration-fragments::slack-form}"></th:block>
+        <th:block th:replace="~{module/integration/integration-fragments::msteams-form}"></th:block>
+        <th:block th:replace="~{module/integration/integration-fragments::jira-form()}"></th:block>
+        <th:block th:replace="~{module/integration/integration-fragments::basecamp-form()}"></th:block>
+    </div>
+
+</div>
+</body>
+</html>

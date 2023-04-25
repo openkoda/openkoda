@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content">
+        <form th:fragment="settings-form" th:object="${globalModuleConfiguration}"
+              th:action="${@url.globalModuleSettings(globalModuleConfiguration.moduleName)}" method="post">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">Integration Configuration</h6>
+                </div>
+                <div class="card-body">
+                    <input th:replace="~{forms::text-simple('configuration.gitHubClientId', 'GitHub Client Id', 'eg. fa90a6549716957b48ec')}"/>
+                    <input th:replace="~{forms::text-simple('configuration.gitHubClientSecret', 'GitHub Client Secret', 'eg. fa90a6549716957b48ecfa90a6549716957b48ec')}"/>
+                    <input th:replace="~{forms::text-simple('configuration.jiraClientId', 'JIRA Client Id', 'eg. ba90a6549716957b48ec')}"/>
+                    <input th:replace="~{forms::text-simple('configuration.jiraClientSecret', 'JIRA Client Secret', 'eg. ba90a6549716957b48ecfa90a6549716957b48ec')}"/>
+                    <input th:replace="~{forms::text-simple('configuration.basecampClientId', 'Basecamp Client Id', 'eg. fa90a6549716957b48ecfa90a6549716957b48ec')}"/>
+                    <input th:replace="~{forms::text-simple('configuration.basecampClientSecret', 'Basecamp Client Secret', 'eg. fa90a6549716957b48ecfa90a6549716957b48ec')}"/>
+                    <button th:replace="~{forms::button-submit(#{template.save})}"/>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+</body>
+</html>

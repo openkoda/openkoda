@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns: lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}">
+
+    <title><th:block th:text="${@environment.getProperty('application.name')}"></th:block> - Dashboard</title>
+
+    <!-- Custom CSS -->
+    <th:block th:replace="~{frontend-resource/head-customization::css}"></th:block>
+
+    <!-- Custom fonts -->
+    <link href="/vendor/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- App css -->
+    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script th:src="@{/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
+
+    <!-- Custom head scripts -->
+    <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>
+
+    <!--Chart scripts-->
+    <script src="/vendor/chart.js/chart.min.js"></script>
+
+</head>
+
+<body id="page-top">
+
+<script th:if="${organizationDictionariesJson != null}" th:inline="javascript">
+    var organizationDictionaries = [(${organizationDictionariesJson})];
+</script>
+<script th:if="${commonDictionaries != null}" th:inline="javascript">
+    var commonDictionaries = [(${commonDictionaries})];
+    var commonDictionariesHeaders = {};
+</script>
+<script th:each="k : ${commonDictionariesNames}" th:if="${#messages.msgOrNull('commonDictionaries.' + k + '.headers') != null }"
+          th:utext="${'commonDictionariesHeaders[''' + k + '''] = ''' + #messages.msg('commonDictionaries.' + k + '.headers') + '''.split('','');'}"/>
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="${@url.logoImageUrl(organizationEntity != null ? organizationEntity.id : null)}">
+            <div class="sidebar-brand-icon">
+                <th:block th:replace="~{/frontend-resource/main-page-fragments::logo}"></th:block>
+            </div>
+        </a>
+
+        <th:block th:if="${@user.hasOrganizations()}" th:replace="/frontend-resource/menu::users-menu">
+
+        </th:block>
+
+        <!--<div th:replace="~{snippets::cmsEntry('LEFT_ENTRY')}" />-->
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top">
+
+                <!-- Sidebar Toggle (Topbar) -->
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle border-0">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <!-- Topbar Search -->
+                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
+                      id="top-search" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
+                    <div class="input-group">
+                        <input type="text" class="form-control simple-control form-neutral border-0 small"
+                               placeholder="Search..."
+                               th:placeholder="#{search.placeholder}"
+                               aria-label="Search" aria-describedby="basic-addon2" name="search_search">
+                        <div class="input-group-append">
+                            <button class="input-group-text form-neutral border-0" type="submit" form="top-search" formmethod="get"
+                                    formaction="/html/search">
+                                <i class="fas fa-search fa-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+
+                    <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                    <li class="nav-item dropdown no-arrow d-sm-none">
+                        <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <!-- Dropdown - Messages -->
+                        <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                             aria-labelledby="searchDropdown">
+                            <form class="form-inline mr-auto w-100 navbar-search">
+                                <div class="input-group">
+                                    <input type="text" class="form-control simple-control form-neutral border-0 small"
+                                           placeholder="Search for..." aria-label="Search"
+                                           aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                        <button class="input-group-text form-neutral border-0" type="button">
+                                            <i class="fas fa-circle- fa-search fa-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+
+                    <!-- Spinner -->
+                    <th:block th:replace="~{frontend-resource/main-page-fragments::navbar-spinner}"></th:block>
+
+                    <!-- Nav Item - Alerts -->
+                    <div th:replace="~{notification-dropdown :: notifications(${readNotificationsList}, ${unreadNotificationsList}, ${userEntityId})}"></div>
+
+                    <div class="topbar-divider d-none d-sm-block"></div>
+
+                    <!-- Nav Item - User Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user d-lg-max-inline mr-2" th:if="${GravatarModuleWidgetData == null || !GravatarModuleWidgetData.isEnabled}"></i>
+                            <span class="d-lg-inline text-gray-600 small"
+                                  th:text="${@user.getFullName()}">Valerie Luna</span>
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="userDropdown">
+                            <a class="dropdown-item" th:href="${@url.userSettings(@user.getUserId())}" onclick="app.adminMode(false)" th:text="#{template.profile}">
+                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Profile
+                            </a>
+                            <form th:if="${!@auth.isSpoofMode()}"  method="POST" action="/logout">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button class="dropdown-item" type="submit" th:text="#{template.logout}">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout
+                                </button>
+                            </form>
+                            <a th:if="${@auth.isSpoofMode()}" class="dropdown-item" th:href="${@url.exitSpoof()}">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Exit Spoof
+                            </a>
+
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Sub Menu -->
+            <div layout:fragment="sub-menu"></div>
+<!--            <span th:text="${GravatarModuleWidgetData == null}"></span>-->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <h1 class="page-header h3 mb-4 text-gray-800" layout:fragment="title"></h1>
+                <div layout:fragment="content"></div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>Copyright &copy; <th:block th:text="${@environment.getProperty('application.name')}"></th:block> 2023</span>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded-circle" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Bootstrap core JavaScript-->
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>
+
+<th:block th:replace="~{frontend-resource/bottom-customization::sbadmin}"></th:block>
+
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content" th:attr="data-menu-item='frontendresource'">
+        <div th:replace="tables::frontend-resource(${organizationRelatedEntityPage}, #{template.frontendResources})"/>
+    </div>
+</div>
+</body>
+</html>

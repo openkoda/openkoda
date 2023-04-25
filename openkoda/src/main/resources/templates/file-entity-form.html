@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" >
+<body>
+
+<form th:fragment="file-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${fileForm}, 'fileForm', '', '', '', 'File Data', #{template.save}, true)}" />
+<form th:fragment="file-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${fileForm}, 'fileForm', '', #{template.forms.containsErrors}, 'alert-danger', 'File Data', #{template.save}, false)}" />
+<form th:fragment="file-settings-form-success" th:replace="~{generic-forms::go-back( ${'../all'} )}"/>
+
+</body>
+</html>

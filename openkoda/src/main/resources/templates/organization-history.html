@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content" th:attr="data-menu-item=${'organization-settings-history-' + organizationEntity.id}">
+        <div th:fragment="frontend-resource(frontendResourcePage, title)" class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center ">
+                <h6 class="m-0 font-weight-bold"><th:block th:text="#{template.audit}"></th:block></h6>
+            </div>
+
+            <div class="card-body py-0">
+                <nav th:replace="~{tables::search('audit', ${auditPage})}"></nav>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th th:replace="~{tables::asort('id', '#', 'audit', ${auditPage})}"></th>
+                            <th th:replace="~{tables::asort('createdOn', 'Timestamp', 'audit', ${auditPage})"}>Timestamp</th>
+                            <th th:replace="~{tables::asort('ipAddress', 'IP Address', 'audit', ${auditPage})">}IP Address</th>
+                            <th>Change</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="a : ${auditPage.content}">
+                            <td th:text="${a.id}">1</td>
+                            <td th:text="${#temporals.format(a.createdOn, 'yyyy-MM-dd HH:mm:ss')}">Mark</td>
+                            <td th:text="${a.ipAddress}">Otto</td>
+                            <td class="text-sm" th:utext="${a.change}">Aldo</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <nav th:replace="~{tables::tablenav('audit', ${auditPage})}"></nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

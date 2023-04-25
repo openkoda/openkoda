@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<th:block th:fragment="google-tracking(trackingId)">
+    <script async th:src="'https://www.googletagmanager.com/gtag/js?id=' + ${trackingId}"></script>
+    <script th:inline="javascript">
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        let googleTrackingId;
+        if(!googleTrackingId) {
+            googleTrackingId = /*[[${ '' + trackingId + '' }]]*/ '';
+        }
+        gtag('config', googleTrackingId);
+    </script>
+
+</th:block>
+<th:block th:fragment="hotjar-tracking(trackingId)">
+    <script th:inline="javascript">
+    (function(h,o,t,j,a,r){
+        let hotjarTrackingId;
+        if(!hotjarTrackingId) {
+            hotjarTrackingId = /*[[${ trackingId }]]*/ 0;
+        }
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:hotjarTrackingId,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+</th:block>
+<th:block th:fragment="linkedin-insight-tracking(trackingId)">
+    <script type="text/javascript" th:inline="javascript">
+		_linkedin_partner_id = /*[[${ trackingId }]]*/ '';
+		window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+		window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+    </script>
+    <script type="text/javascript">
+	    (function () {
+		    var s = document.getElementsByTagName("script")[0];
+		    var b = document.createElement("script");
+		    b.type = "text/javascript";
+		    b.async = true;
+		    b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+		    s.parentNode.insertBefore(b, s);
+	    })();
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none;" alt=""
+             th:src="'https://px.ads.linkedin.com/collect/?pid=' + ${trackingId} + '&fmt=gif'" />
+    </noscript>
+</th:block>
+</body>
+</html>

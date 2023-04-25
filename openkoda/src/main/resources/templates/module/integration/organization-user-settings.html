@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+    <div layout:fragment="content">
+
+        <form th:fragment="settings-form" th:object="${organizationUserModuleConfiguration}"
+              th:action="${@url.userOrganizationModuleSettings(organizationUserModuleConfiguration.moduleName, organizationUserModuleConfiguration.userId, organizationUserModuleConfiguration.organizationId)}"
+              method="post">
+
+            <button th:replace="~{forms::button-submit(#{template.save})}"/>
+        </form>
+
+    </div>
+
+</div>
+</body>
+</html>

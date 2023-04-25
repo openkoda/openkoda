@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <div th:fragment="runtimeError(message)">
+        <th:block th:text="${message}" />
+    </div>
+
+    <th:block th:fragment="empty"> </th:block>
+
+    <th:block th:fragment="apiKey">
+        The new API Key is:<br/>
+        <pre id="newApiKey" th:text="${plainApiKeyString}"/>
+    </th:block>
+
+    <th:block th:fragment="loading">
+        <div class="loader-container">
+            <div class="loader spinner-border"></div>
+        </div>
+    </th:block>
+
+    <th:block th:fragment="random-text-from-list(textList)">
+        <th:block th:with="random=${T(java.lang.Math).random() * (#lists.size(textList) - 1)},index=${#numbers.formatInteger(random,1)}">
+            <th:block th:text="${textList[index]}"></th:block>
+        </th:block>
+    </th:block>
+
+    <th:block th:fragment="codemirror-import">
+        <!--CodeMirror-->
+        <!--CSS-->
+        <link href="/vendor/codemirror/codemirror.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/display/fullscreen.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/hint/show-hint.css" rel="stylesheet" type="text/css">
+        <link href="/vendor/codemirror/addon/dialog/dialog.css" rel="stylesheet" type="text/css">
+        <!--JS-->
+        <script type="text/javascript" src="/vendor/codemirror/codemirror.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/comment/comment.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/display/fullscreen.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/javascript/javascript.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/css/css.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/mode/xml/xml.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/html-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/xml-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/show-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/css-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/hint/javascript-hint.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/search.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/searchcursor.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/search/jump-to-line.js"></script>
+        <script type="text/javascript" src="/vendor/codemirror/addon/dialog/dialog.js"></script>
+    </th:block>
+
+</body>
+</html>

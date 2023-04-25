@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+    <div class="row" layout:fragment="content"  th:attr="data-menu-item=${'organization-settings-' + organizationEntity.id}">
+        <th:block th:if="${!@auth.hasGlobalOrOrgPrivilege('manageOrgData', organizationEntity.id)}">
+            <div class="col">
+                <form th:replace="~{entity-forms::organization-settings-form-new}"/>
+            </div>
+        </th:block>
+
+        <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('manageOrgData', organizationEntity.id)}">
+            <div class="col-lg-4">
+                <form th:replace="~{entity-forms::organization-settings-form-new}"/>
+                <form th:replace="~{entity-forms::invite-user-form-new}"/>
+            </div>
+        </th:block>
+
+        <div class="col-lg-8">
+           <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('readUserData', organizationEntity.id)}">
+              <table th:replace="~{tables::users(${usersPage}, ${organizationEntity}, #{template.forms.teamMembers}, false, true)}"/>
+           </th:block>
+            <th:block
+                    th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings') && @AllRepositories.unsecure.globalOrganizationRole.findAll().size()>0}">
+              <form th:replace="~{entity-forms::global-org-role-form}"/>
+            </th:block>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

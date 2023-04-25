@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<head>
+    <meta charset="UTF-8">
+    <title>Frontend Element Editor</title>
+</head>
+<body class="uicomponent-editor">
+<div class="container-fluid">
+
+    <div layout:fragment="content" th:attr="data-menu-item='frontend-elements'" >
+        <div id="uicomponent-alert" class="form-alert alert alert-danger" role="alert" style="display: none;">
+            This form contains errors
+        </div>
+        <div class="">
+
+            <div class="">
+                <form th:fragment="uicomponent-frontend-resource-settings-form-new"
+                      th:replace="~{generic-forms::generic-form(${uiComponentFrontendResourceForm}, 'uiComponentFrontendResourceForm', '', '', '', 'Frontend Resource Data', #{template.save}, true)}"/>
+            </div>
+
+            <div class="card shadow mb-4" th:if="${uiComponentFrontendResourceForm.entity != null}" id="controller-endpoints">
+                <div class="card-header py-3 d-flex flex-row align-items-center ">
+                    <h6 class="m-0 font-weight-bold" th:text="#{template.endpoints}">Controller Endpoints</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="ce-form-tabs" role="tablist">
+                        <th:block th:each="ce,iter : ${controllerEndpoints}" >
+                            <li class="nav-item" role="presentation">
+                                <a th:class="'nav-link ' + ${iter.index == 0 ? 'active' : ''}" th:id="'tabnav' + ${iter.index}" data-toggle="tab" th:data-index="${iter.index}"
+                                    th:href="'#tab' + ${iter.index}" role="tab" th:aria-controls="'tab' + ${iter.index}"
+                                        aria-selected="true">
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-inline" th:text="${ce.httpMethod + (ce.subPath != null ? ' ' + ce.subPath : '')}"></div>
+                                        <form th:action="${'./controllerEndpoint/' + ce.id + '/remove'}" method="POST" class="d-flex">
+                                                <button class="border-0 font-weight-normal ml-2 pl-2 pr-2 badge badge-primary" th:onclick="|app.confirmAndSubmit('#{template.confirmationPrompt}', this.form)|" type="button" th:text="#{template.remove}"></button>
+                                        </form>
+                                    </div>
+                                </a>
+                            </li>
+                        </th:block>
+                        <li class="nav-item" role="presentation">
+                            <a th:class="'nav-link new-controller-endpoint '  + ${#lists.size(controllerEndpoints) == 0 ? 'active' : ''}" th:id="'tabnav' + ${#lists.size(controllerEndpoints)}" data-toggle="tab" th:data-index="${#lists.size(controllerEndpoints)}"
+                                th:href="'#tab' + ${#lists.size(controllerEndpoints)}" role="tab"
+                                    th:aria-controls="'tab' + ${#lists.size(controllerEndpoints)}" aria-selected="false">
+                                <i class='fas fa-plus'></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- Tabs navs -->
+
+                    <!-- Tabs content -->
+                    <div class="tab-content" id="">
+                        <th:block th:replace="~{forms::code-editor-prerequisites}"/>
+                        <form th:id="${'uiComponentControllerEndpointFormList'}"
+                              th:class="'uiComponentControllerEndpointFormList'" method="post"
+                              th:object="${uiComponentControllerEndpointList}"
+                              th:action="''">
+                            <th:block th:each="ceForm,iter : *{uiComponentControllerEndpointFormList}">
+                                <div th:class="'tab-pane fade' + ${iter.index == 0 ? ' show active' : ''}"
+                                     th:id="'tab' + ${iter.index}" role="tabpanel" th:aria-labelledby="'tab' + ${iter.index}">
+                                    <div class="card-body pl-0 pr-0 pt-2" th:with="fieldNamePrefix='uiComponentControllerEndpointFormList[__${iter.index}__].'">
+                                        <th:block th:fragment="uicomponent-controller-endpoint-settings-form-new"
+                                                  th:replace="~{generic-forms::form-fields(${ceForm},  'uiComponentControllerEndpointFormList[__${iter.index}__]', '', '', '', #{template.save}, false)}"/>
+                                    </div>
+                                </div>
+                            </th:block>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card shadow mb-4" th:if="${uiComponentFrontendResourceForm.entity != null}">
+                <div class="card-header py-3  flex-row align-items-center ">
+                    <h6 class="m-0 font-weight-bold d-inline"><th:block th:text="#{template.preview} + ' '"></th:block></h6>
+                    <a th:href="${#strings.substringBefore(uiComponentPreviewUrl,'?')}" th:text="${#strings.substringBefore(uiComponentPreviewUrl,'?')}" target="_blank"></a>
+                </div>
+                <div class="card-body" id="uicomponent-preview"></div>
+                <div th:text="${error}"></div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+			function getPreview(){
+				let uiComponentPreviewUrl = /*[[${uiComponentPreviewUrl}]]*/ window.location.href;
+				let callForPreview = /*[[${uiComponentFrontendResourceForm.entity != null}]]*/ false;
+				if(callForPreview) {
+					$.get(uiComponentPreviewUrl)
+						.done(function (data) {
+							$('#uicomponent-preview').removeClass("text-danger").html(data);
+						})
+                        .fail(function () {
+	                        $('#uicomponent-preview').addClass("text-danger").html("Error loading html preview");
+                        });
+				}
+            };
+        </script>
+
+        <script>
+            function refreshCodeMirror(index){
+                document.getElementById(`-uiComponentControllerEndpointFormList[${index}].dto.code`)
+                    .parentElement.querySelector('.CodeMirror').CodeMirror.refresh();
+            };
+
+			function onSave(data) {
+				if(data === true || data.indexOf('/html/webendpoints/') > -1) {
+					if($('#controller-endpoints').length) {
+						app.refreshView();
+					} else {
+						window.location.href = data;
+                    }
+                }
+            };
+
+            function onSaveError(data) {
+                $('#uicomponent-alert').show();
+	            setTimeout(() => {
+		            $('#uicomponent-alert').hide(); //close the popup
+	            },3000)
+            };
+
+            $( document ).ready(function() {
+                $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+                    refreshCodeMirror(e.target.dataset.index);
+                });
+	            $(".uiComponentFrontendResourceForm .btn-submit,.uiComponentControllerEndpointFormList .btn-submit")
+                    .attr("onclick","app.submitToUrlAndCallbackOrElseFailure(this.form,onSave,onSaveError)");
+                getPreview();
+            });
+        </script>
+    </div>
+</div>
+
+<div th:fragment="preview-error" class="card-body">
+    <span th:text="${errorMessage}"></span>
+</div>
+
+</body>
+</html>

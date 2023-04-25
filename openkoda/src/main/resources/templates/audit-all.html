@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+    <div layout:fragment="content" th:attr="data-menu-item='audit'">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Audit</h6>
+            </div>
+            <div class="card-body pt-0">
+                <nav th:replace="~{tables::search('audit', ${auditPage})}"></nav>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th th:replace="~{tables::asort('id', '#', 'audit', ${auditPage})}"></th>
+                            <th th:replace="~{tables::asort('createdOn', 'Timestamp', 'audit', ${auditPage})}">Timestamp
+                            </th>
+                            <th>Support ID</th>
+                            <th th:replace="~{tables::asort('ipAddress', 'IP Address', 'audit', ${auditPage})}">IP
+                                Address
+                            </th>
+                            <th>Change</th>
+                            <th>Content</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="a : ${auditPage.content}">
+                            <td class="text-sm" th:text="${a.id}">1</td>
+                            <td class="text-sm" th:text="${#temporals.format(a.createdOn, 'yyyy-MM-dd HH:mm:ss')}">Mark</td>
+                            <td class="text-sm" th:text="${#strings.substringAfter(a.requestId, '-')}"></td>
+                            <td class="text-sm" th:text="${a.ipAddress}">Otto</td>
+                            <td class="text-sm" th:utext="${a.change}">Aldo</td>
+                            <td>
+                                <a th:if="${a.content}"
+                                   th:href="${@url.downloadAuditContent(a.id)}" download="content.html"
+                                   class="btn btn-primary btn-sm">Content</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav th:replace="~{tables::tablenav('audit', ${auditPage})}"></nav>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
