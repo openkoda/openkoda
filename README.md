@@ -1,5 +1,5 @@
 <p style="text-align: center;" align="center">
-    <img alt="Openkoda Logo" src="src/main/resources/public/vendor/openkoda/openkoda_logo.svg" width="40%"/>
+    <img alt="Openkoda Logo" src="openkoda/src/main/resources/public/vendor/openkoda/openkoda_logo.svg" width="40%"/>
 </p>
 
 <div style="text-align: center;" align="center">
@@ -16,13 +16,13 @@
 
 
 ### Documentation Links
-* [Application Development](doc/app-development.md)
-* [Admin Panel](doc/admin.md)
-* [Installation](doc/installation.md)
-* [Example Application](doc/5-minute-guide.md)
+* [Application Development](openkoda/doc/app-development.md)
+* [Admin Panel](openkoda/doc/admin.md)
+* [Installation](openkoda/doc/installation.md)
+* [Example Application](openkoda/doc/5-minute-guide.md)
 
 ###
 <div style="text-align: center;" align="center">
-    <a href="https://www.facebook.com/Openkoda/"><img alt="Openkoda Facebook" src="src/main/resources/public/vendor/fontawesome-free/svgs/brands/facebook.svg" width="20px"></a>
-    <a href="https://www.linkedin.com/company/openkoda"><img alt="Openkoda Facebook" src="src/main/resources/public/vendor/fontawesome-free/svgs/brands/linkedin.svg" width="20px" style="margin-left: 10px"></a>
+    <a href="https://www.facebook.com/Openkoda/"><img alt="Openkoda Facebook" src="openkoda/src/main/resources/public/vendor/fontawesome-free/svgs/brands/facebook.svg" width="20px"></a>
+    <a href="https://www.linkedin.com/company/openkoda"><img alt="Openkoda Facebook" src="openkoda/src/main/resources/public/vendor/fontawesome-free/svgs/brands/linkedin.svg" width="20px" style="margin-left: 10px"></a>
 </div>

@@ -1,4 +1,4 @@
-****# Openkoda Introduction
+# Openkoda Introduction
 
 ## What can be done
 
