@@ -34,6 +34,7 @@ import com.openkoda.core.repository.common.ProfileSettingsRepository;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.dto.OrganizationDto;
 import com.openkoda.dto.OrganizationRelatedObject;
+import com.openkoda.dto.ServerJsThreadDto;
 import com.openkoda.dto.web.OrganizationWebPageDto;
 import com.openkoda.dto.web.WebPage;
 import com.openkoda.form.*;
@@ -158,7 +159,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<OrganizationWebPageDto> organizationWebPageDto = new PageAttr<>("organizationWebPageDto");
     PageAttr<List<Notification>> readNotificationsList = new PageAttr<>("readNotificationsList");
     PageAttr<List<Notification>> unreadNotificationsList = new PageAttr<>("unreadNotificationsList");
-    PageAttr<Map<Thread, LoggingEntriesStack<String>>> threads = new PageAttr<>("threads");
+    PageAttr<Map<ServerJsThreadDto, LoggingEntriesStack<String>>> serverJsThreads = new PageAttr<>("serverJsThreads");
     PageAttr<String> unreadNotificationsIdListString = new PageAttr<>("unreadNotificationsIdListString");
     PageAttr<String> notificationMessage = new PageAttr<>("notificationMessage");
     PageAttr<String> menuItem = new PageAttr<>("menuItem");
@@ -186,6 +187,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<Map<Object, Object[]>> rulesSelectedElements = new PageAttr<>("rulesSelectedElements");
     PageAttr<List<Tuple5<ProfileSettingsRepository, Function, PageAttr, String, String>>> additionalSettingsForms = new PageAttr<>("additionalSettingsForms");
     PageAttr<Boolean> isValid = new PageAttr<>("isValid");
+    PageAttr<String> redirectUrl = new PageAttr<>("redirectUrl");
 
 
     default <S, T> Function<Page<S>, Page<T>> pageConverter(Function<? super S, ? extends T> elementConverter) {

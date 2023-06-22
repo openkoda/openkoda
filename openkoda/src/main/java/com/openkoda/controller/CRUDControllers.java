@@ -50,7 +50,7 @@ public class CRUDControllers {
     @Inject
     CustomisationService customisationService;
     @Inject
-    CRUDControllerConfigurationMap crudControllerConfigurationMap;
+    HtmlCRUDControllerConfigurationMap htmlCrudControllerConfigurationMap;
     @Inject
     SecureServerJsRepository serverJsRepository;
     @Inject
@@ -65,20 +65,20 @@ public class CRUDControllers {
     void init() {
 
         customisationService.registerOnApplicationStartListener(
-                a -> crudControllerConfigurationMap.registerCRUDController(
+                a -> htmlCrudControllerConfigurationMap.registerCRUDController(
                                 serverJsFrontendMappingDefinition, serverJsRepository, ReflectionBasedEntityForm.class)
                         .setDtoClass(ServerJsDto.class)
                         .setFormClass(ServerJsForm.class)
                         .setGenericTableFields("name"));
 
         customisationService.registerOnApplicationStartListener(
-                a -> crudControllerConfigurationMap.registerCRUDController(
+                a -> htmlCrudControllerConfigurationMap.registerCRUDController(
                                 frontendResourceForm, frontendResourceRepository, ReflectionBasedEntityForm.class)
                         .setGenericTableFields("name","includeInSitemap","type","urlPath")
                         .setTableView("frontend-resource-all"));
 
         customisationService.registerOnApplicationStartListener(
-                a -> crudControllerConfigurationMap.registerCRUDController(
+                a -> htmlCrudControllerConfigurationMap.registerCRUDController(
                                 organizationsApi, secureOrganizationRepository, ReflectionBasedEntityForm.class, Privilege.readOrgData,Privilege.manageOrgData)
                         .setGenericTableFields("id","name"));
 

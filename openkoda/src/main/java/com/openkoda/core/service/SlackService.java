@@ -69,6 +69,12 @@ public class SlackService extends ComponentProvider {
         debug("[sendMessageToSlack] Message to {}", webHook);
         String requestJson = String.format("{\"text\":\"%s\"}",
                 StringUtils.replace(message, "\"", "\\\""));
+        return sendJSONMessageToSlack(requestJson, webHook);
+
+    }
+
+    public boolean sendJSONMessageToSlack(String requestJson, String webHook) {
+        debug("[sendMessageToSlack] Message to {}", webHook);
         HttpRequestTask httpRequestTask = new HttpRequestTask(webHook, requestJson);
         repositories.unsecure.httpRequest.save(httpRequestTask);
         return true;

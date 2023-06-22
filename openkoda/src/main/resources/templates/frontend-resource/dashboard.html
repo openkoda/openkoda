@@ -9,7 +9,7 @@
 
         <div th:utext="#{template.dashboard.default.message(${@url.allFrontendResource()})}"></div>
         <div class="row" id="registered-cruds">
-            <th:block th:each="entry : ${@CRUDControllerConfigurationMap.entrySet()}">
+            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.entrySet()}">
                 <div class="col-lg-3">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">

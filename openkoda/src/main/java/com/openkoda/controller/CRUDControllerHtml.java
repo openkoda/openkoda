@@ -50,7 +50,7 @@ import static com.openkoda.core.controller.generic.AbstractController._HTML;
 
 
 /**
- * Controller that handles requests for generic controllers registered in {@link CRUDControllerConfigurationMap}.
+ * Controller that handles requests for generic controllers registered in {@link HtmlCRUDControllerConfigurationMap}.
  */
 @RestController
 @RequestMapping({_HTML_ORGANIZATION_ORGANIZATIONID + "/{obj}", _HTML + "/{obj}"})
@@ -74,7 +74,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @Qualifier("obj") Pageable aPageable,
             @RequestParam(required = false, defaultValue = "", name = "obj_search") String search) {
         debug("[getAll]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getGetAllPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -113,7 +113,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @RequestParam(required = false, defaultValue = "", name = "obj_search") String search
             ) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         debug("[getAll]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getGetAllPrivilege();
 
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
@@ -160,7 +160,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey) {
 
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getGetNewPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -187,7 +187,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey) {
 
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getGetSettingsPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -216,7 +216,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name="obj", required=true) String objKey,
             @Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getPostNewPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -249,7 +249,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name="obj", required=true) String objKey,
             @Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getPostSavePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -279,7 +279,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name=ID) Long objectId,
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey) {
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(objKey);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getPostRemovePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

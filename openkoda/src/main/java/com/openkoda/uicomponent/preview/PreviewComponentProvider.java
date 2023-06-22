@@ -25,13 +25,14 @@ package com.openkoda.uicomponent.preview;
 import com.openkoda.uicomponent.DataServices;
 import com.openkoda.uicomponent.IntegrationServices;
 import com.openkoda.uicomponent.MessagesServices;
+import com.openkoda.uicomponent.UtilServices;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PreviewComponentProvider {
-
     public final DataServices data = new PreviewDataServices();
     public final IntegrationServices integrations = new PreviewIntegrationServices();
     public final MessagesServices messages = new PreviewMessagesServices();
+    public final UtilServices util = new UtilServices();
 
 }

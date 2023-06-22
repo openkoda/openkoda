@@ -181,6 +181,8 @@ tenant.initialization.table.names.commaseparated=
 Multiple databases multitenancy is similar to Single Database / Many Schemas approach. 
 The key difference is there should be defined multiple datasources and (optionally) there can be a strategy for database selection per client request.
 
+**IMPORTANT:** To make multiple databases setup work you need to manually configure replication for databases you want to connect. 
+
 ```
 #Multitenancy Configuration
 

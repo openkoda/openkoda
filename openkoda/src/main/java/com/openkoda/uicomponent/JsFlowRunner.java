@@ -32,6 +32,7 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import reactor.util.function.Tuples;
 
@@ -62,15 +63,21 @@ public class JsFlowRunner {
         Context c = contextBuilder.build();
         Value b = c.getBindings("js");
         b.putMember("flow", initializedFlow);
-        b.putMember("dateNow", (Supplier<LocalDate>) () -> LocalDate.now());
-        b.putMember("dateTimeNow", (Supplier<LocalDateTime>) () -> LocalDateTime.now());
-        b.putMember("parseInt", (Function<String, Integer>) s -> Integer.parseInt(s));
-        b.putMember("parseLong", (Function<String, Long>) s -> Long.parseLong(s));
-        b.putMember("parseDate", (Function<String, LocalDate>) s -> LocalDate.parse(s));
-        String finalScript = "let result = " + jsFlow + ";\nresult";
+        b.putMember("dateNow", (Supplier<LocalDate>) () -> componentProvider.util.dateNow());
+        b.putMember("dateTimeNow", (Supplier<LocalDateTime>) () -> componentProvider.util.dateTimeNow());
+        b.putMember("parseInt", (Function<String, Integer>) s -> componentProvider.util.parseInt(s));
+        b.putMember("parseLong", (Function<String, Long>) s -> componentProvider.util.parseLong(s));
+        b.putMember("parseDate", (Function<String, LocalDate>) s -> componentProvider.util.parseDate(s));
+        b.putMember("toString", (Function<Object, String>) s -> componentProvider.util.toString(s));
+        b.putMember("isNaN", (Function<Double, Boolean>) s -> componentProvider.util.isNaN(s));
+        b.putMember("parseFloat", (Function<String, Float>) s -> componentProvider.util.parseFloat(s));
+        b.putMember("parseJSON", (Function<String, JSONObject>) s -> componentProvider.util.parseJSON(s));
+        b.putMember("toJSON", (Function<Object, String>) s -> componentProvider.util.toJSON(s));
+        b.putMember("decodeURI", (Function<String, String>) s -> componentProvider.util.decodeURI(s));
+        b.putMember("encodeURI", (Function<String, String>) s -> componentProvider.util.encodeURI(s));
 
-        Flow result = c.eval("js", finalScript).as(initializedFlow.getClass());
-        return result;
+        String finalScript = "let result = " + jsFlow + ";\nresult";
+        return c.eval("js", finalScript).as(initializedFlow.getClass());
     }
 
     private PageModelMap executeFlow(Flow f) {

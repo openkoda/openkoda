@@ -23,6 +23,7 @@ package com.openkoda.uicomponent.preview;
 
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.repository.common.SecuredRepository;
+import com.openkoda.model.User;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.uicomponent.DataServices;
 
@@ -57,6 +58,11 @@ public class PreviewDataServices implements DataServices {
 
     @Override
     public AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName, SearchableOrganizationRelatedEntity entity) {
+        return null;
+    }
+
+    @Override
+    public User registerUserOrReturnExisting(String email, String firstName, String lastName) {
         return null;
     }
 

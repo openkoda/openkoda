@@ -25,12 +25,14 @@ import com.openkoda.AbstractTest;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -97,10 +99,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.LINUX)
     public void shouldCreateDatabaseBackup_windowsEnv() {
 
         // GIVEN
-        Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(BACKUP_DATABASE);
 
         // WHEN
@@ -113,10 +115,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void shouldCreateDatabaseBackup_nonWindowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(BACKUP_DATABASE);
 
         // WHEN
@@ -130,10 +132,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void shouldCreatePropertiesBackup_nonWindowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(BACKUP_PROPERTIES);
 
         // WHEN
@@ -147,10 +149,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void shouldCreateFullBackup_nonWindowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(BACKUP_PROPERTIES, BACKUP_DATABASE);
 
         // WHEN
@@ -178,10 +180,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.LINUX)
     public void shouldNotCopyBackup_windowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeTrue(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(SCP_ENABLED);
         File fileToCopy = getTmpFile(true);
 
@@ -193,10 +195,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void shouldCopyBackup_nonWindowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(SCP_ENABLED);
         File fileToCopy = getTmpFile(true);
 
@@ -208,10 +210,10 @@ public class BackupWriterTest extends AbstractTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void shouldNotCopyBackupWhenItDoesNotExist_nonWindowsEnv() throws IOException {
 
         // GIVEN
-        Assumptions.assumeFalse(System.getProperty("os.name").toLowerCase().startsWith("windows"));
         Set<BackupOption> backupOptions = Set.of(SCP_ENABLED);
         File fileToCopy = getTmpFile(false);
 
@@ -241,7 +243,7 @@ public class BackupWriterTest extends AbstractTest {
     private void assertTarContains(String... paths) throws IOException {
 
         // remove leading slash to match tar content
-        Stream<String> pathsStream = Stream.of(paths).map(path -> path.substring(1));
+        Stream<String> pathsStream = Stream.of(paths).filter(StringUtils::isNotBlank).map(path -> path.substring(1));
 
         TarArchiveInputStream tarStream = getTarStream();
         List<String> tarFiles = new ArrayList<>();

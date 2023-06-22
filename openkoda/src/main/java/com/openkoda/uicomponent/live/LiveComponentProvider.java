@@ -25,6 +25,7 @@ package com.openkoda.uicomponent.live;
 import com.openkoda.uicomponent.DataServices;
 import com.openkoda.uicomponent.IntegrationServices;
 import com.openkoda.uicomponent.MessagesServices;
+import com.openkoda.uicomponent.UtilServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,14 +35,17 @@ public class LiveComponentProvider {
     public final DataServices data;
     public final IntegrationServices integrations;
     public final MessagesServices messages;
+    public final UtilServices util;
 
     public LiveComponentProvider(
             @Autowired DataServices data,
             @Autowired IntegrationServices integrations,
-            @Autowired MessagesServices messages) {
+            @Autowired MessagesServices messages,
+            @Autowired UtilServices util) {
         this.data = data;
         this.integrations = integrations;
         this.messages = messages;
+        this.util = util;
     }
 
 }

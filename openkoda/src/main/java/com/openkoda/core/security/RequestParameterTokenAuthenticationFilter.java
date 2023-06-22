@@ -21,10 +21,10 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.security;
 
+import com.openkoda.core.configuration.RequestParameterTokenAuthenticationSuccessHandler;
 import com.openkoda.model.Token;
 import com.openkoda.repository.user.TokenRepository;
 import jakarta.inject.Inject;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -32,11 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
 
 /**
  * This class is a filter that allows to authenticate GET request that have "token" request parameter.
@@ -51,26 +48,12 @@ public class RequestParameterTokenAuthenticationFilter extends AbstractTokenAuth
     @Inject
     private TokenRepository tokenRepository;
 
-    /**
-     * On successful authentication, do a redirect to the url, but without the token parameter.
-     */
-    private static class RequestParameterTokenAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-            String redirectUrl = getUrlWithoutTokenParameter(request);
-            response.sendRedirect(redirectUrl);
-        }
-
-        private String getUrlWithoutTokenParameter(HttpServletRequest request) {
-            String queryReplacement = request.getQueryString().replaceAll(TOKEN + "=[0-9a-zA-Z_\\-]+[=]*", "");
-            return request.getServletPath()
-                    + (StringUtils.isEmpty(queryReplacement) ? "" : "?" + queryReplacement);
-        }
-    }
+    @Autowired
+    SecurityContextRepository securityContextRepository;
 
     public RequestParameterTokenAuthenticationFilter() {
         super( RequestParameterTokenAuthenticationFilter::checkRequestSupport );
-        setAuthenticationSuccessHandler(new RequestParameterTokenAuthenticationSuccessHandler());
+        setAuthenticationSuccessHandler(new RequestParameterTokenAuthenticationSuccessHandler(securityContextRepository));
     }
 
     /**

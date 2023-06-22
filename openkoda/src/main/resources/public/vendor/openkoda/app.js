@@ -251,9 +251,10 @@ app.dictionaryToRadiobuttonTable = function (dictionaryName, fieldName, selected
     let result = "";
     let fieldNameClass = "radio-option " + fieldName.replace(".", "-")
     try {
-        var arr = JSON.parse(a)
+        let arr = JSON.parse(a)
         arr.forEach(e => {
             let row = e['v'];
+            let key = e['k'];
             let isArray = Array.isArray(row);
             let labels = "";
             if (isArray) {
@@ -263,8 +264,8 @@ app.dictionaryToRadiobuttonTable = function (dictionaryName, fieldName, selected
             } else {
                 labels = "<td class='" + fieldNameClass + "'>" + row + "</td>";
             }
-            let selected = (selectedValue === e) ? " checked='checked'" : "";
-            result += "<tr><td><input class='" + fieldNameClass + "' type='radio'  name='" + fieldName + "' value='" + e + "'" + selected + "/></td>" + labels + "</tr>";
+            let selected = (!!selectedValue && selectedValue.toString() === e) ? " checked='checked'" : "";
+            result += "<tr><td><input class='" + fieldNameClass + "' type='radio'  name='" + fieldName + "' value='" + key + "'" + selected + "/></td>" + labels + "</tr>";
         })
     } catch (exception) {
         for (e in a) {
@@ -278,7 +279,7 @@ app.dictionaryToRadiobuttonTable = function (dictionaryName, fieldName, selected
             } else {
                 labels = "<td class='" + fieldNameClass + "'>" + row + "</td>";
             }
-            let selected = (selectedValue === e) ? " checked='checked'" : "";
+            let selected = (!!selectedValue && selectedValue.toString() === e) ? " checked='checked'" : "";
             result += "<tr><td><input class='" + fieldNameClass + "' type='radio'  name='" + fieldName + "' value='" + e + "'" + selected + "/></td>" + labels + "</tr>";
         }
     }
@@ -745,4 +746,17 @@ app.subscribeToChannel = function(channelName, handler) {
     } else {
         app.stompClient.subscribe(channelName , handler);
     }
+}
+
+app.initHtmlIdHolder = function(frontendResourceId, editorId, selector) {
+    if (frontendResourceId == null) {
+        return;
+    }
+    const idHolder = document.createElement('input');
+    idHolder.name = 'idConnector';
+    idHolder.type = 'hidden';
+    idHolder.setAttribute('data-resourceid', frontendResourceId);
+    idHolder.setAttribute('data-editorid', editorId);
+    idHolder.setAttribute('data-restored', false);
+    document.querySelector(selector).appendChild(idHolder);
 }

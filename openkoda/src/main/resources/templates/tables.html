@@ -35,18 +35,17 @@
                 </a>
             </li>
 
-            <th:block th:if="${page.number == 1}">
-                <li th:if="${page.hasPrevious()}" class="page-item"><a class="page-link"
-                                                                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__"
-                                                                       th:text="${page.number}">1</a></li>
-            </th:block>
+                <li th:if="${page.isLast() AND page.number > 1}" class="page-item">
+                    <a class="page-link"
+                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__"
+                       th:text="${page.number-1}">1</a>
+                </li>
 
-            <th:block th:if="${page.number != 1}">
-                <li th:if="${page.hasPrevious()}" class="page-item"><a class="page-link"
-                                                                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__"
-                                                                       th:text="${page.number - 1}">1</a></li>
-            </th:block>
-
+                <li th:if="${page.hasPrevious()}" class="page-item">
+                    <a class="page-link"
+                       th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__"
+                       th:text="${page.number}">1</a>
+                </li>
 
             <li class="page-item active"><a class="page-link" href="#" th:text="${page.number + 1}">3</a></li>
 
@@ -95,7 +94,7 @@
                                th:value="${searchTerm}"/>
                         <input type="hidden" th:name="${qualifier + '_size'}"
                                th:value="${page.size}"/>
-                        <input type="hidden" th:name="${qualifier + '_sort'}"
+                        <input type="hidden" th:if="${page.sort.toString() != 'UNSORTED'}" th:name="${qualifier + '_sort'}"
                                th:value="${#strings.replace(page.sort, ': ', ',')}"/>
                         <input type="hidden" th:name="${qualifier + '_page'}"
                                th:value="${page.number}"/>
@@ -505,6 +504,66 @@
     <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
 </div>
 
+<div th:fragment="frontend-element-dashboard(organizationRelatedEntityPage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row ">
+        <h6 class="m-0 font-weight-bold" th:text="${title}">Frontend Element</h6>
+    </div>
+    <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('urlPath', #{frontendresource.urlPath.label}, 'obj', ${organizationRelatedEntityPage})}">
+                        URL Path
+                    </th>
+                    <th th:text="#{template.preview}">Preview</th>
+                    <th th:replace="~{tables::asort('isPublic', #{frontendresource.isPublic}, 'obj', ${organizationRelatedEntityPage})}">
+                        Is public
+                    </th>
+                    <th th:text="#{template.endpoints}">Number of web endpoints</th>
+                    <th th:replace="~{tables::asort('createdOn', #{template.updatedOn}, 'obj', ${organizationRelatedEntityPage})}">
+                        updated On
+                    </th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${organizationRelatedEntityPage.content}">
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.urlPath}"></a></td>
+                    <td><a th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"
+                           th:target="_blank"
+                           th:text="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"></a>
+                    </td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.isPublic}"></a></td>
+                    <td th:text="${@AllRepositories.unsecure.controllerEndpoint.findByFrontendResourceId(a.id).size()}">
+                        0
+                    </td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}"
+                           th:text="${@dates.formatDateTimeLocaleEN(a.getUpdatedOn)}"></a>
+                    </td>
+
+                    <td>
+                        <div class="tbuttons d-flex">
+                            <th:block th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}">
+                                <a class="btn btn-sm btn-primary btn-simple text-nowrap"
+                                   th:href="${@url.UIComponentSettings(a.id)}"
+                                   th:text="#{template.settings}"></a>
+                            </th:block>
+                            <a class="btn btn-sm btn-primary btn-simple text-nowrap"
+                               th:target="_blank"
+                               th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"
+                               th:text="#{template.preview}"></a>
+                        </div>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+</div>
 
 <div th:fragment="event(eventListenerPage, title)" class="card shadow mb-4">
     <div class="card-header py-3 d-flex flex-row justify-content-between">

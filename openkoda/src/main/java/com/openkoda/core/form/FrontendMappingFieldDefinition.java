@@ -64,6 +64,10 @@ public class FrontendMappingFieldDefinition {
     public final Function dtoToEntityValueConverter;
     public final Function entityToDtoValueConverter;
 
+    public final PrivilegeBase actionPrivilege;
+    public final String actionUrl;
+    public final String actionLabelKey;
+
     public boolean isText(Form form) {
         return getFieldType(form) == text;
     }
@@ -108,144 +112,148 @@ public class FrontendMappingFieldDefinition {
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, Function<Object, FieldType> fieldTypeFunction) {
         return new FrontendMappingFieldDefinition(formName, name, null, null, null, null, null, null, null, fieldTypeFunction,
-                null, null, false, null, null, null, null, null);
+                null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, Function<Object, FieldType> fieldTypeFunction, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, null, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, fieldTypeFunction, null, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, null, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, fieldTypeFunction, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, Function<AbstractForm, Object> valueSupplier, FieldType type) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, valueSupplier, null, null, null, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, valueSupplier, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, null, null, null, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, null, null, datalistId, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, null, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type, String additionalCss, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, additionalCss, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, additionalCss, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createNonDtoFormFieldDefinition(String formName, String name, String datalistId, FieldType type, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type, BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
-        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, datalistId, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, boolean allowNull, FieldType type, BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
-        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, datalistId, null, allowNull, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, datalistId, null, allowNull, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, boolean allowNull, FieldType type, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, allowNull, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, readPrivilege, writePrivilege, null, null, null, datalistId, null, allowNull, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type, Function<AbstractForm, Object> datalistSupplier) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, datalistSupplier, null, datalistId, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, null, null, null, datalistSupplier, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId,
                                                                            FieldType type, Function<AbstractForm, Object> datalistSupplier, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, null,  null, null, null, null);
+                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId,
                                                                            FieldType type, Function<AbstractForm, Object> datalistSupplier, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, String contentType, Function dtoToEntityValueConverter) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, null,  null, contentType, dtoToEntityValueConverter, null);
+                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, null, null, contentType, dtoToEntityValueConverter, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, String url,
                                                                            FieldType type, Function<AbstractForm, Object> datalistSupplier, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, url,  null, null, null, null);
+                requiredWritePrivilege, null, datalistSupplier, null, datalistId, null, false, url, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, FieldType type, String additionalCss,
                                                                            Function<AbstractForm, Object> datalistSupplier, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, null, datalistSupplier, null, datalistId, additionalCss, false, null,  null, null, null, null);
+                requiredWritePrivilege, null, datalistSupplier, null, datalistId, additionalCss, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, String datalistId, Boolean allowNull, FieldType type, String additionalCss,
                                                                            Function<AbstractForm, Object> datalistSupplier, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, Function dtoToEntityValueConverter) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, null, datalistSupplier, null, datalistId, additionalCss, allowNull, null,  null, null, dtoToEntityValueConverter, null);
+                requiredWritePrivilege, null, datalistSupplier, null, datalistId, additionalCss, allowNull, null, null, null, dtoToEntityValueConverter, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type,
                                                                            PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, Function<AbstractForm, Object> valueSupplier) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, valueSupplier, null, null, null, null, false, null,  null, null, null, null);
+                requiredWritePrivilege, valueSupplier, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type,
                                                                            PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, Function<AbstractForm, Object> valueSupplier, boolean hasDto) {
         return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege,
-                requiredWritePrivilege, valueSupplier, null, null, null, null, false, null,  null, null, null, null);
+                requiredWritePrivilege, valueSupplier, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, String additionalCss, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, additionalCss, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, additionalCss, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, String additionalCss, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, String contentType, Function dtoToEntityValueConverter) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, additionalCss, false, null,  null, contentType, dtoToEntityValueConverter, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, additionalCss, false, null, null, contentType, dtoToEntityValueConverter, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, String additionalCss, PrivilegeBase requiredReadPrivilege, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, canWriteCheck, requiredReadPrivilege, null, null, null, null, null, additionalCss, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, canWriteCheck, requiredReadPrivilege, null, null, null, null, null, additionalCss, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
-        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, null, null, false, null,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, null, null, false, null, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, String url) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, null, false, url,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, null, null, null, null, null, false, url, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, PrivilegeBase requiredReadPrivilege, PrivilegeBase requiredWritePrivilege, String url, Function<AbstractForm, Object> valueSupplier, String htmlFragmentName) {
-        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, valueSupplier, null, null, null, null, false, url,  htmlFragmentName, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, null, null, requiredReadPrivilege, requiredWritePrivilege, valueSupplier, null, null, null, null, false, url, htmlFragmentName, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, String name, FieldType type, BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck, String url) {
-        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null,null, null, null, null, null, false, url,  null, null, null, null);
+        return new FrontendMappingFieldDefinition(formName, name, type, canReadCheck, canWriteCheck, null, null, null, null, null, null, null, false, url, null, null, null, null, null, null, null);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, String additionalCss) {
-        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter);
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter, f.actionPrivilege, f.actionUrl, f.actionLabelKey);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
-        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, readPrivilege, writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter);
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, readPrivilege, writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter, f.actionPrivilege, f.actionUrl, f.actionLabelKey);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
-        return new FrontendMappingFieldDefinition(formName, f.name, f.type, canReadCheck, canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url,  f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter);
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, canReadCheck, canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter, f.actionPrivilege, f.actionUrl, f.actionLabelKey);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, Function<AbstractForm, Object> valueSupplier) {
-        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url,  f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter);
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter, f.actionPrivilege, f.actionUrl, f.actionLabelKey);
     }
 
     public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, Function dtoToEntityValueConverter, Function entityToDtoValueConverter) {
-        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url,  f.htmlFragmentName, f.contentType, dtoToEntityValueConverter, entityToDtoValueConverter);
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, dtoToEntityValueConverter, entityToDtoValueConverter, f.actionPrivilege, f.actionUrl, f.actionLabelKey);
+    }
+
+    public static FrontendMappingFieldDefinition createFormFieldDefinition(String formName, FrontendMappingFieldDefinition f, String  actionLabelKey, String actionUrl, PrivilegeBase actionPrivilege ) {
+        return new FrontendMappingFieldDefinition(formName, f.name, f.type, f.canReadCheck, f.canWriteCheck, f.readPrivilege, f.writePrivilege, f.valueSupplier, f.datalistSupplier, f.fieldTypeFunction, f.datalistId, f.additionalCss, f.allowNull, f.url, f.htmlFragmentName, f.contentType, f.dtoToEntityValueConverter, f.entityToDtoValueConverter, actionPrivilege, actionUrl, actionLabelKey);
     }
 
     public String getName() {
@@ -278,7 +286,10 @@ public class FrontendMappingFieldDefinition {
             String htmlFragmentName,
             String contentType,
             Function<?, ?> dtoToEntityValueConverter,
-            Function<?, ?> entityToDtoValueConverter) {
+            Function<?, ?> entityToDtoValueConverter,
+            PrivilegeBase actionPrivilege,
+            String actionUrl,
+            String actionLabelKey) {
         this.name = name;
         this.type = type;
         this.readPrivilege = readPrivilege;
@@ -302,6 +313,10 @@ public class FrontendMappingFieldDefinition {
         this.contentType = contentType;
         this.dtoToEntityValueConverter = dtoToEntityValueConverter;
         this.entityToDtoValueConverter = entityToDtoValueConverter;
+        this.actionPrivilege = actionPrivilege;
+        this.actionUrl = actionUrl;
+        this.actionLabelKey = actionLabelKey;
+
     }
 
 }

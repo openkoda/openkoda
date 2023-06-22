@@ -18,7 +18,7 @@ Feature: Registration
       | aaa       | aaa      | aaa@gmail.com | aaaaaaaa | aaaaaaaa        | enabled     |
 
   Scenario: Register new user
-    When I fill registration form with "TestFirstName","TestLastName","aaa@aaa.aa","admin123","admin123"
+    When I fill registration form with "TestFirstName","TestLastName","registerTest@testopenkoda.com","admin123","admin123"
     And I submit registration
     Then I should see "Your account is now created." message
 

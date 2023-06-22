@@ -291,6 +291,7 @@ public class UserServiceTest extends AbstractTest {
         when(userRepository.findByLogin(anyString())).thenReturn(null);
         when(organizationRepository.save(any(Organization.class))).thenReturn(organization);
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(organizationRepository.findOne(anyLong())).thenReturn(organization);
         when(user.getId()).thenReturn(1L);
         when(user.getName()).thenReturn(USER_FIRST_NAME + USER_LAST_NAME);
         when(user.getEmail()).thenReturn(USER_EMAIL);
@@ -303,7 +304,8 @@ public class UserServiceTest extends AbstractTest {
 //        then
         verify(userRepository, times(2)).save(any(User.class));
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(USER_EMAIL, result.getEmail());
     }
 
     @Test

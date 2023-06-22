@@ -79,7 +79,7 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
 
 
 
-    private Map<String, Object> commonDictionaries = new HashMap<>();
+    protected Map<String, Object> commonDictionaries = new HashMap<>();
     private Map<String, String> languages = new LinkedHashMap<>();
     public static HashMap<String, String> countries;
     private static Map<String, Map<Object, String>> moduleDictionaries = new HashMap<>();
@@ -201,25 +201,30 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
 
 
     public String getCommonDictionaries() throws JSONException {
-        commonDictionaries.clear();
-        commonDictionaries.put("booleanValues", toJsonString(Map.of("true", "YES", "false", "NO")));
-        commonDictionaries.put("privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString());
-        commonDictionaries.put("frontendResourceType", enumsToJsonString(FrontendResource.Type.values()));
-        commonDictionaries.put("consumers", mapObjectArraysToJsonString(services.eventListener.getConsumersArray()));
-        commonDictionaries.put("organizationRoles", listTupleToJsonString(repositories.unsecure.organizationRole.findAllAsTupleWithLabelName()));
-        commonDictionaries.put("globalRoles", listTupleToJsonString(repositories.unsecure.globalRole.findAllAsTupleWithLabelName()));
-        commonDictionaries.put("languages", toJsonString(languages));
-        commonDictionaries.put("events", mapObjectToJsonString(services.eventListener.getEvents()));
-        commonDictionaries.put("roleTypes", listStringToJsonString(roleTypes));
-        commonDictionaries.put("httpMethod", enumsToJsonString(ControllerEndpoint.HttpMethod.values()));
-        commonDictionaries.put("responseType", enumsToJsonString(ControllerEndpoint.ResponseType.values()));
-        commonDictionaries.put("countries", toJsonString(countries));
-        commonDictionaries.put("operators", enumsLabelToJsonString(Operator.values()));
-        commonDictionaries.put("logicalOperators", enumsLabelToJsonString(LogicalOperator.values()));
-        commonDictionaries.put("globalOrganizationRoles", listTupleToJsonString(repositories.unsecure.globalOrganizationRole.findAllAsTuple()));
-        commonDictionaries.putAll(moduleDictionaries);
-
+        setupCommonDictionaries();
         return JsonHelper.to(commonDictionaries);
+    }
+
+    public void setupCommonDictionaries() throws JSONException {
+        Map<String, Object> newCommonDictionaries = new HashMap<>();
+        newCommonDictionaries.clear();
+        newCommonDictionaries.put("booleanValues", toJsonString(Map.of("true", "YES", "false", "NO")));
+        newCommonDictionaries.put("privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString());
+        newCommonDictionaries.put("frontendResourceType", enumsToJsonString(FrontendResource.Type.values()));
+        newCommonDictionaries.put("consumers", mapObjectArraysToJsonString(services.eventListener.getConsumersArray()));
+        newCommonDictionaries.put("organizationRoles", listTupleToJsonString(repositories.unsecure.organizationRole.findAllAsTupleWithLabelName()));
+        newCommonDictionaries.put("globalRoles", listTupleToJsonString(repositories.unsecure.globalRole.findAllAsTupleWithLabelName()));
+        newCommonDictionaries.put("languages", toJsonString(languages));
+        newCommonDictionaries.put("events", mapObjectToJsonString(services.eventListener.getEvents()));
+        newCommonDictionaries.put("roleTypes", listStringToJsonString(roleTypes));
+        newCommonDictionaries.put("httpMethod", enumsToJsonString(ControllerEndpoint.HttpMethod.values()));
+        newCommonDictionaries.put("responseType", enumsToJsonString(ControllerEndpoint.ResponseType.values()));
+        newCommonDictionaries.put("countries", toJsonString(countries));
+        newCommonDictionaries.put("operators", enumsLabelToJsonString(Operator.values()));
+        newCommonDictionaries.put("logicalOperators", enumsLabelToJsonString(LogicalOperator.values()));
+        newCommonDictionaries.put("globalOrganizationRoles", listTupleToJsonString(repositories.unsecure.globalOrganizationRole.findAllAsTuple()));
+        newCommonDictionaries.putAll(moduleDictionaries);
+        commonDictionaries = newCommonDictionaries;
     }
 
     public String getOrganizationDictionaries(Long organizationId) {

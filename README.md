@@ -9,7 +9,7 @@
 
 <div style="text-align: center;" align="center">
     <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-18B2C6.svg"/></a>
-    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.4.0" src="https://img.shields.io/static/v1?label=Openkoda&message=1.4.0&color=18B2C6"/></a>
+    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.4.1" src="https://img.shields.io/static/v1?label=Openkoda&message=1.4.0&color=18B2C6"/></a>
     <img alt="Java: 17.0.2" src="https://img.shields.io/static/v1?label=Java&message=17.0.2&color=18B2C6"/>
     <img alt="Spring Boot: 3.0.5" src="https://img.shields.io/static/v1?label=Spring%20Boot&message=3.0.5&color=18B2C6"/>
 </div>

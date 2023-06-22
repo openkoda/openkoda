@@ -9,15 +9,19 @@
         <url>https://openkoda.com/</url>
     </organization>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.5</version>
+    </parent>
+
     <groupId>com.openkoda</groupId>
     <artifactId>openkoda-aggregator</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.1</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>openkoda-app</module>
         <module>openkoda</module>
     </modules>
-
-    
 </project>

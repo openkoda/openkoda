@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.form;
 
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
+import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.dto.OrganizationDto;
 import com.openkoda.model.Organization;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +73,9 @@ public class OrganizationForm extends AbstractOrganizationRelatedEntityForm<Orga
     @Override
     protected Organization populateTo(Organization entity) {
         entity.setName(getSafeValue(entity.getName(), NAME_));
+        if(MultitenancyService.isMultitenancy()) {
+            entity.setAssignedDatasource(getSafeValue(entity.getAssignedDatasource(), ASSIGNED_DATASOURCE_));
+        }
         return entity;
     }
 

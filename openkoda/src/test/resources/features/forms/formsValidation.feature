@@ -3,8 +3,9 @@ Feature: FormsValidation
 
   Scenario Outline: Check if forms produce errors when wrong values are entered
     Given I am logged as user "admin" with password "admin"
+    When I open "/html/organization/all" page
     And I open "<formPageUrl>" page
-    When fill "<formName>" with values "<setFormValues>"
+    When I fill "<formName>" with values "<setFormValues>"
     And I submit form "<formName>"
     Then I should see "<formAlertType>" "<formAlertMessage>" form alert
     And I should see "<alertMessage>" alert
@@ -25,13 +26,7 @@ Feature: FormsValidation
       # No form after send
 #      | /html/role/new/settings          | Required                                           | roleForm                | ;;                                                                                                                                                                                                                                                     | This form contains errors | danger        |
 #      | /html/role/new/settings          | Required                                           | roleForm                | name=test;;                                                                                                                                                                                                                                            | This form contains errors | danger        |
-#      | /html/role/new/settings          | Required                                           | roleForm                | ;type=ORG;                                                                                                                                                                                                                                             | This form contains errors | danger        |
-
-        # Module
-#      | /html/module/attribute/new      | Required                                           | attributeDefinitionForm | ;;                                                                                                                                                                                                                                                     | This form contains errors | danger        |
-#      | /html/module/attribute/new      | Required                                           | attributeDefinitionForm | ;name=NAME;defaultValue=VALUE;                                                                                                                                                                                                                         | This form contains errors | danger        |
-#      | /html/module/attribute/new      | Required                                           | attributeDefinitionForm | ;defaultValue=VALUE;level=GLOBAL;                                                                                                                                                                                                                      | This form contains errors | danger        |
-#      | /html/module/attribute/new      | Required                                           | attributeDefinitionForm | ;name=NAME;level=GLOBAL;                                                                                                                                                                                                                               | This form contains errors | danger        |
+#      | /html/role/new/settings          | Required                                           | roleForm                | ;type=ORG;                                                                                                                                                                                                                                             | This form contains errors | danger        |       | This form contains errors | danger        |
 
       | /html/user/10000/settings         | Required                                           | editUserForm            | firstName=;lastName=;email=                                                                                                                                                                                                                             | This form contains errors | danger        |
       | /html/user/10000/settings         | Required                                           | editUserForm            | firstName=Test;lastName=;email=                                                                                                                                                                                                                         | This form contains errors | danger        |
@@ -44,10 +39,12 @@ Feature: FormsValidation
 #      | /html/organization/121/settings | RequiredNot valid                                  | inviteUserForm          | firstName=;lastName=;email=;                                                                                                                                                                                                                           | This form contains errors | danger        |
 #      | /html/organization/121/settings | Not valid                                          | inviteUserForm          | firstName=Test;lastName=Test;email=test;roleName=;                                                                                                                                                                                                     | This form contains errors | danger        |
 #      | /html/organization/121/settings | Required                                           | inviteUserForm          | firstName=Test;lastName=Test;email=test@test.pl;roleName=;                                                                                                                                                                                             | This form contains errors | danger        |
+
   Scenario Outline: Check if forms produce errors when wrong values are entered
     Given I am logged as user "admin" with password "admin"
+    When I open "/html/organization/all" page
     And I open "<formPageUrl>" page
-    When fill "<formName>" with values "<setFormValues>"
+    When I fill "<formName>" with values "<setFormValues>"
     And I submit form "organizationRelatedForm"
     Then I should see "<formAlertType>" "<formAlertMessage>" form alert
     Examples:

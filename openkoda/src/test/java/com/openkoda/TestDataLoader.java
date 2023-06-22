@@ -120,7 +120,7 @@ public class TestDataLoader extends BaseDatabaseInitializer {
                         String[] globalRoles,
                         String orgRoles) {
 
-        User user = repositories.unsecure.user.findByLogin(firstName);
+        User user = repositories.unsecure.user.findByLogin(email);
         if (user != null) {
             return user;
         }
@@ -228,17 +228,17 @@ public class TestDataLoader extends BaseDatabaseInitializer {
 
         if ("event".equals(column)) {
             if (numberOfTestRecords > 0) {
-                createEventListenerEntry("com.openkoda.core.service.event.ApplicationEvent", "SCHEDULER_EXECUTION", "com.openkoda.dto.system.ScheduledSchedulerDto", "com.openkoda.core.service.BackupService", "doFullBackup");
+                createEventListenerEntry("com.openkoda.core.service.event.ApplicationEvent", "SCHEDULER_EXECUTED", "com.openkoda.dto.system.ScheduledSchedulerDto", "com.openkoda.core.service.BackupService", "doFullBackup");
             }
             if (numberOfTestRecords > 1) {
-                createEventListenerEntry("com.openkoda.core.service.event.ApplicationEvent", "USER_CREATED", "com.openkoda.model.User", "com.openkoda.model.User", "sendAndSaveEmail", "com.openkoda.model.User", "test", null, null, null);
+                createEventListenerEntry("com.openkoda.core.service.event.ApplicationEvent", "USER_CREATED", "com.openkoda.dto.user.BasicUser", "com.openkoda.core.service.email.EmailService", "sendAndSaveEmail", "com.openkoda.dto.CanonicalObject", "test", "test@test.com", null, null);
             }
             return;
         }
 
         for (int i = 0; i < numberOfTestRecords; i++) {
             if ("user".equals(column)) {
-                registerUser("test_" + i, "test_" + i, "test_" + i, "test_" + i);
+                createUser("test_" + i, "test_" + i, "test_" + i, "ROLE_USER");
             } else if ("audit".equals(column)) {
                 createInfoAudit(admin.getId(), "Add/Edit/Remove", "test_" + i, "test_" + i);
             } else if ("organization".equals(column)) {

@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -97,6 +98,14 @@ public class ServerJSRunner extends ComponentProvider {
         return evaluateServerJsScript(serverJs, null, Arrays.asList(schedulerData, serverJsName, argument1, argument2), Object.class);
     }
 
+    /**
+     * Starts a Server-side JS script with  {@link CustomisationService}
+     */
+    public Object startCustomisationServerJs(LocalDateTime startDateTime, String serverJsName, String argument1, String argument2, String argument3) {
+        ServerJs serverJs = repositories.unsecure.serverJs.findByName(serverJsName);
+        return evaluateServerJsScript(serverJs, null, Arrays.asList(serverJsName, argument1, argument2, argument3), Object.class);
+    }
+
     public <T> T evaluateServerJsScript(String serverJsName, Map<String, Object> externalModel, List<String> externalArguments, Class<T> resultType) {
         return evaluateServerJsScript(repositories.unsecure.serverJs.findByName(serverJsName), externalModel, externalArguments, resultType);
     }
@@ -148,7 +157,6 @@ public class ServerJSRunner extends ComponentProvider {
             b.putMember(o.getKey(), o.getValue());
         }
         b.putMember("model", bindings);
-        b.putMember("repositories", repositories);
         b.putMember("process", new ServerJSProcessRunner(services, log == null ? new NullWriter() : log));
         T result = c.eval("js", script).as(resultType);
         return result;

@@ -21,13 +21,14 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package cucumber.page;
 
+import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.form.FrontendMappingFieldDefinition;
-import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.form.TestModel;
 import cucumber.common.StepsBase;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -36,8 +37,11 @@ import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,13 +58,13 @@ public class FormsStepsDefs extends StepsBase implements LoggingComponent {
         page.sleep(2000);
     }
 
-    @And("I open {string} page with url parameter {string}")
+    @When("I open {string} page with url parameter {string}")
     public void iOpenPageUrlWithParameter(String pageUrl, String pageSize) {
         driver.get(SpringStepsDefs.baseUrl + pageUrl + "?" + pageSize);
         page.sleep(2000);
     }
 
-    @When("fill {string} with values {string}")
+    @When("I fill {string} with values {string}")
     public void fillWithValues(String formName, String urlEncodedParameters) {
         List<NameValuePair> params = URLEncodedUtils.parse(urlEncodedParameters, Charset.defaultCharset());
         FrontendMappingDefinition f = TestModel.forms.get(formName);
@@ -96,7 +100,8 @@ public class FormsStepsDefs extends StepsBase implements LoggingComponent {
 
     @And("I submit form {string}")
     public void iSubmitForm(String formName) {
-        WebElement form = page.waitFor(driver.findElement(By.className(formName)));
+        new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.className(formName)));
+        WebElement form = driver.findElement(By.className(formName));
         WebElement button = page.waitFor(form.findElement(By.className("btn-submit")));
         page.click(button);
         page.sleep(2000);
@@ -109,8 +114,8 @@ public class FormsStepsDefs extends StepsBase implements LoggingComponent {
         page.click(header);
     }
 
-    @And("I should find data sorted \"([^\"]*)\" by \"([^\"]*)\" column")
-    public void iShouldFindDataSorted(String sortType, String property) {
+    @Then("I should find data sorted {string} by {string} column")
+    public void i_should_find_data_sorted_by_column(String sortType, String property) {
         WebElement table = page.waitFor(driver.findElement(By.className("table-responsive")));
         WebElement headerRow = table.findElement(By.xpath("//table//tr[th]"));
         int propertyColumn = findPropertyIndex(property, headerRow);
@@ -236,7 +241,7 @@ public class FormsStepsDefs extends StepsBase implements LoggingComponent {
                     element = it.next();
                     continue;
                 }
-                while (!v.equals(element.getText())) {
+                while (!element.getText().contains(v)) {
                     element = it.next();
                 }
             }

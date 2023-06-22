@@ -23,7 +23,9 @@ package cucumber;
 
 import cucumber.common.StepsBase;
 import io.cucumber.java.AfterAll;
+import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
+import io.cucumber.java.Scenario;
 import io.cucumber.junit.CucumberOptions;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectDirectories;
@@ -37,11 +39,16 @@ import org.junit.platform.suite.api.Suite;
         plugin = { "pretty", "json:target/site/cucumber/cucumber.json" })
 public class CucumberTest {
 
+
     @BeforeAll
     public static void before() {
         StepsBase.setup();
     }
 
+    @Before
+    public void before(Scenario scenario) {
+        System.out.println("Scenario name: " + scenario.getName());
+    }
     @AfterAll
     public static void after() {
         StepsBase.cleanup();

@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.form;
 
-import com.openkoda.controller.CRUDControllerConfigurationMap;
+import com.openkoda.controller.HtmlCRUDControllerConfigurationMap;
 import com.openkoda.core.customisation.FrontendMapping;
 import com.openkoda.core.customisation.FrontendMappingMap;
 import com.openkoda.core.helper.ReadableCode;
@@ -46,12 +46,12 @@ import java.util.Map;
 
 public class MapFormArgumentResolver implements HandlerMethodArgumentResolver, HasSecurityRules, ReadableCode {
 
-    private final CRUDControllerConfigurationMap crudControllerConfigurationMap;
+    private final HtmlCRUDControllerConfigurationMap htmlCRUDControllerConfigurationMap;
     private final FrontendMappingMap frontendMappingMap;
     private final UrlHelper urlHelper;
 
-    public MapFormArgumentResolver(CRUDControllerConfigurationMap crudControllerConfigurationMap, FrontendMappingMap frontendMappingMap, UrlHelper urlHelper) {
-        this.crudControllerConfigurationMap = crudControllerConfigurationMap;
+    public MapFormArgumentResolver(HtmlCRUDControllerConfigurationMap htmlCRUDControllerConfigurationMap, FrontendMappingMap frontendMappingMap, UrlHelper urlHelper) {
+        this.htmlCRUDControllerConfigurationMap = htmlCRUDControllerConfigurationMap;
         this.frontendMappingMap = frontendMappingMap;
         this.urlHelper = urlHelper;
     }
@@ -67,7 +67,7 @@ public class MapFormArgumentResolver implements HandlerMethodArgumentResolver, H
 
         AbstractOrganizationRelatedEntityForm form = null;
         if(entityKey != null) {
-            CRUDControllerConfiguration conf = crudControllerConfigurationMap.get(entityKey);
+            CRUDControllerConfiguration conf = htmlCRUDControllerConfigurationMap.get(entityKey);
             if (conf != null) {
                 form = conf.createNewForm();
                 bindForm(mavContainer, webRequest, binderFactory, form);

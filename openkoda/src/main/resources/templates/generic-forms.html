@@ -101,12 +101,12 @@
                             <th:block th:if="${canWrite AND fieldType=='map'}">
                                 <input th:replace="~{forms::simple-map('', ${fieldName}, ${providedValue}, ${fieldLabel}, ${field.placeholderKey}, false, false, '')}"/>
                             </th:block>
-                            <th:block th:if="${canWrite AND fieldType=='organization_select'}">
-                                <th:block th:if="${canChangeEntityOrganization}">
-                                    <input th:replace="~{forms::text-simple-with-class(${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${additionalClass})}"/>
+                            <th:block th:if="${fieldType=='organization_select'}" th:with="fileId=*{__${fieldName}__}">
+                                <th:block  th:if="${canWrite AND canChangeEntityOrganization AND organizationId == null AND genericForm.entity == null }">
+                                    <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass})}"/>
                                 </th:block>
-                                <th:block th:if="${!canChangeEntityOrganization}">
-                                    <input th:replace="~{forms::hidden(${fieldName})}"/>
+                                <th:block  th:with="filedId=*{__${organizationId}__}" th:if="${!canWrite OR !canChangeEntityOrganization OR organizationId != null OR  genericForm.entity != null}">
+                                    <input th:replace="~{forms::select-simple-organization-datalist('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, true, true, ${additionalClass})}"/>
                                 </th:block>
                             </th:block>
                             <th:block th:if="${fieldType=='hidden'}">
@@ -125,10 +125,10 @@
                                 <input th:replace="~{forms::select-datalist-options-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${!canWrite}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='radio_list'}">
-                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact', ${!canWrite}, '', ${additionalClass}, true)}"/>
+                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, true)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='radio_list_no_label'}">
-                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact', ${!canWrite}, '', ${additionalClass}, false)}"/>
+                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, false)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='checkbox'}">
                                 <th:block th:if="${genericForm.isMapDto()}">

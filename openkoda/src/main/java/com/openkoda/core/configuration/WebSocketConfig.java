@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.configuration;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -45,6 +46,9 @@ import static com.openkoda.controller.common.URLConstants._HTML;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     public static final String CHANNEL_PREFIX = "/queue/";
+
+    @Value("${application.websocket.allowed-origins}")
+    public String[] allowedOrigins;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -73,6 +77,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         }
                         return true;
                     }}
-        ).withSockJS();
+        ).setAllowedOrigins(allowedOrigins).withSockJS();
     }
 }

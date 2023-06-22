@@ -9,8 +9,7 @@
     <th:block th:replace="~{frontend-resource/email-fragments::hello-text}"/>!
 </div>
 <br/>
-<div>
-    It is so great you joined us, welcome to ${applicationName}!
+<div th:text="${'It is so great you joined us, welcome to ' + applicationName + '!'}">
 </div>
 <br/><div>
     You are just one click away, <a th:href="${accountVerificationLink}">please follow this link</a> to verify your e-mail and log in to your dashboard.

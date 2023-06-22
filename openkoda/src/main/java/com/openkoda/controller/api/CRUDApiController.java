@@ -60,7 +60,7 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
             @Qualifier("obj") Pageable aPageable,
             @RequestParam(required = false, defaultValue = "", name = "obj_search") String search) {
         debug("[getAll]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.apiCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getGetAllPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -78,7 +78,7 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId
             ) {
 
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.apiCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getGetSettingsPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -95,7 +95,7 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @RequestBody HashMap<String,String> params) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.apiCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostSavePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -105,15 +105,15 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
                 .thenSet((PageAttr<E>) conf.getEntityPageAttribute(), a -> (E) conf.getSecureRepository().findOne(objectId))
                 .thenSet((PageAttr<ReflectionBasedEntityForm>) conf.getFormAttribute(), a -> (ReflectionBasedEntityForm) conf.createNewForm(organizationId, a.result))
                  .then(a -> a.result.prepareDto(params, (E) a.model.get(conf.getEntityPageAttribute())))
-                .thenSet(isValid,a -> services.validation.validateAndPopulateToEntity((ReflectionBasedEntityForm) a.model.get(conf.getFormAttribute()), (E) a.model.get(conf.getEntityPageAttribute())))
-                .then( a -> {
-                    if(a.result) {
-                        conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()));
-                    }
-                    return 1;
-                })
+                 .thenSet(isValid,a -> services.validation.validateAndPopulateToEntity((ReflectionBasedEntityForm) a.model.get(conf.getFormAttribute()), (E) a.model.get(conf.getEntityPageAttribute())))
+                 .thenSet(longEntityId, a -> {
+                     if(a.result) {
+                         return ((E) conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()))).getId();
+                     }
+                     return null;
+                 })
                 .execute()
-                .getAsMap(isValid);
+                .getAsMap(isValid, longEntityId);
     }
 
     @PostMapping(value="create", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -121,7 +121,7 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @RequestBody HashMap<String,String> params) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.apiCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostNewPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -131,21 +131,21 @@ abstract public class CRUDApiController<E extends SearchableOrganizationRelatedE
                 .thenSet((PageAttr<ReflectionBasedEntityForm>) conf.getFormAttribute(), a -> (ReflectionBasedEntityForm) conf.createNewForm(organizationId, a.result))
                 .then(a -> a.result.prepareDto(params, (SearchableOrganizationRelatedEntity) a.model.get(conf.getEntityPageAttribute())))
                 .thenSet(isValid,a -> services.validation.validateAndPopulateToEntity((ReflectionBasedEntityForm) a.model.get(conf.getFormAttribute()), (E) a.model.get(conf.getEntityPageAttribute())))
-                .then( a -> {
+                .thenSet(longEntityId, a -> {
                     if(a.result) {
-                        conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()));
+                        return ((E) conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()))).getId();
                     }
-                    return 1;
+                    return null;
                 })
                 .execute()
-                .getAsMap(isValid);
+                .getAsMap(isValid, longEntityId);
     }
 
     @PostMapping(value="{id}/remove", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object remove(
             @PathVariable(name=ID) Long objectId,
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId) {
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.apiCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostRemovePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

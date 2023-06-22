@@ -7,14 +7,13 @@ Feature: Tables
     Then I should find "<expectedTableColumnValues>" in the visible table
     Examples:
       | tablePageUrl                | expectedTableColumnValues       |
-   #   | /html/module/all            | ?;attribute;attribute-global    |
       | /html/organization/all      | 121;Test Org                    |
       | /html/role/all              | ?;ROLE_USER;GLOBAL              |
       | /html/role/all              | ?;ROLE_ORG_ADMIN;ORG            |
       | /html/role/all              | ?;ROLE_ADMIN;GLOBAL             |
       | /html/role/all              | ?;ROLE_ORG_USER;ORG             |
       | /html/role/all              | ?;ROLE_UNAUTHENTICATED;GLOBAL   |
-#      | /html/user/all         | ?;Arek Drysch;?               |
+      | /html/user/all              | ?;Test Org;?               |
       | /html/frontendresource/all  | ?;login;login |
 
   Scenario Template: Global admin can sort values lexicographically in admin tables
@@ -29,25 +28,18 @@ Feature: Tables
       | /html/audit/all             | createdOn         | lexic    | /html/audit/all?audit_page=0&audit_size=20&audit_sort=createdOn,ASC&audit_search=                               |
       | /html/audit/all             | ipAddress         | lexic    | /html/audit/all?audit_page=0&audit_size=20&audit_sort=ipAddress,ASC&audit_search=                               |
       | /html/role/all              | name              | lexic    | /html/role/all?role_page=0&role_size=20&role_sort=name,ASC&role_search=                                         |
-      #| /html/module/all            | moduleName        | lexic    | /html/module/all?module_page=0&module_size=20&module_sort=moduleName,ASC&module_search=                         |
       | /html/frontendresource/all  | name              | lexic    | /html/frontendresource/all?obj_page=0&obj_size=20&obj_sort=name,ASC&obj_search=                             |
       | /html/eventlistener/all     | eventClassName    | lexic    | /html/eventlistener/all?event_page=0&event_size=20&event_sort=eventClassName,ASC&event_search=                  |
       | /html/eventlistener/all     | eventName         | lexic    | /html/eventlistener/all?event_page=0&event_size=20&event_sort=eventName,ASC&event_search=                       |
       | /html/eventlistener/all     | consumerClassName | lexic    | /html/eventlistener/all?event_page=0&event_size=20&event_sort=consumerClassName,ASC&event_search=               |
       | /html/scheduler/all         | cronExpression    | lexic    | /html/scheduler/all?scheduler_page=0&scheduler_size=20&scheduler_sort=cronExpression,ASC&scheduler_search=      |
       | /html/scheduler/all         | eventData         | lexic    | /html/scheduler/all?scheduler_page=0&scheduler_size=20&scheduler_sort=eventData,ASC&scheduler_search=           |
-      #| /html/module/attribute/all  | name              | lexic    | /html/module/attribute/all?attribute_page=0&attribute_size=20&attribute_sort=name,ASC&attribute_search=         |
-      #| /html/module/attribute/all  | defaultValue      | lexic    | /html/module/attribute/all?attribute_page=0&attribute_size=20&attribute_sort=defaultValue,ASC&attribute_search= |
-      #| /html/module/attribute/all  | level             | lexic    | /html/module/attribute/all?attribute_page=0&attribute_size=20&attribute_sort=level,ASC&attribute_search=        |
-      #| /html/user/all              | id                 | linear   | /html/user/all?user_page=0&user_size=20&user_sort=id,ASC&user_search=                                           |
       | /html/organization/all      | id                | linear   | /html/organization/all?organization_page=0&organization_size=20&organization_sort=id,ASC&organization_search=   |
       | /html/audit/all             | id                | linear   | /html/audit/all?audit_page=0&audit_size=20&audit_sort=id,ASC&audit_search=                                      |
       | /html/role/all              | id                | linear   | /html/role/all?role_page=0&role_size=20&role_sort=id,ASC&role_search=                                           |
-      #| /html/module/all            | id                | linear   | /html/module/all?module_page=0&module_size=20&module_sort=id,ASC&module_search=                                 |
       | /html/frontendresource/all  | id                | linear   | /html/frontendresource/all?obj_page=0&obj_size=20&obj_sort=id,ASC&obj_search=                                    |
       | /html/eventlistener/all     | id                | linear   | /html/eventlistener/all?event_page=0&event_size=20&event_sort=id,ASC&event_search=                              |
       | /html/scheduler/all         | id                | linear   | /html/scheduler/all?scheduler_page=0&scheduler_size=20&scheduler_sort=id,ASC&scheduler_search=                  |
-      #| /html/module/attribute/all  | id                | linear   | /html/module/attribute/all?attribute_page=0&attribute_size=20&attribute_sort=id,ASC&attribute_search=           |
 
   Scenario Template: Global admin can use pagination in admin tables
     Given I am expecting no less than "<numberOfRecords>" number of records in "<column>" column
@@ -65,7 +57,6 @@ Feature: Tables
       | /html/frontendresource/all  | obj_page=1&obj_size=1                             | Next     | Previous          | pagination-wrapper   | frontendResource  | 2               | obj_size=1 |
       | /html/eventlistener/all     | event_page=1&event_size=1                         | Next     | Previous          | pagination-wrapper   | event             | 2               | event_size=1             |
       | /html/scheduler/all         | scheduler_page=1&scheduler_size=1                 | Next     | Previous          | pagination-wrapper   | scheduler         | 2               | scheduler_size=1         |
-     # | /html/module/attribute/all  | attribute_page=1&attribute_size=1                 | Next     | Previous          | pagination-wrapper   | attributes       | 2               | attribute_size=1         |
 
   Scenario Template: Global admin don't see pagination in admin tables
     Given I am expecting no less than "<numberOfRecords>" number of records in "<column>" column
@@ -81,4 +72,3 @@ Feature: Tables
       | /html/frontendresource/all  | frontendResource | 1               | pagination   |
       | /html/eventlistener/all     | event            | 1               | pagination   |
       | /html/scheduler/all         | scheduler        | 1               | pagination   |
-      | /html/module/attribute/all  | attributes       | 1               | pagination   |

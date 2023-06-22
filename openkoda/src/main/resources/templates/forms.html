@@ -44,6 +44,11 @@
     </button>
 </form>
 
+<form th:fragment="single-nostyle-button-post-form-with-confirm-class(url, label, confirmationText, formClass, btnClass)" method="POST"
+      th:action="${url}" th:class="${formClass}">
+    <button th:class="${btnClass}" th:utext="${label}"
+            th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
+
 <form th:fragment="single-button-post-form-with-confirm-class(url, label, confirmationText, aclass)" method="POST"
       th:action="${url}" th:class="${aclass}">
     <button th:class="${'btn btn-sm btn-primary ' + aclass}" th:text="${label}"
@@ -224,13 +229,18 @@
         <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, ${allowNull}, #{template.dropdown.select}, '', ${isDisabled}, '', false, false, false, '', null, '')}"> </div>
     </div>
 
+    <div th:fragment="select-simple-organization-datalist(moduleName, fieldName, label, datalistId, allowNull, isDisabled, addedOuterClass)"
+         th:class="'form-group ' + ${addedOuterClass}">
+        <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, ${allowNull}, #{template.unassigned}, '', ${isDisabled}, '', false, false, false, '', ${organizationId}, '')}"> </div>
+    </div>
+
     <!--    fragment to allow disabling options in dropdown on the basis of user's privileges -->
     <div th:fragment="select-datalist-options-with-disable-with-class(moduleName, fieldName, label, datalistId, isDisabled, addedOuterClass)"
          th:class="'form-group ' + ${addedOuterClass}">
         <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, '', ${isDisabled}, '', false, true, false, '', null, '')}"> </div>
     </div>
 
-    <div th:fragment="radiobutton-table-with-disable-with-class(moduleName, fieldName, label, description, datalistId, isDisabled, addedClass, isDisabled, addedOuterClass, hasLabel)"
+     <div th:fragment="radiobutton-table-with-disable-with-class(moduleName, fieldName, label, description, datalistId, isDisabled, addedClass, addedOuterClass, hasLabel)"
          th:class="'form-group ' + ${addedOuterClass}">
         <div th:replace="~{forms::radiobutton-table-base(${moduleName}, ${fieldName}, ${label}, ${description}, ${datalistId}, ${addedClass}, ${isDisabled}, '', ${hasLabel})}"> </div>
     </div>
@@ -288,7 +298,16 @@
                name="singleFieldToUpdate" th:value="${fieldName}"/>
     </form>
 
-    <div th:fragment="select-base-datalist(moduleName, fieldName, label, datalistId, showDefault, defaultText, addedClass, isDisabled, help, hasGroup, disableOptions, onChangeSubmit, onChangeCallback, value, addedOuterClass)" th:class="${'form-group ' + addedOuterClass}">
+    <div th:fragment="additional-inline-action()"
+         class="d-flex align-items-center"
+         th:if="${field.actionUrl != null AND  @auth.hasGlobalPrivilege(field.actionPrivilege)}">
+        <a class="btn btn-sm btn-primary btn-simple text-nowrap ml-2"
+           th:href="${field.actionUrl}"
+           th:text="${@messages.getFieldLabel(field.actionLabelKey, 'action')}">Action</a>
+    </div>
+
+    <div th:fragment="select-base-datalist(moduleName, fieldName, label, datalistId, showDefault, defaultText, addedClass, isDisabled, help, hasGroup, disableOptions, onChangeSubmit, onChangeCallback, value, addedOuterClass)"
+         th:class="${'form-group ' + addedOuterClass + field.actionUrl != null AND @auth.hasGlobalPrivilege(field.actionPrivilege) ? 'd-flex':''}">
         <label th:if="${label != null}" th:for="${fieldName}" th:class="${addedClass}">
             <th:block th:text="${label}" />&nbsp;
             <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
@@ -300,7 +319,7 @@
                 th:onchange="'${onChangeSubmit ? 'app.submitAndCallback(this.form, [[${changeCallback}]])' : 'a => null'}'" >
             <option th:if="${showDefault}" value="" th:text="${defaultText}">Select...</option>
         </select>
-
+        <th:block th:replace="~{forms::additional-inline-action()}"/>
         <script th:inline="javascript">
             (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
                 let selectId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
@@ -323,7 +342,7 @@
 				<i class="fa fa-question-circle"></i>
 			</span>
         </label>
-        <table th:class="${'table table-responsive table-radio ' + addedClass}">
+        <table th:class="${'form-control table table-responsive table-radio ' + addedClass}">
             <tbody th:id="${moduleName + '_' + fieldName}">
             </tbody>
         </table>
@@ -474,7 +493,7 @@
                 let editor = CodeMirror.fromTextArea(document.getElementById(textAreaId), config);
                 if(canWrite === 'true'){
                   let textAreaSelector = getSelectorFromId(textAreaId);
-                  $(textAreaSelector).data('CodeMirrorEditor', editor);
+                  codemirrorEditors[textAreaSelector] = editor;
                   $("#controller-endpoints " + textAreaSelector).next(".CodeMirror").find("textarea").on('focus', () => {
                      activateEditor(textAreaSelector);
                   })
@@ -919,21 +938,24 @@
             $("body").append('<div id="root" style="height:0px; overflow:hidden;"></div>');
           }
         </script>
-        <script>!function(e){function t(t){for(var n,a,i=t[0],c=t[1],l=t[2],p=0,s=[];p<i.length;p++)a=i[p],Object.prototype.hasOwnProperty.call(o,a)&&o[a]&&s.push(o[a][0]),o[a]=0;for(n in c)Object.prototype.hasOwnProperty.call(c,n)&&(e[n]=c[n]);for(f&&f(t);s.length;)s.shift()();return u.push.apply(u,l||[]),r()}function r(){for(var e,t=0;t<u.length;t++){for(var r=u[t],n=!0,i=1;i<r.length;i++){var c=r[i];0!==o[c]&&(n=!1)}n&&(u.splice(t--,1),e=a(a.s=r[0]))}return e}var n={},o={1:0},u=[];function a(t){if(n[t])return n[t].exports;var r=n[t]={i:t,l:!1,exports:{}};return e[t].call(r.exports,r,r.exports,a),r.l=!0,r.exports}a.e=function(e){var t=[],r=o[e];if(0!==r)if(r)t.push(r[2]);else{var n=new Promise((function(t,n){r=o[e]=[t,n]}));t.push(r[2]=n);var u,i=document.createElement("script");i.charset="utf-8",i.timeout=120,a.nc&&i.setAttribute("nonce",a.nc),i.src=function(e){return a.p+"static/js/"+({}[e]||e)+"."+{3:"594de08a"}[e]+".chunk.js"}(e);var c=new Error;u=function(t){i.onerror=i.onload=null,clearTimeout(l);var r=o[e];if(0!==r){if(r){var n=t&&("load"===t.type?"missing":t.type),u=t&&t.target&&t.target.src;c.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",c.name="ChunkLoadError",c.type=n,c.request=u,r[1](c)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:i})}),12e4);i.onerror=i.onload=u,document.head.appendChild(i)}return Promise.all(t)},a.m=e,a.c=n,a.d=function(e,t,r){a.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},a.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},a.t=function(e,t){if(1&t&&(e=a(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(a.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var n in e)a.d(r,n,function(t){return e[t]}.bind(null,n));return r},a.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return a.d(t,"a",t),t},a.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},a.p="/",a.oe=function(e){throw console.error(e),e};var i=this.webpackJsonpautocomplete=this.webpackJsonpautocomplete||[],c=i.push.bind(i);i.push=t,i=i.slice();for(var l=0;l<i.length;l++)t(i[l]);var f=c;r()}([])</script>
+        <script>!function(e){function t(t){for(var n,a,i=t[0],c=t[1],l=t[2],p=0,s=[];p<i.length;p++)a=i[p],Object.prototype.hasOwnProperty.call(o,a)&&o[a]&&s.push(o[a][0]),o[a]=0;for(n in c)Object.prototype.hasOwnProperty.call(c,n)&&(e[n]=c[n]);for(f&&f(t);s.length;)s.shift()();return u.push.apply(u,l||[]),r()}function r(){for(var e,t=0;t<u.length;t++){for(var r=u[t],n=!0,i=1;i<r.length;i++){var c=r[i];0!==o[c]&&(n=!1)}n&&(u.splice(t--,1),e=a(a.s=r[0]))}return e}var n={},o={1:0},u=[];function a(t){if(n[t])return n[t].exports;var r=n[t]={i:t,l:!1,exports:{}};return e[t].call(r.exports,r,r.exports,a),r.l=!0,r.exports}a.e=function(e){var t=[],r=o[e];if(0!==r)if(r)t.push(r[2]);else{var n=new Promise((function(t,n){r=o[e]=[t,n]}));t.push(r[2]=n);var u,i=document.createElement("script");i.charset="utf-8",i.timeout=120,a.nc&&i.setAttribute("nonce",a.nc),i.src=function(e){return a.p+"static/js/"+({}[e]||e)+"."+{3:"614e5d8e"}[e]+".chunk.js"}(e);var c=new Error;u=function(t){i.onerror=i.onload=null,clearTimeout(l);var r=o[e];if(0!==r){if(r){var n=t&&("load"===t.type?"missing":t.type),u=t&&t.target&&t.target.src;c.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",c.name="ChunkLoadError",c.type=n,c.request=u,r[1](c)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:i})}),12e4);i.onerror=i.onload=u,document.head.appendChild(i)}return Promise.all(t)},a.m=e,a.c=n,a.d=function(e,t,r){a.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},a.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},a.t=function(e,t){if(1&t&&(e=a(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(a.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var n in e)a.d(r,n,function(t){return e[t]}.bind(null,n));return r},a.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return a.d(t,"a",t),t},a.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},a.p="/",a.oe=function(e){throw console.error(e),e};var i=this.webpackJsonpautocomplete=this.webpackJsonpautocomplete||[],c=i.push.bind(i);i.push=t,i=i.slice();for(var l=0;l<i.length;l++)t(i[l]);var f=c;r()}([])</script>
         <script type="text/javascript" src="/vendor/autocomplete/chunk2.min.js"></script>
         <script type="text/javascript" src="/vendor/autocomplete/main.min.js"></script>
+        <link href="/vendor/autocomplete/style.css" rel="stylesheet">
         <script th:inline="javascript">
         var autocompleteEditor = null;
         var activeTextareaSelector = null;
+        var codemirrorEditors = {};
 	    $(document).ready(function() {
-		    autocompleteEditor = document.querySelector('.react-codemirror2 .CodeMirror').CodeMirror;
-		    autocompleteEditor.on('change', () => {
-                getActiveEditor().setValue(autocompleteEditor.getValue());
+		    autocompleteEditor = document.querySelector('.react-codemirror2 .CodeMirror');
+		    initEditorExtraKeysOptions(autocompleteEditor);
+		    autocompleteEditor.CodeMirror.on('change', () => {
+                getActiveEditor().setValue(autocompleteEditor.CodeMirror.getValue());
                 getActiveEditor().save();
 		    })
 	    });
 	    function getActiveEditor(){
-	        return $(activeTextareaSelector).data('CodeMirrorEditor');
+            return codemirrorEditors[activeTextareaSelector];
 	    }
 	    function getActiveEditorDiv(){
 	        return $(activeTextareaSelector).next(".CodeMirror");
@@ -943,33 +965,59 @@
 	    }
 	    function activateEditor(textAreaSelector){
 	        $(".CodeMirror-focused").removeClass("CodeMirror-focused");
-	        console.log("active: " + activeTextareaSelector);
 	        if(activeTextareaSelector != null){
                  getActiveEditorDiv().show();
                  getActiveEditor().refresh();
                  removeFocusFromActiveEditor();
             }
             activeTextareaSelector = textAreaSelector;
-            console.log("active after update: " + activeTextareaSelector);
             var line = getActiveEditor().getCursor().line;
             var ch = getActiveEditor().getCursor().ch;
             getAutocompleteDiv().show();
             getAutocompleteDiv().height("auto");
-            //console.log("autocomplete div: " + getAutocompleteDiv().parent().children("textarea")[0].id);
             var aDiv = getAutocompleteDiv().detach();
             aDiv.insertAfter(getActiveEditorDiv());
             removeFocusFromActiveEditor();
             getActiveEditorDiv().hide();
-            autocompleteEditor.setValue(getActiveEditor().getValue());
-            autocompleteEditor.setCursor({line:line, ch:ch});
-            autocompleteEditor.setOption("mode", getActiveEditor().getOption("mode"));
-            autocompleteEditor.focus();
+            autocompleteEditor.CodeMirror.setValue(getActiveEditor().getValue());
+            autocompleteEditor.CodeMirror.setCursor({line:line, ch:ch});
+            autocompleteEditor.CodeMirror.setOption("mode", getActiveEditor().getOption("mode"));
+            autocompleteEditor.CodeMirror.focus();
 	   }
 	   function getSelectorFromId(id){
 	       return "#" + id.replaceAll(".", "\\.").replaceAll("[", "\\[").replaceAll("]","\\]");
 	   }
 	   function removeFocusFromActiveEditor(){
 	        getActiveEditor().display.input.blur();
+	   }
+	   function initEditorExtraKeysOptions(autocompleteEditor) {
+	        autocompleteEditor.CodeMirror.options.fullScreen = false;
+		    autocompleteEditor.CodeMirror.options.extraKeys =
+		        {"Ctrl-Space": "autocomplete",
+                    "F11": function(cm) {
+                        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                        if (!autocompleteEditor.classList.contains("CodeMirror-fullscreen")) {
+                            autocompleteEditor.classList.add("CodeMirror-fullscreen");
+                        } else {
+                            autocompleteEditor.classList.remove("CodeMirror-fullscreen");
+                        }
+                    },
+                    "Ctrl-Enter": function(cm) {
+                        cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+                    },
+                    "Esc": function(cm) {
+                        if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+                        if (autocompleteEditor.classList.contains("CodeMirror-fullscreen")) {
+                            autocompleteEditor.classList.remove("CodeMirror-fullscreen");
+                        }
+                    },
+                    "Ctrl-S": function(cm) {
+                        app.submitAndCallback( $('#'+formId).get(0), a => $('#' + formId + '-toast').toast('show'));
+                    },
+                    "Ctrl-/": function(cm) {
+                        cm.execCommand('toggleComment')
+                    }
+                };
 	   }
       </script>
     </th:block>

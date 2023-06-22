@@ -25,6 +25,7 @@ import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.flow.ValidationException;
 import com.openkoda.model.file.File;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -36,25 +37,17 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.exception.SdkException;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.InvalidObjectStateException;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Blob;
 import java.sql.SQLException;
-import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static com.openkoda.core.service.FileService.StorageType.database;
 import static com.openkoda.core.service.FileService.StorageType.filesystem;
@@ -155,7 +148,7 @@ public class FileService extends ComponentProvider {
         File f = null;
         Path path = new java.io.File(originalFilename).toPath();
         String mimeType = Files.probeContentType(path);
-        FileService.StorageType actualStorageType = getStorageType();
+        StorageType actualStorageType = getStorageType();
         if (actualStorageType == filesystem) {
             String targetFileName = prepareStoredFileName(orgId, uuid, fileName);
             try (FileOutputStream fileOnDisk = new FileOutputStream(targetFileName)) {
@@ -170,28 +163,26 @@ public class FileService extends ComponentProvider {
         return f;
     }
 
-    public String getPresignedUrlToFileFromAws(File f) {
-        debug("[getPresignedUrlToFileFromAws]");
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(storageAmazonBucket)
-                .key(f.getFilesystemPath())
-                .build();
-        GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofSeconds(amazonPresignedUrlExpiryTimeInSeconds))
-                .getObjectRequest(getObjectRequest)
-                .build();
-        try {
-            PresignedGetObjectRequest presignedGetObjectRequest = services.amazonS3Presigner.presignGetObject(getObjectPresignRequest);
-            return presignedGetObjectRequest.url().toString();
-        } catch (NoSuchKeyException | InvalidObjectStateException e) {
-            error(e, "[getPresignedUrlToFileFromAws] {} thrown while trying to get presigned URL to fileId {}. " +
-                    "File is either deleted or archived on AWS S3", e.getClass().getName(), f.getId());
-            throw new RuntimeException("[getPresignedUrlToFileFromAws] " + e.getClass().getName()
-                    + " thrown while trying to get presigned URL to fileId " + f.getId() + ". File is either deleted or archived on AWS S3");
-        } catch (SdkException e) {
-            error(e, "[getPresignedUrlToFileFromAws] {} thrown while trying to get presigned URL to fileId {}", e.getClass().getName(), f.getId());
-            throw new RuntimeException("[getPresignedUrlToFileFromAws] " + e.getClass().getName()
-                    + " thrown while trying to get presigned URL to fileId " + f.getId());
+    //public for access in tests in FileServiceTest, because this method was in FileService
+    //and creating test class for this controller creates problem with setting FileService.storageType in test cases
+    public HttpServletResponse getFileContentAndPrepareResponse(File f, boolean download, HttpServletResponse response) throws IOException, SQLException {
+        debug("[getFileContentAndPrepareResponse] fileId: {}", f.getId());
+        response.addHeader("Content-Type", f.getContentType());
+        response.addHeader("Content-Length", Long.toString(f.getSize()));
+        if (download) response.addHeader("Content-Disposition", "attachment; filename=\"" + f.getFilename() + "\"");
+        LocalDateTime updatedOn = f.getUpdatedOn() == null ? LocalDateTime.now() : f.getUpdatedOn();
+        response.addDateHeader("Last-Modified", updatedOn.toEpochSecond(ZoneOffset.UTC) * 1000);
+
+        StorageType storageType = f.getStorageType();
+        if (storageType == filesystem || storageType == database) {
+            response.addHeader("Accept-Ranges", "bytes");
+            response.addHeader("Cache-Control", "max-age=604800, public");
+            OutputStream os = response.getOutputStream();
+            try (InputStream is = f.getContentStream()) {
+                IOUtils.copy(is, os);
+            }
+            os.flush();
         }
+        return response;
     }
 }

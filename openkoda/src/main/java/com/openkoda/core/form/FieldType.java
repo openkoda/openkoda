@@ -50,7 +50,7 @@ public enum FieldType {
 
     datalist(false),
     //One value from dictionary:
-    dropdown, dropdown_with_disable, radio_list, radio_list_no_label,
+    dropdown, dropdown_with_disable, radio_list, radio_list_no_label, dropdown_with_entities,
 
     //Many values from dictionary:
     checkbox_list,

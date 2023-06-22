@@ -89,7 +89,7 @@ public class MultitenancyService implements LoggingComponentWithRequestId, Reada
      * Collects result from futures. Executes {@link Future#get()} on each provided future
      * @return a list of results
      */
-    private <T> List<T> collect(List<Future<T>> r) {
+    protected <T> List<T> collect(List<Future<T>> r) {
         if (r == null) {
             return Collections.emptyList();
         }
@@ -291,7 +291,7 @@ public class MultitenancyService implements LoggingComponentWithRequestId, Reada
         return true;
     }
 
-    private <T> List<Future<T>> executeTasks(long timeoutInMilliseconds, boolean wait, List<Callable<T>> tasks) throws InterruptedException {
+    protected  <T> List<Future<T>> executeTasks(long timeoutInMilliseconds, boolean wait, List<Callable<T>> tasks) throws InterruptedException {
         debug("[executeTasks]");
         if (tasks == null || tasks.isEmpty()) {
             warn("[executeTasks] empty tasks list");

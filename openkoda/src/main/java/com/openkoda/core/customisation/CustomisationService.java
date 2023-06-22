@@ -22,8 +22,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.customisation;
 
 import com.openkoda.core.audit.PropertyChangeListener;
-import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.flow.PageAttr;
+import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.repository.common.ProfileSettingsRepository;
 import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
@@ -70,6 +70,7 @@ public interface CustomisationService {
     void registerOnApplicationStartListener(Consumer<CustomisationService> c);
 
     void registerFrontendMapping(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
-    CRUDControllerConfiguration registerCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
+    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
+    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
 
 }

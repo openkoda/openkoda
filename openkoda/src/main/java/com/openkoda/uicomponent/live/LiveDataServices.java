@@ -29,8 +29,11 @@ import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.repository.common.SecuredRepository;
 import com.openkoda.core.service.ValidationService;
+import com.openkoda.form.RegisterUserForm;
+import com.openkoda.model.User;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.repository.SearchableRepositories;
+import com.openkoda.service.user.UserService;
 import com.openkoda.uicomponent.DataServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
@@ -42,6 +45,9 @@ public class LiveDataServices implements DataServices {
 
     @Inject
     private ValidationService validationService;
+
+    @Inject
+    private UserService userService;
 
     public SecuredRepository<?> getRepository(String entityKey) {
         return SearchableRepositories.getSearchableRepository(entityKey);
@@ -55,6 +61,15 @@ public class LiveDataServices implements DataServices {
         }
         ReflectionBasedEntityForm result = (ReflectionBasedEntityForm) conf.createNewForm(orgId, entity);
         return result;
+    }
+
+    @Override
+    public User registerUserOrReturnExisting(String email, String firstName, String lastName) {
+        RegisterUserForm form = new RegisterUserForm();
+        form.setLogin(email);
+        form.setFirstName(firstName);
+        form.setLastName(lastName);
+        return userService.registerUserOrReturnExisting(form);
     }
 
     public AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName) {

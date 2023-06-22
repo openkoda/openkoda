@@ -318,17 +318,21 @@ public class AbstractFrontendResourceController extends AbstractController imple
                     : jsFlowRunner.runLiveFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form);
             mav.getModelMap().putAll(pageModelMap);
             boolean isError = Boolean.TRUE.equals(pageModelMap.get(BasePageAttributes.isError));
-            if (form == null) {
-                if (isError) {
-                    mav.setViewName(WEBENDPOINTS + "-" + SETTINGS + "::" + PREVIEW + "-error");
-                }
+            if(pageModelMap.has(redirectUrl)) {
+                mav.setViewName("generic-forms::go-to(url='" + pageModelMap.get(redirectUrl) + "')");
             } else {
-                mav.getModelMap().put("organizationRelatedForm", form);
-                if (isError) {
-                    mav.setViewName("generic-settings-entity-form::generic-settings-form-error");
-                } else {
-                    mav.setViewName("generic-settings-entity-form::generic-settings-form-reload");
-                }
+               if (form == null) {
+                   if (isError) {
+                       mav.setViewName(WEBENDPOINTS + "-" + SETTINGS + "::" + PREVIEW + "-error");
+                   }
+               } else {
+                   mav.getModelMap().put("organizationRelatedForm", form);
+                   if (isError) {
+                       mav.setViewName("generic-settings-entity-form::generic-settings-form-error");
+                   } else {
+                       mav.setViewName("generic-settings-entity-form::generic-settings-form-reload");
+                   }
+               }
             }
             return mav;
         } else {

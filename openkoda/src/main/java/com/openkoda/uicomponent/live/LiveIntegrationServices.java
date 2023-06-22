@@ -36,4 +36,9 @@ public class LiveIntegrationServices implements IntegrationServices {
         return slackService.sendMessageToSlack(message, webHook);
     }
 
+    @Override
+    public boolean sendJsonMessageToSlack(String JSONMessage, String webHook) {
+        return slackService.sendJSONMessageToSlack(JSONMessage, webHook);
+    }
+
 }

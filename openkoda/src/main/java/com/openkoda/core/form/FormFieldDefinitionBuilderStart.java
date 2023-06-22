@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.form;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.openkoda.model.Organization;
 import com.openkoda.model.PrivilegeBase;
 import reactor.util.function.Tuple2;
 
@@ -158,10 +159,10 @@ public class FormFieldDefinitionBuilderStart {
     }
 
     public FormFieldDefinitionBuilder<Long> organizationSelect(String fieldName) {
-        fields.add(lastField = createFormFieldDefinition(formName, fieldName, organization_select, defaultReadPrivilege, defaultWritePrivilege));
+        datalist("organizations", f -> f.getDictionaryRepository().dictionary(Organization.class));
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, "organizations", true, organization_select, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Long>)this;
     }
-
     public FormFieldDefinitionBuilder<Object> radioList(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, radio_list, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;

@@ -13,4 +13,4 @@ Feature: Authentication process
 
   Scenario: Check if user can login
     When I login as user "admin" with password "admin"
-    Then I should see "/html/organization/121/settings" page
+    Then I should see "/html/dashboard" page

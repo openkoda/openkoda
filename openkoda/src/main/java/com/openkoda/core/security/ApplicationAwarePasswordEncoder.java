@@ -23,6 +23,7 @@ package com.openkoda.core.security;
 
 import com.openkoda.model.authentication.ApiKey;
 import com.openkoda.model.authentication.LoginAndPassword;
+import com.openkoda.service.user.UserService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
@@ -41,10 +42,11 @@ public class ApplicationAwarePasswordEncoder extends BCryptPasswordEncoder {
     @PostConstruct void init () {
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put("bcrypt", this);
-        DelegatingPasswordEncoder passworEncoder = new DelegatingPasswordEncoder(
+        DelegatingPasswordEncoder passwordEncoder = new DelegatingPasswordEncoder(
                 "bcrypt", encoders);
-        passworEncoder.setDefaultPasswordEncoderForMatches(this);
-        LoginAndPassword.setPasswordEncoderOnce(passworEncoder);
+        passwordEncoder.setDefaultPasswordEncoderForMatches(this);
+        LoginAndPassword.setPasswordEncoderOnce(passwordEncoder);
+        UserService.setPasswordEncoderOnce(passwordEncoder);
         ApiKey.setPasswordEncoderOnce(this);
     }
 

@@ -23,6 +23,7 @@ package com.openkoda.uicomponent;
 
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.repository.common.SecuredRepository;
+import com.openkoda.model.User;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 
 public interface DataServices {
@@ -31,5 +32,6 @@ public interface DataServices {
     SearchableOrganizationRelatedEntity saveForm(AbstractOrganizationRelatedEntityForm form, SearchableOrganizationRelatedEntity entity);
     AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName);
     AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName, SearchableOrganizationRelatedEntity entity);
+    User registerUserOrReturnExisting(String email, String firstName, String lastName);
 
 }

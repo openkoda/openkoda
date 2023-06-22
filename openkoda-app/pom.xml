@@ -10,14 +10,13 @@
     </organization>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.5</version>
+        <groupId>com.openkoda</groupId>
+        <artifactId>openkoda-aggregator</artifactId>
+        <version>1.4.1</version>
     </parent>
 
-    <groupId>com.openkoda</groupId>
     <artifactId>openkoda-app</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -202,6 +201,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
             <version>1.22</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -520,6 +524,7 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <configuration>
                         <layout>ZIP</layout>
+                        <outputDirectory>build</outputDirectory>
                     </configuration>
                     <executions>
                         <execution>
@@ -591,6 +596,16 @@
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
                     <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <includePluginDependencies>true</includePluginDependencies>
+                    <mainClass>com.openkoda.App</mainClass>
                 </configuration>
             </plugin>
 

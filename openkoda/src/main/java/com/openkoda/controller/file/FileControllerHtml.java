@@ -157,7 +157,7 @@ public class FileControllerHtml extends AbstractFileController {
             HttpServletResponse response) throws IOException, SQLException {
         debug("[content] fileId {}", fileId);
         File f = secureFileRepository.findOne(fileId);
-        getFileContentAndPrepareResponse(f, true, response);
+        services.file.getFileContentAndPrepareResponse(f, true, response);
     }
 
     @Transactional

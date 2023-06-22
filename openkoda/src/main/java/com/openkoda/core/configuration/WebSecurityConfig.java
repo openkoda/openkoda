@@ -27,6 +27,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.Filter;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -42,6 +43,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -149,16 +152,42 @@ public class WebSecurityConfig implements URLConstants {
     private String pageAfterAuthForMultipleOrganizations;
 
     @Bean
-    public SecurityFilterChain filterChainPublic(HttpSecurity http) throws Exception {
-        http.securityMatcher("/**")
+    @Order(10)
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+        return webHttpSecurity(http).build();
+    }
+    @Bean
+    @Order(20)
+    public SecurityFilterChain apiAuthSecurityFilterChain(HttpSecurity http) throws Exception {
+        return apiAuthHttpSecurity(http).build();
+    }
+    @Bean
+    @Order(21)
+    public SecurityFilterChain apiTokenSecurityFilterChain(HttpSecurity http) throws Exception {
+        return apiTokenHttpSecurity(http).build();
+    }
+    @Bean
+    @Order(22)
+    public SecurityFilterChain apiV1SecurityFilterChain(HttpSecurity http) throws Exception {
+        return apiV1HttpSecurity(http).build();
+    }
+    @Bean
+    @Order(23)
+    public SecurityFilterChain apiV2SecurityFilterChain(HttpSecurity http) throws Exception {
+        return apiV2HttpSecurity(http).build();
+    }
+    @Bean
+    @Order(50)
+    public SecurityFilterChain publicWebSecurityFilterChain(HttpSecurity http) throws Exception {
+        return publicWebHttpSecurity(http).build();
+    }
+
+    public HttpSecurity webHttpSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher(_HTML + "/**")
                 .addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(loginAndPasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(csrfDisabledPages)
-                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicPages).permitAll()
-                        .requestMatchers(regexMatcher("/" + FRONTENDRESOURCEREGEX)).permitAll()
                         .requestMatchers(_HTML + _ADMIN + _ANY).hasRole("_ADMIN")
                         .requestMatchers(_HTML + _LOCAL + "/**").access(new WebExpressionAuthorizationManager(
                                     "hasIpAddress('" + localNetwork + "')"
@@ -173,20 +202,66 @@ public class WebSecurityConfig implements URLConstants {
                         .rememberMeCookieName(rememberMeCookieName)
                         .rememberMeParameter(rememberMeParameter)
                         .key(rememberMeKey)
+                );
+    }
+    public HttpSecurity apiAuthHttpSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher(_API_AUTH_ANT_EXPRESSION)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .requestCache(AbstractHttpConfigurer::disable)
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    }
+    public HttpSecurity apiTokenHttpSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher(_TOKEN_PREFIX_ANT_EXPRESSION)
+                .addFilterBefore(tokenPathPrefixAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .requestCache(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    }
+    public HttpSecurity apiV1HttpSecurity(HttpSecurity http) throws Exception {
+       return http.securityMatcher(_API_V1_ANT_EXPRESSION)
+                .addFilterBefore(apiTokenHeaderAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .requestCache(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(eh -> eh.authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
+    }
+    public HttpSecurity apiV2HttpSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher(_API_V2_ANT_EXPRESSION)
+                .addFilterBefore(apiTokenHeaderAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .requestCache(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(eh -> eh.authenticationEntryPoint((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
+    }
+    public HttpSecurity publicWebHttpSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher("/**")
+                .addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(loginAndPasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(csrfDisabledPages)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(publicPages).permitAll()
+                        .requestMatchers(regexMatcher("/" + FRONTENDRESOURCEREGEX)).permitAll()
+                        .requestMatchers(_PASSWORD + "/**").authenticated()
                 )
                 .logout(logout -> logout
                         .logoutUrl(_LOGOUT)
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/")
-                )
-        ;
-        return http.build();
+                );
     }
-
-
     private Filter ssoFilter() {
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
+        requestParameterTokenAuthenticationFilter.setAuthenticationSuccessHandler(new RequestParameterTokenAuthenticationSuccessHandler(securityContextRepository()));
         filters.add(requestParameterTokenAuthenticationFilter);
         filter.setFilters(filters);
         return filter;

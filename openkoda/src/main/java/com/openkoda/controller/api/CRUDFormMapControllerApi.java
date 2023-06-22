@@ -60,7 +60,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
             @Qualifier("obj") Pageable aPageable,
             @RequestParam(required = false, defaultValue = "", name = "obj_search") String search) {
         debug("[getAll]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getGetAllPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -78,7 +78,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId
             ) {
 
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getGetSettingsPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -95,7 +95,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @RequestBody HashMap<String,String> params) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostSavePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -121,7 +121,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @RequestBody HashMap<String,String> params) {
         debug("[saveNew]");
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostNewPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -145,7 +145,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
     public Object remove(
             @PathVariable(name=ID) Long objectId,
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId) {
-        CRUDControllerConfiguration conf = controllers.crudControllerConfigurationMap.get(key);
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(key);
         PrivilegeBase privilege = conf.getPostRemovePrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

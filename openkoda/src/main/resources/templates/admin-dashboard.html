@@ -5,7 +5,7 @@
 <div class="container-fluid">
     <div layout:fragment="content" th:attr="data-menu-item='admin-dashboard'">
         <div class="row" id="registered-cruds">
-            <th:block th:each="entry : ${@CRUDControllerConfigurationMap.entrySet()}">
+            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.entrySet()}">
                 <div class="col-lg-3">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -20,6 +20,9 @@
                     </div>
                 </div>
             </th:block>
+        </div>
+        <div id="web-endpoints">
+            <div th:replace="~{tables::frontend-element-dashboard(${frontendResourcePage}, #{template.frontendElements})}"/>
         </div>
     </div>
 </div>

@@ -31,6 +31,7 @@ import com.openkoda.dto.user.UserRoleDto;
 import com.openkoda.model.event.EventListenerEntry;
 
 import java.io.File;
+import java.time.LocalDateTime;
 
 /**
  * <p>ApplicationEvent class.</p>
@@ -62,6 +63,7 @@ public class ApplicationEvent<T> extends AbstractApplicationEvent<T> {
     public static final ApplicationEvent<PlanDto> TRIAL_EXPIRED = new ApplicationEvent<>(PlanDto.class, "TRIAL_EXPIRED");
 
     public static final ApplicationEvent<NotificationDto> APPLICATION_ERROR = new ApplicationEvent<>(NotificationDto.class, "APPLICATION_ERROR");
+    public static final ApplicationEvent<LocalDateTime> APPLICATION_STARTED = new ApplicationEvent<>(LocalDateTime.class, "APPLICATION_STARTED");
 
     public static ApplicationEvent<NotificationDto> NOTIFICATION_CREATED = new ApplicationEvent<>(NotificationDto.class, "NOTIFICATION_CREATED");
     /**

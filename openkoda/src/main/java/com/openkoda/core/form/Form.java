@@ -73,7 +73,7 @@ public abstract class Form implements PostExecuteProcessablePageAttr, LoggingCom
         return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditor(this));
     }
     public boolean requiresCodeEditorWithAutocomplete(){
-        return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditor(this));
+        return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditorWithAutocomplete(this));
     }
     public boolean requiresMap() {
         return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isMap(this));

@@ -28,4 +28,9 @@ public class PreviewIntegrationServices implements IntegrationServices {
         return true;
     }
 
+    @Override
+    public boolean sendJsonMessageToSlack(String JSONMessage, String webHook) {
+        return true;
+    }
+
 }

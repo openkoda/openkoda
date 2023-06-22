@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import reactor.util.function.Tuple2;
 
 import java.util.Set;
 
@@ -94,8 +95,9 @@ public class PublicController extends AbstractController implements HasSecurityR
             mav.addObject(error.name, "ReCaptcha response unverified");
             return mav;
         }
-        User existingUser = services.user.registerUserOrReturnExisting(registerUserForm, request.getCookies(), languagePrefix);
-        if (existingUser != null) {
+        Tuple2<User, Boolean> userOrReturnExisting = services.user.registerUserOrReturnExisting(registerUserForm, request.getCookies(), languagePrefix);
+        if (userOrReturnExisting.getT2()) {
+            User existingUser = userOrReturnExisting.getT1();
             Set<LoggedUser.AuthenticationMethods> existingMethods = existingUser.getAuthenticationMethods();
             debug("[registerUser] User with given login {} already exists with auth methods: {}", registerUserForm.getLogin(), existingMethods);
             ModelAndView mav = new ModelAndView(frontendResourceTemplateNamePrefix + languagePrefix_ + "register");

@@ -118,6 +118,7 @@ public abstract class AbstractForm<D> extends Form {
      */
     public boolean validateField(FrontendMappingFieldDefinition ffd, Function<Object, String> fieldValidator) {
         Object dtoValue = getField(ffd.getPlainName());
+        dtoValue = convertDtoValue(ffd, dtoValue);
         String errorCode = fieldValidator.apply(dtoValue);
         return !StringUtils.isNotBlank(errorCode);
 

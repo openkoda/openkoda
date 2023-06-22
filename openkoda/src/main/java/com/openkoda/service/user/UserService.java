@@ -95,8 +95,7 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
     @Inject
     private OrganizationService organizationService;
 
-    @Inject
-    private PasswordEncoder passwordEncoder;
+    private static PasswordEncoder passwordEncoder;
 
     @Inject
     private Messages messages;
@@ -116,6 +115,11 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
         services.applicationEvent.emitEvent(USER_CREATED, u.getBasicUser());
         debug("[createUser] event USER_CREATED emitted");
         return repositories.unsecure.user.findOne(u.getId());
+    }
+
+    public User createUser(User user) {
+        String[] globalRoles = {roleGlobalUser};
+        return createUser(user.getFirstName(), user.getLastName(), user.getEmail(), globalRoles);
     }
 
     public User createUser(String firstName,
@@ -253,27 +257,27 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
     }
 
     public User registerUserOrReturnExisting(RegisterUserForm registerUserForm) {
-        return registerUserOrReturnExisting(registerUserForm, null, "");
+        return registerUserOrReturnExisting(registerUserForm, null, "").getT1();
     }
 
-    public User registerUserOrReturnExisting(RegisterUserForm registerUserForm, Cookie[] cookies, String languagePrefix) {
+    public Tuple2<User, Boolean> registerUserOrReturnExisting(RegisterUserForm registerUserForm, Cookie[] cookies, String languagePrefix) {
         debug("[registerUserOrReturnExisting]");
         try {
             User existingUser = repositories.unsecure.user.findByEmailLowercase(registerUserForm.getLogin());
-
-            if (existingUser == null) {
+            boolean userAlreadyExists = existingUser != null;
+            if (!userAlreadyExists) {
 
                 //user with this email does not exist so create a brand new one with new organization
                 UserProvider.setCronJobAuthentication();
                 Organization organization = createOrganizationOrAssignToDefault(registerUserForm);
                 User user = registerUserWithStrategy(registerUserForm, cookies, organization);
                 repositories.unsecure.loginAndPassword.save(user.getLoginAndPassword());
-                user = repositories.unsecure.user.save(user);
-                sendAccountVerificationEmail(user, languagePrefix);
+                existingUser = repositories.unsecure.user.save(user);
+                sendAccountVerificationEmail(existingUser, languagePrefix);
                 debug("[registerUserOrReturnExisting] new user with id {} registered", user.getId());
             }
 
-            return existingUser;
+            return Tuples.of(existingUser, userAlreadyExists);
 
         } finally {
             UserProvider.clearAuthentication();
@@ -315,6 +319,19 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
         }
     }
 
+    /**
+     * <p>setPasswordEncoderOnce.</p>
+     *
+     * @param pe a {@link org.springframework.security.crypto.password.PasswordEncoder} object.
+     */
+    public static void setPasswordEncoderOnce(PasswordEncoder pe) {
+        if (passwordEncoder != null) {
+            //Password encoder already initialized
+            return;
+        }
+        UserService.passwordEncoder = pe;
+    }
+
     private Organization createOrganizationOrAssignToDefault(RegisterUserForm registerUserForm) {
         if (creationStrategy.equals(OrganizationCreationStrategy.CREATE)) {
             return organizationService.createOrganization(StringUtils.substringBefore(registerUserForm.getLogin(), "@"), 0);
@@ -337,7 +354,7 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
             Tuple2<String, Long> orgRole = Tuples.of(roleOrgAdmin, organization.getId());
             Tuple2[] orgRoles = {orgRole};
             user = createUser(registerUserForm.getFirstName(), registerUserForm.getLastName(), registerUserForm.getLogin(), false, globalRoles, orgRoles);
-            user.setLoginAndPassword(user.getEmail(), registerUserForm.getPassword(), false);
+            user.setLoginAndPassword(user.getEmail(), registerUserForm.getPassword() != null ? registerUserForm.getPassword() : RandomStringUtils.randomAlphanumeric(initialPasswordLength), false);
             services.applicationEvent.emitEvent(USER_REGISTERED, new RegisteredUserDto(registerUserForm, user.getId(), organization.getId(), cookies));
         }
         return user;

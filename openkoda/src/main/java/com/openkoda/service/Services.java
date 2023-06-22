@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service;
 
+import com.openkoda.core.customisation.CustomisationService;
 import com.openkoda.core.customisation.ServerJSRunner;
 import com.openkoda.core.flow.TransactionalExecutor;
 import com.openkoda.core.helper.SystemStatHelper;
@@ -37,14 +38,14 @@ import com.openkoda.core.service.event.EventListenerService;
 import com.openkoda.core.service.event.SchedulerService;
 import com.openkoda.core.service.module.ModuleService;
 import com.openkoda.core.service.pdf.PdfConstructor;
+import com.openkoda.service.autocomplete.AutocompleteService;
 import com.openkoda.service.captcha.CaptchaService;
 import com.openkoda.service.notification.NotificationService;
 import com.openkoda.service.organization.OrganizationService;
 import com.openkoda.service.user.*;
+import com.openkoda.uicomponent.live.LiveDataServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 /**
  *
@@ -81,12 +82,13 @@ public class Services {
     @Inject public ClusterEventSenderService clusterEventSender;
     @Inject public ThymeleafService thymeleaf;
     @Inject public FileService file;
-    @Inject public S3Client amazonS3;
-    @Inject public S3Presigner amazonS3Presigner;
     @Inject public CaptchaService captcha;
     @Inject public RestClientService restClient;
     @Inject public TenantResolver tenantResolver;
     @Inject public FrontendMappingDefinitionService frontendMappingDefinition;
     @Inject public WebsocketService websocket;
     @Inject public UserRoleService userRole;
+    @Inject public LiveDataServices data;
+    @Inject public CustomisationService customisation;
+    @Inject public AutocompleteService autocompleteService;
 }

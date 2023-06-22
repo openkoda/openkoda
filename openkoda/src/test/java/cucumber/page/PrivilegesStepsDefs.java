@@ -22,19 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static cucumber.page.SpringStepsDefs.baseUrl;
-
 public class PrivilegesStepsDefs extends StepsBase implements LoggingComponent {
 
     AdminPage page = new AdminPage(driver);
 
     @Autowired
     protected TestDataLoader testDataLoader;
-
-    @Given("test user {string} {string}")
-    public void testUser(String firstName, String lastName) {
-        testDataLoader.getUser(firstName, lastName, firstName + "@openkodatest.com", true, new String[]{"ROLE_USER"}, "ROLE_USER");
-    }
 
     @Given("Frontend resources {string}")
     public void frontendResource(String name) {
@@ -55,25 +48,19 @@ public class PrivilegesStepsDefs extends StepsBase implements LoggingComponent {
         Tuple2[] tuple2 = new Tuple2[]{Tuples.of(privilegeName, org.getId())};
         if ("Organization".equals(area)) {
             testDataLoader.createOrganizationRole(privilegeName, privileges, true);
-            testDataLoader.createUser(userName, password, userName + "@openkodatest.com", true, new String[]{}, tuple2);
+            testDataLoader.createUser(userName, password, userName + "@openkodatest.com", true, new String[]{"ROLE_USER"}, tuple2);
 
         } else {
             testDataLoader.createGlobalRole(privilegeName, privileges, true);
-            testDataLoader.createUser(userName, password, userName + "@openkodatest.com", true, new String[]{privilegeName}, new Tuple2[]{});
+            testDataLoader.createUser(userName, password, userName + "@openkodatest.com", true, new String[]{"ROLE_USER"}, new Tuple2[]{});
 
         }
 
     }
 
-    @And("I am logged as user {string} with lastName {string}")
-    public void i_am_logged_as_user_with_lastname(String username, String password) {
-        driver.get(baseUrl + "/login");
-        page.doLogin(username, password);
-    }
-
     @And("I click {string} on the side menu")
     public void i_click_on_the_side_menu(String menuItemLabel) {
-        page.waitFor(driver.findElement(By.linkText(menuItemLabel))).click();
+        page.waitFor(driver.findElement(By.partialLinkText(menuItemLabel))).click();
     }
 
     @And("I click {string} link")

@@ -2,8 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns: lang="en">
 
 <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'prod')}" th:fragment="scripts">
-    <th:block th:replace="~{analytics::google-tracking('put google analytics tracking id here')}"></th:block>
-    <th:block th:replace="~{analytics::hotjar-tracking('put hotjar tracking id here')}"></th:block>
+<!--    <th:block th:replace="~{analytics::google-tracking('put google analytics tracking id here')}"></th:block>-->
 </th:block>
 
 <th:block th:fragment="public-pages-scripts">

@@ -23,5 +23,6 @@ package com.openkoda.uicomponent;
 
 public interface IntegrationServices {
     boolean sendMessageToSlack(String message, String webHook);
+    boolean sendJsonMessageToSlack(String JSONMessage, String webHook);
 
 }

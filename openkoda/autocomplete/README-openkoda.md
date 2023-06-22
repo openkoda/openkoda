@@ -1,6 +1,7 @@
 ###How to add to openkoda project
 
-1. If not downloaded already, download dependencies with `yarn`
+1. If not downloaded already, download dependencies with `yarn`. Then copy `/autocomplete/src/show-hint.js`
+to `/autocomplete/node_modules/codemirror/addon/hint/show-hint.js`
 2. In `packagaje.json` set
     <pre>"scripts": {
     (...)

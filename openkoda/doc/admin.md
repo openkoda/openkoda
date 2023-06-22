@@ -322,7 +322,18 @@ When correct configuration is provided, you can use the login form by providing 
 Useful links:
 * [LDAP Documentation](https://ldap.com/ldap-urls/).
 
+## User Session
 
+### Session Timeout
+
+We can easily configure the Session timeout value of the embedded server using properties:
+
+<code>
+server.servlet.session.timeout
+</code>
+
+If a duration suffix is not specified, seconds will be used. The default value is <code>30m</code>.
+For a value of <code>-1</code> the session will not expire.
 
 ## Multitenancy
 

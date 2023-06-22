@@ -5,8 +5,9 @@ Feature: Forms
     Given I am logged as user "admin" with password "admin"
 
   Scenario Outline: Global admin can submit forms on admin pages
+    When I open "/html/organization/all" page
     And I open "<formPageUrl>" page
-    When fill "<formName>" with values "<setFormValues>"
+    When I fill "<formName>" with values "<setFormValues>"
     And I submit form "<newFormName>"
     Then I should see "<targetPageUrl>" page
     And I should find "<expectedTableColumnValues>" in the visible table
@@ -18,13 +19,13 @@ Feature: Forms
 
 
   Scenario Outline: Global admin can submit forms form on admin pages, and forms will not be redirected after save
+    When I open "/html/organization/all" page
     And I open "<formPageUrl>" page
-    When fill "<formName>" with values "<setFormValues>"
+    When I fill "<formName>" with values "<setFormValues>"
     And I submit form "<formName>"
     Then I should see "<formAlertMessage>" "<formAlertType>" form alert
     Examples:
       | formPageUrl                     | formName                | setFormValues                                                                       | formAlertMessage    | formAlertMessage |
       | /html/organization/121/settings | inviteUserForm          | firstName=boo;lastName=foo;email=test@codedose.com;roleName=ROLE_ORG_USER           | ?;User invited      | success          |
-      #| /html/module/attribute/new      | attributeDefinitionForm | name=boo;defaultValue=12;level=GLOBAL                                               | Settings saved      | success          |
       | /html/organization/new/settings | organizationForm        | name=boo                                                                            | Organization saved  | success          |
       | /html/user/10000/settings       | editUserForm            | firstName=Test;lastName=LastTest;email=test@t.test                                  | User data saved     | success          |

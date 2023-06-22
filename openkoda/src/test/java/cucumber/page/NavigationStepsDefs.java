@@ -53,9 +53,9 @@ public class NavigationStepsDefs extends StepsBase {
         page.waitFor(driver.findElement(By.linkText(menuItemLabel))).click();
     }
 
-    @And("I click {string} in top horizontal admin menu")
-    public void i_click_in_top_horizontal_admin_menu(String adminPageLinkLabel) {
-        String xpathExpression = "//div[@id=\"collapseAdmin\"]//a[.=\""+adminPageLinkLabel+"\"]";
+    @And("I click {string} in admin menu")
+    public void i_click_in_admin_menu(String adminPageLinkLabel) {
+        String xpathExpression = "//div[@id=\"collapseAdmin\"]//a[@data-sidebar-menu-item=\""+adminPageLinkLabel+"\"]";
         page.waitFor(driver.findElement(By.xpath(xpathExpression))).click();
     }
 

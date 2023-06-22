@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.form;
 
+import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.core.security.OrganizationUser;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.common.LongIdEntity;
@@ -32,6 +33,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.openkoda.core.form.FrontendMappingFieldDefinition.createFormFieldDefinition;
+import static com.openkoda.core.helper.PrivilegeHelper.valueOfString;
 
 public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderStart {
 
@@ -60,8 +62,22 @@ public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderSta
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, readPrivilege, writePrivilege));
         return this;
     }
+    public FormFieldDefinitionBuilder<V> additionalPrivileges(String readPrivilege, String writePrivilege) {
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, (PrivilegeBase) valueOfString(readPrivilege), (PrivilegeBase) valueOfString(writePrivilege)));
+        return this;
+    }
     public FormFieldDefinitionBuilder<V> additionalPrivileges(BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck, BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, canReadCheck, canWriteCheck));
+        return this;
+    }
+
+    public FormFieldDefinitionBuilder<V> additionalAction(String actionLabelKey, String actionUrl, PrivilegeBase additionalActionPrivilege) {
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, actionLabelKey, actionUrl, additionalActionPrivilege));
+        return this;
+    }
+
+    public FormFieldDefinitionBuilder<V> additionalAction(String actionLabelKey, String actionUrl, String privilegeNameAsString) {
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, actionLabelKey, actionUrl, (PrivilegeBase) PrivilegeHelper.valueOfString(privilegeNameAsString)));
         return this;
     }
 

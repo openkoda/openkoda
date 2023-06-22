@@ -22,6 +22,8 @@ public class Assignment extends OpenkodaEntity {
     }
 
     private boolean billable;
+    private boolean researchAndDevelopment;
+    private boolean creativeWork;
 
     @Formula(descriptionFormula)
     private String description;
@@ -101,5 +103,21 @@ public class Assignment extends OpenkodaEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isResearchAndDevelopment() {
+        return researchAndDevelopment;
+    }
+
+    public void setResearchAndDevelopment(boolean researchAndDevelopment) {
+        this.researchAndDevelopment = researchAndDevelopment;
+    }
+
+    public boolean isCreativeWork() {
+        return creativeWork;
+    }
+
+    public void setCreativeWork(boolean creativeWork) {
+        this.creativeWork = creativeWork;
     }
 }

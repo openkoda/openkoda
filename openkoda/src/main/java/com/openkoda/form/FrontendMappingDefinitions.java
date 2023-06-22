@@ -26,6 +26,7 @@ import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.FrontendResource;
+import com.openkoda.model.PrivilegeBase;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -57,7 +58,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
                 .dropdown(TYPE_, ROLE_TYPES_)
                 .checkboxList(PRIVILEGES_, PRIVILEGES_).additionalCss(TABLE_COMPACT_CSS));
 
-    FrontendMappingDefinition userForm = createFrontendMappingDefinition(USER_FORM, null, null,
+    FrontendMappingDefinition userForm = createFrontendMappingDefinition(USER_FORM, null, (PrivilegeBase) null,
         a -> a  .text(EMAIL_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IF_CAN_WRITE_USER)
                 .text(FIRST_NAME_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IS_NEW_USER_OR_OWNER)
                 .text(LAST_NAME_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IS_NEW_USER_OR_OWNER)
@@ -128,10 +129,10 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
                         return ce == null ? "" : (ce.isDraft() ? ce.getDraftContent() : ce.getContent());
                     })
                     .validateForm((ReflectionBasedEntityForm f) ->
-                        (f.dto.get(TYPE_) == FrontendResource.Type.CSS.name() && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension())) ||
-                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension()) && f.dto.get(TYPE_) != FrontendResource.Type.CSS.name()) ||
-                        ((f.dto.get(TYPE_) == FrontendResource.Type.JS.name()) && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension())) ||
-                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension()) && (f.dto.get(TYPE_) != FrontendResource.Type.JS.name())) ?
+                        (f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name()) && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension())) ||
+                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension()) && !f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name())) ||
+                        ((f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name())) && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension())) ||
+                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension()) && (!f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name()))) ?
                                 Map.of(TYPE_, "incompatible.frontend-resource.types", URL_PATH_, "incompatible.frontend-resource.types") : null)
     );
     FrontendMappingDefinition uiComponentFrontendResourceForm = createFrontendMappingDefinition(FRONTENDRESOURCE, readFrontendResource, manageFrontendResource,

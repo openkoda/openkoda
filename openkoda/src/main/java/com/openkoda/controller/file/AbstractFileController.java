@@ -26,28 +26,16 @@ import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.core.service.FileService;
 import com.openkoda.form.FileForm;
 import com.openkoda.model.file.File;
 import com.openkoda.repository.file.FileRepository;
 import com.openkoda.repository.file.SecureFileRepository;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.validation.BindingResult;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import static com.openkoda.core.service.FileService.StorageType.database;
-import static com.openkoda.core.service.FileService.StorageType.filesystem;
 
 public class AbstractFileController extends AbstractController implements HasSecurityRules {
 
@@ -112,30 +100,6 @@ public class AbstractFileController extends AbstractController implements HasSec
             .then(a -> unsecureFileRepository.removeFile(fileId))
             .execute();
     }
-
-    //public for access in tests in FileServiceTest, because this method was in FileService
-    //and creating test class for this controller creates problem with setting FileService.storageType in test cases
-    public HttpServletResponse getFileContentAndPrepareResponse(File f, boolean download, HttpServletResponse response) throws IOException, SQLException {
-        debug("[getFileContentAndPrepareResponse] fileId: {}", f.getId());
-        response.addHeader("Content-Type", f.getContentType());
-        response.addHeader("Content-Length", Long.toString(f.getSize()));
-        if (download) response.addHeader("Content-Disposition", "attachment; filename=\"" + f.getFilename() + "\"");
-        LocalDateTime updatedOn = f.getUpdatedOn() == null ? LocalDateTime.now() : f.getUpdatedOn();
-        response.addDateHeader("Last-Modified", updatedOn.toEpochSecond(ZoneOffset.UTC) * 1000);
-
-        FileService.StorageType storageType = f.getStorageType();
-        if (storageType == filesystem || storageType == database) {
-            response.addHeader("Accept-Ranges", "bytes");
-            response.addHeader("Cache-Control", "max-age=604800, public");
-            OutputStream os = response.getOutputStream();
-            try (InputStream is = f.getContentStream()) {
-                IOUtils.copy(is, os);
-            }
-            os.flush();
-        }
-        return response;
-    }
-
 
     protected PageModelMap updateFile(){
         return Flow.init(transactional)

@@ -23,6 +23,9 @@ package com.openkoda.controller.admin;
 
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.security.HasSecurityRules;
+import com.openkoda.model.FrontendResource;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,8 +69,9 @@ public class SystemHealthController extends AbstractSystemHealthController imple
 
     @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
     @GetMapping(_DASHBOARD)
-    public Object adminDashboard() {
+    public Object adminDashboard(@Qualifier("obj") Pageable pageable) {
         return Flow.init()
+                .thenSet(frontendResourcePage, a -> repositories.unsecure.frontendResource.findByType(FrontendResource.Type.UI_COMPONENT,pageable))
                 .execute()
                 .mav("admin-dashboard");
 

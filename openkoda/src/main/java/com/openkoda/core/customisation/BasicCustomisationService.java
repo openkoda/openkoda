@@ -21,14 +21,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.customisation;
 
+import com.openkoda.controller.ApiCRUDControllerConfigurationMap;
 import com.openkoda.controller.ComponentProvider;
-import com.openkoda.controller.CRUDControllerConfigurationMap;
+import com.openkoda.controller.HtmlCRUDControllerConfigurationMap;
 import com.openkoda.core.audit.AuditInterceptor;
 import com.openkoda.core.audit.PropertyChangeListener;
+import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
-import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.helper.SpringProfilesHelper;
 import com.openkoda.core.lifecycle.BaseDatabaseInitializer;
 import com.openkoda.core.lifecycle.SearchViewCreator;
@@ -37,10 +38,12 @@ import com.openkoda.core.repository.common.ProfileSettingsRepository;
 import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.UserProvider;
 import com.openkoda.core.service.BackupService;
+import com.openkoda.core.service.FrontendMappingDefinitionService;
 import com.openkoda.core.service.GenericWebhookService;
 import com.openkoda.core.service.SlackService;
 import com.openkoda.core.service.email.EmailService;
 import com.openkoda.core.service.event.AbstractApplicationEvent;
+import com.openkoda.core.service.event.ApplicationEvent;
 import com.openkoda.core.service.event.EventConsumer;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.dto.NotificationDto;
@@ -64,6 +67,7 @@ import reactor.util.function.Tuple5;
 import reactor.util.function.Tuples;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -99,10 +103,16 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
     private MultitenancyService multitenancyService;
 
     @Autowired
-    private CRUDControllerConfigurationMap controllerConfigurationMap;
+    private HtmlCRUDControllerConfigurationMap htmlCrudControllerConfigurationMap;
+
+    @Autowired
+    private ApiCRUDControllerConfigurationMap apiCrudControllerConfigurationMap;
 
     @Autowired
     private FrontendMappingMap frontendMappingMap;
+
+    @Autowired
+    private FrontendMappingDefinitionService frontendMappingDefinitionService;
 
     @Value("${init.admin.username}")
     private String initAdminUsername;
@@ -170,6 +180,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
             for (Consumer<CustomisationService> c : onApplicationStartListeners) {
                 c.accept(this);
             }
+            services.applicationEvent.emitEvent(ApplicationEvent.APPLICATION_STARTED, LocalDateTime.now());
         } finally {
             UserProvider.clearAuthentication();
         }
@@ -198,7 +209,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
         services.applicationEvent.registerEventConsumerWithMethod(CanonicalObject.class, ServerJSRunner.class, "runScriptJS",
                 "This consumer will run Javascript that is defined as \"SERVER_JS\". Consumer is parametrized by the name of script.", String.class);
         services.applicationEvent.registerEventConsumerWithMethod(OrganizationRelatedObject.class, RoleModificationsConsumers.class, "modifyRoleForAllUsersInOrganization",
-                "This consumer will run Javascript that is defined in ServerJs. And modify all users role given by the script. Consumer is parametrized by the name of script.", String.class);
+                "This consumer will run Javascript that is defined in Server-side Js. And modify all users role given by the script. Consumer is parametrized by the name of script.", String.class);
         services.applicationEvent.registerEventConsumerWithMethod(OrganizationRelatedObject.class, RoleModificationsConsumers.class, "modifyGlobalRoleForOrganization",
                 "This consumer will run Javascript that is defined as \"SERVER_JS\". And add or remove roles given by the script. Consumer is parametrized by the name of script.", String.class);
         services.applicationEvent.registerEventConsumerWithMethod(NotificationDto.class, PushNotificationService.class, "createSlackPostMessageRequest",
@@ -210,9 +221,11 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
         services.applicationEvent.registerEventConsumerWithMethod(CanonicalObject.class, SlackService.class, "sendToSlackWithCanonical",
                 "Sends message generated in FrontendResource(first param) to slack via webHook(second param).", String.class, String.class);
         services.applicationEvent.registerEventConsumerWithMethod(ScheduledSchedulerDto.class, ServerJSRunner.class, "startScheduledServerJs",
-                "Executes ServerJs on Scheduler Event. Param1: Scheduler event data must match Static Parameter 1 in order to run. Param2: Name of the ServerJS to run. All 4 Static Parameters are passed as arguments to Server js (arguments.length == 4)", String.class, String.class, String.class, String.class);
+                "Executes Server-side Js on Scheduler Event. Param1: Scheduler event data must match Static Parameter 1 in order to run. Param2: Name of the Server-side JS to run. All 4 Static Parameters are passed as arguments to Server js (arguments.length == 4)", String.class, String.class, String.class, String.class);
         services.applicationEvent.registerEventConsumerWithMethod(CanonicalObject.class, GenericWebhookService.class, "sendToUrlWithCanonical",
                 "Sends message to url (first param) generated as JSON in FrontendResource(second param), with headers as JSON in FrontendResource(third param).", String.class, String.class, String.class);
+        services.applicationEvent.registerEventConsumerWithMethod(LocalDateTime.class, ServerJSRunner.class, "startCustomisationServerJs",
+                "Executes ServerJs with customisation service. Param1: Name of the ServerJS to run. Server js can access 'customisationService' object. All 4 Static Parameters are passed as arguments to Server js (arguments.length == 4)", String.class, String.class, String.class, String.class);
     }
 
     @Override
@@ -241,15 +254,17 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
     public synchronized void registerFrontendMapping(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
 
         String uniqueName = definition.name;
-        if (frontendMappingMap.containsKey(uniqueName)) {
-            throw new RuntimeException("Frontend Mapping Key not unique: " + uniqueName);
-        }
         frontendMappingMap.put(uniqueName, new FrontendMapping(definition, repository));
     }
 
     @Override
-    public CRUDControllerConfiguration registerCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
-        return controllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class);
+    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
+        return htmlCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class);
+    }
+
+    @Override
+    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
+        return apiCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class);
     }
 
     @EventListener(ContextRefreshedEvent.class)
@@ -261,4 +276,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
         return null;
     }
 
+    public FrontendMappingDefinitionService getFrontendMappingDefinitionService() {
+        return frontendMappingDefinitionService;
+    }
 }

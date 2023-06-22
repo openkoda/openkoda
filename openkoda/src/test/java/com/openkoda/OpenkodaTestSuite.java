@@ -29,15 +29,15 @@ import com.openkoda.core.service.backup.BackupWriterTest;
 import com.openkoda.service.*;
 import com.openkoda.service.map.MapServiceTest;
 import com.openkoda.uicomponent.JsFlowRunnerTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * @author Martyna Litkowska (mlitkowska@stratoflow.com)
  * @since 2019-01-31
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
         MapServiceTest.class,
         BackupServiceTest.class,
         EventListenerServiceTest.class,

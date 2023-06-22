@@ -53,7 +53,8 @@ public class LoginAndPassword extends LoggedUser {
     private String password;
 
     @MapsId
-    @OneToOne(mappedBy = "loginAndPassword")
+    @OneToOne
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
 

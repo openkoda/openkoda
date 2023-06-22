@@ -25,6 +25,7 @@ import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -51,6 +52,7 @@ import java.util.Base64;
  *
  */
 @Service
+@Profile("mailgun")
 public class MailgunEmailSender extends EmailSender {
 
     @Value("${mailgun.apikey:}")

@@ -81,8 +81,8 @@ public class User extends TimestampedEntity implements AuditableEntity, Searchab
     @PrimaryKeyJoinColumn
     private GoogleUser googleUser;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @PrimaryKeyJoinColumn
     private LoginAndPassword loginAndPassword;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
@@ -112,6 +112,16 @@ public class User extends TimestampedEntity implements AuditableEntity, Searchab
 
     @Formula("( '" + PrivilegeNames._manageUserData + "' )")
     private String requiredWritePrivilege;
+
+    @ElementCollection
+    @CollectionTable(name = "user_property",
+            joinColumns = {
+                    @JoinColumn(name = "user_id", referencedColumnName = "id")
+            })
+    @MapKeyColumn(name = "name")
+    @Column(name = "value")
+    private Map<String, String> properties = new HashMap<>();
+
 
     /**
      * <p>Constructor for User.</p>
@@ -551,6 +561,14 @@ public class User extends TimestampedEntity implements AuditableEntity, Searchab
                 .filter(role -> role.getType().equals("GLOBAL"))
                 .collect(Collectors.toList());
         return globals.isEmpty() ? null : globals.get(0).getName();
+    }
+
+    public String getProperty(String name) {
+        return properties.get(name);
+    }
+
+    public String setProperty(String name, String value) {
+        return properties.put(name, value);
     }
 
 }

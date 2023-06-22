@@ -51,7 +51,10 @@ public class Controllers {
     public FrontendResourceControllerHtml frontendResource;
 
     @Inject
-    public CRUDControllerConfigurationMap crudControllerConfigurationMap;
+    public HtmlCRUDControllerConfigurationMap htmlCrudControllerConfigurationMap;
+
+    @Inject
+    public ApiCRUDControllerConfigurationMap apiCrudControllerConfigurationMap;
 
 
 

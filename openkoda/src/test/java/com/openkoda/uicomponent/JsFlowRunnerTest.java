@@ -33,8 +33,7 @@ public class JsFlowRunnerTest  extends AbstractTest {
     @Autowired
     JsFlowRunner jsFlowRunner;
 
-    String flow = "flow.then(a => a.model.put(\"users\", a.services.userRepository.findAll()))";
-
+    String flow = "flow.then(a => a.model.put(\"users\", a.services.data.getRepository(\"user\").findAll()))";
 
     @Test
     public void testRunPreviewFlow() {

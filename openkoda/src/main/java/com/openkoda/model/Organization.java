@@ -28,6 +28,9 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Formula;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  *
@@ -74,6 +77,16 @@ public class Organization extends TimestampedEntity implements AuditableEntity, 
 
     @Formula("( '" + PrivilegeNames._manageOrgData + "' )")
     private String requiredWritePrivilege;
+
+    @ElementCollection
+    @CollectionTable(name = "organization_property",
+            joinColumns = {
+                    @JoinColumn(name = "organization_id", referencedColumnName = "id")
+            })
+    @MapKeyColumn(name = "name")
+    @Column(name = "value")
+    private Map<String, String> properties = new HashMap<>();
+
 
     public Organization() {
     }
@@ -144,5 +157,13 @@ public class Organization extends TimestampedEntity implements AuditableEntity, 
     @Override
     public String getRequiredWritePrivilege() {
         return requiredWritePrivilege;
+    }
+
+    public String getProperty(String name) {
+        return properties.get(name);
+    }
+
+    public String setProperty(String name, String value) {
+        return properties.put(name, value);
     }
 }

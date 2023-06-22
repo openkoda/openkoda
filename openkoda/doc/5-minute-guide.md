@@ -11,7 +11,7 @@ In the main catalogue:
 
 In `examples/timelog` catalogue:
 
-```mvn install spring-boot:repackage```
+```mvn install  spring-boot:repackage```
 
 ### Initialize Database
 

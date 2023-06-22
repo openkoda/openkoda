@@ -69,7 +69,7 @@ public class RegisterPage extends BasePage{
     public WebElement confirmPassword;
     @FindBy(how = How.CSS, using = "button[type='submit'")
     public WebElement enabledSubmit;
-    @FindBy(how = How.XPATH, using = "//*['Registration Successful']")
+    @FindBy(how = How.CSS, using = ".text-center")
     public WebElement registeredMessage;
     @FindBy(how=How.LINK_TEXT, using = "Forgot Password?")
     public WebElement forgotPasswordLink;

@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.configuration;
 
-import com.openkoda.controller.CRUDControllerConfigurationMap;
+import com.openkoda.controller.HtmlCRUDControllerConfigurationMap;
 import com.openkoda.controller.common.SessionData;
 import com.openkoda.controller.common.URLConstants;
 import com.openkoda.core.customisation.FrontendMappingMap;
@@ -48,9 +48,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
@@ -165,7 +163,7 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
     public ObjectFactory<ConversionService> conversionService;
 
     @Inject
-    public CRUDControllerConfigurationMap crudControllerConfigurationMap;
+    public HtmlCRUDControllerConfigurationMap htmlCrudControllerConfigurationMap;
 
     @Inject
     FrontendMappingMap frontendMappingMap;
@@ -175,7 +173,7 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(new MapFormArgumentResolver(crudControllerConfigurationMap, frontendMappingMap, urlHelper));
+        argumentResolvers.add(new MapFormArgumentResolver(htmlCrudControllerConfigurationMap, frontendMappingMap, urlHelper));
     }
 
     @Bean

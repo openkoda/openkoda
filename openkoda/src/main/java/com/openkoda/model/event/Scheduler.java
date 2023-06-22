@@ -62,7 +62,7 @@ public class Scheduler extends TimestampedEntity implements SearchableOrganizati
     @ManyToOne(optional = true)
     @JoinColumn(nullable = true, insertable = false, updatable = false, name = ModelConstants.ORGANIZATION_ID)
     private Organization organization;
-    @Column(nullable = true, name = ModelConstants.ORGANIZATION_ID)
+    @Column(nullable = true, name = ModelConstants.ORGANIZATION_ID, updatable = false)
     private Long organizationId;
 
     @Formula(REFERENCE_FORMULA)

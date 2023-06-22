@@ -9,10 +9,12 @@ import 'codemirror/theme/material-ocean.css';
 // codemirror - show-hint
 import 'codemirror/addon/hint/show-hint';
 import 'codemirror/addon/hint/show-hint.css';
+import {createPortal} from 'react-dom';
 
 import {usePrevious} from "../../hooks/usePrevious.hook";
-import {fetchSuggestions} from "../../services/suggestionsNetwork.service";
+import {fetchSuggestions, serviceHintsDocumentation} from "../../services/suggestionsNetwork.service";
 import {FlowResult} from "../../GrammarVisitor";
+
 
 // CodeMirror's base and show-hint type
 type CodeMirrorEditorType = CodeMirror.Editor & Editor;
@@ -31,6 +33,14 @@ interface SuggestionsInfo {
     suggestions: string[];
 }
 
+interface HintDocumentationInfo{
+    visible: boolean;
+    selectedHint: number;
+    leftPosition: number;
+    topPosition: number;
+    message: any;
+}
+
 export const AutoComplete: FunctionComponent = () => {
     const [codeMirrorEditor, setCodeMirrorEditor] = useState<CodeMirrorEditorType>();
 
@@ -46,6 +56,13 @@ export const AutoComplete: FunctionComponent = () => {
         suggestions: [],
     });
 
+    const [hintDocumentationInfo, setHintDocumentationInfo] = useState<HintDocumentationInfo>({
+        visible: false,
+        selectedHint: -1,
+        leftPosition: -1,
+        topPosition: -1,
+        message:''
+    });
     const onChange = useCallback((editor: CodeMirrorEditorType) => {
 
         const idx = editor.getCursor().line === 0 ? editor.getCursor().ch : Array.from({ length: editor.getCursor().line}, (a,b) => b).map(a => editor.lineInfo(a).text.length).reduce((a,b) => a + b) + editor.getCursor().line + editor.getCursor().ch;
@@ -84,7 +101,6 @@ export const AutoComplete: FunctionComponent = () => {
             suggestions: fetchedSuggestions,
         }));
     }, [codeMirrorEditor, prevQueryInfo, queryInfo]);
-
     useEffect(() => {
         if (!codeMirrorEditor) {
             return;
@@ -103,11 +119,39 @@ export const AutoComplete: FunctionComponent = () => {
                     text: `${text}`,
                 })),
             }),
+            extraKeys: {"Ctrl-Q": (cm:Editor, handle:any) => {
+               if(suggestionsInfo.result?.type === 'ServicesResult' && !!cm.state.completionActive&& !!cm.state.completionActive.widget && window.innerWidth > 610){
+                    serviceHintsDocumentation.then(
+                      array =>
+                         setHintDocumentationInfo(prevState => {
+                            const selectedHint = !prevState.visible ? cm.state.completionActive.widget.selectedHint : -1;
+                            const hintsWindow = document.getElementById(cm.state.completionActive.widget.id);
+                            var top:number=0;
+                            var left:number = 0;
+                            if(!!hintsWindow){
+                               var hintsTop:number = Number(hintsWindow.style.top.replace("px", ""));
+                               var hintsLeft:number = Number(hintsWindow.style.left.replace("px", ""));
+                               top = hintsTop;
+                               if(hintsLeft > 410){
+                                left = hintsLeft - 410;
+                               } else {
+                                var hintsWidth:number = Number(getComputedStyle(hintsWindow).width.replace("px",""));
+                                left = hintsLeft + hintsWidth+10;
+                               }
+                            }
+                            return {visible: !prevState.visible, selectedHint: selectedHint, leftPosition: left, topPosition: top, message:array[selectedHint]}
+                         })
+                      );
+                    }
+               }
+            },
+            setHintDocumentationInfo: setHintDocumentationInfo,
+            serviceHintsDocumentation: serviceHintsDocumentation
         };
         codeMirrorEditor.showHint(options);
     }, [codeMirrorEditor, suggestionsInfo]);
-
     return (
+        <div>
         <CodeMirrorEditor
             options={{
                 theme: 'material',
@@ -117,5 +161,18 @@ export const AutoComplete: FunctionComponent = () => {
             editorDidMount={setCodeMirrorEditor}
             onCursorActivity={onChange}
         />
+        {hintDocumentationInfo.visible
+        ?
+        createPortal(<HintDocumentation selectedHint={hintDocumentationInfo.selectedHint}
+                           leftPosition={hintDocumentationInfo.leftPosition}
+                           topPosition={hintDocumentationInfo.topPosition}
+                           message={hintDocumentationInfo.message}
+        />, document.body)
+        : null}
+        </div>
     );
 };
+
+function HintDocumentation(props:any){
+return (<div className={"CodeMirror-hints CodeMirror-hints-documentation"} style={{width:'400px', height:'200px', position:'absolute', background:'white', left:props.leftPosition + 'px', top:props.topPosition + 'px'}}>{props.message}</div>)
+}

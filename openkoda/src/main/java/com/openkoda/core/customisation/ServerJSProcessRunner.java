@@ -24,12 +24,14 @@ package com.openkoda.core.customisation;
 import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.core.flow.mbean.LoggingEntriesStack;
 import com.openkoda.core.service.event.ApplicationEvent;
+import com.openkoda.dto.ServerJsThreadDto;
 import com.openkoda.service.Services;
 import org.apache.commons.io.output.NullWriter;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +72,13 @@ public class ServerJSProcessRunner implements LoggingComponent {
     //TODO: make private or package
     public static final Map<Thread, LoggingEntriesStack<String>> serverJsThreads = new LinkedHashMap<>();
 
+    public static Map<ServerJsThreadDto,LoggingEntriesStack<String>> getServerJsThreads(){
+        Map<ServerJsThreadDto,LoggingEntriesStack<String>> map = new HashMap<>();
+        for(Map.Entry<Thread, LoggingEntriesStack<String>> item:serverJsThreads.entrySet()){
+            map.put(new ServerJsThreadDto(item.getKey()),item.getValue());
+        }
+        return map;
+    }
 
     /**
      * Constructor. The ServerJS can be enhanced with additional services, also can write log messages to a provided writer.

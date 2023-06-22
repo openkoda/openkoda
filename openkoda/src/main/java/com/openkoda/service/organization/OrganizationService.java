@@ -58,7 +58,7 @@ public class OrganizationService extends ComponentProvider {
     private DataSource dataSource;
 
     @Inject
-    MultitenancyService multitenancyService;
+    protected MultitenancyService multitenancyService;
 
     /**
      * <p>createOrganization.</p>

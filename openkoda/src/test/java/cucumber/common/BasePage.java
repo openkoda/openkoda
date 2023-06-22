@@ -27,6 +27,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -44,7 +45,8 @@ public abstract class BasePage implements LoggingComponent {
     public void setValueFieldDefinition(FrontendMappingFieldDefinition field, String value) {
 
         String expr = "//*[starts-with(@name, 'dto') and contains(@name, '"+field.getName()+"')]";
-        WebElement element = this.waitFor(this.driver.findElement(By.xpath(expr)));
+        new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(expr)));
+        WebElement element = this.driver.findElement(By.xpath(expr));
 
         switch (field.type) {
             case dropdown_with_disable:

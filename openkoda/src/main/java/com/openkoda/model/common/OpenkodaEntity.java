@@ -35,6 +35,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @MappedSuperclass
 @Inheritance(
@@ -53,7 +55,7 @@ public abstract class OpenkodaEntity implements ModelConstants, Serializable, Se
     @JoinColumn(nullable = true, insertable = false, updatable = false, name = ORGANIZATION_ID)
     protected Organization organization;
 
-    @Column(nullable = true, name = ORGANIZATION_ID)
+    @Column(nullable = true, name = ORGANIZATION_ID, updatable = false)
     protected Long organizationId;
 
     @Formula(DEFAULT_ORGANIZATION_RELATED_REFERENCE_FIELD_FORMULA)
@@ -124,7 +126,8 @@ public abstract class OpenkodaEntity implements ModelConstants, Serializable, Se
     }
 
     public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+        if (this.organizationId == null)
+            this.organizationId = organizationId;
     }
 
     @Override
@@ -149,5 +152,24 @@ public abstract class OpenkodaEntity implements ModelConstants, Serializable, Se
     public LocalDateTime getUpdatedOn() {
         return updatedOn;
     }
+
+    @ElementCollection
+    @CollectionTable(name = "entity_property",
+            joinColumns = {
+                    @JoinColumn(name = "entity_id", referencedColumnName = "id")
+            },
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @MapKeyColumn(name = "name")
+    @Column(name = "value")
+    private Map<String, String> properties = new HashMap<>();
+
+    public String getProperty(String name) {
+        return properties.get(name);
+    }
+
+    public String setProperty(String name, String value) {
+        return properties.put(name, value);
+    }
+
 
 }

@@ -36,6 +36,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.function.Function;
 
+import static com.openkoda.core.helper.PrivilegeHelper.valueOfString;
+
 @Service
 public class FrontendMappingDefinitionService {
 
@@ -51,6 +53,13 @@ public class FrontendMappingDefinitionService {
             PrivilegeBase defaultWritePrivilege,
             Function<FormFieldDefinitionBuilderStart, FormFieldDefinitionBuilder> builder) {
         return FrontendMappingDefinition.createFrontendMappingDefinition(formName, defaultReadPrivilege, defaultWritePrivilege, builder);
+    }
+    public FrontendMappingDefinition createFrontendMappingDefinition(
+            String formName,
+            String defaultReadPrivilege,
+            String defaultWritePrivilege,
+            Function<FormFieldDefinitionBuilderStart, FormFieldDefinitionBuilder> builder) {
+        return FrontendMappingDefinition.createFrontendMappingDefinition(formName, (PrivilegeBase) PrivilegeHelper.valueOfString(defaultReadPrivilege), (PrivilegeBase) valueOfString(defaultWritePrivilege), builder);
     }
 
     public FrontendMappingDefinition createFrontendMappingDefinition(
@@ -74,13 +83,13 @@ public class FrontendMappingDefinitionService {
 
     public ReflectionBasedEntityForm getForm(String formName, String privilegeName,
                                              Function<FormFieldDefinitionBuilderStart, FormFieldDefinitionBuilder> builder) {
-        PrivilegeBase requiredPrivilege = (PrivilegeBase) PrivilegeHelper.valueOfString(privilegeName);
+        PrivilegeBase requiredPrivilege = (PrivilegeBase) valueOfString(privilegeName);
         return new ReflectionBasedEntityForm(createFrontendMappingDefinition(formName, requiredPrivilege, requiredPrivilege, builder), null, null);
     }
 
     public ReflectionBasedEntityForm getForm(String formName, Long organizationId, String privilegeName,
                                              Function<FormFieldDefinitionBuilderStart, FormFieldDefinitionBuilder> builder) {
-        PrivilegeBase requiredPrivilege = (PrivilegeBase) PrivilegeHelper.valueOfString(privilegeName);
+        PrivilegeBase requiredPrivilege = (PrivilegeBase) valueOfString(privilegeName);
         return new ReflectionBasedEntityForm(createFrontendMappingDefinition(formName, requiredPrivilege, requiredPrivilege, builder), organizationId, null);
     }
 

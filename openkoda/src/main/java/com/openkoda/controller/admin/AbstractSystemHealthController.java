@@ -15,7 +15,7 @@ public class AbstractSystemHealthController extends AbstractController {
 
     protected PageModelMap getThreads(){
         return Flow.init()
-                .thenSet(threads, a -> ServerJSProcessRunner.serverJsThreads)
+               .thenSet(serverJsThreads,  a ->ServerJSProcessRunner.getServerJsThreads())
                 .execute();
     }
 
