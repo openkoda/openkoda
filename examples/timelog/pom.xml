@@ -8,12 +8,12 @@
         <groupId>com.openkoda</groupId>
         <artifactId>openkoda-app</artifactId>
         <relativePath>../../openkoda-app</relativePath>
-        <version>1.4.1</version>
+        <version>1.4.3</version>
     </parent>
 
     <groupId>com.openkoda.example</groupId>
     <artifactId>timelog</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.openkoda</groupId>
             <artifactId>openkoda</artifactId>
-            <version>1.4.1</version>
+            <version>1.4.3</version>
         </dependency>
     </dependencies>
 

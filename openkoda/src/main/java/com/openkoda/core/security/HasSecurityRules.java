@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -27,6 +27,7 @@ package com.openkoda.core.security;
 
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FrontendMappingFieldDefinition;
+import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.model.*;
 import com.openkoda.model.common.EntityWithRequiredPrivilege;
@@ -130,6 +131,7 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
             (u, a) -> (a) == null
             || ((EntityWithRequiredPrivilege) a).getRequiredWritePrivilege() == null
             || u.hasGlobalPrivilege(((EntityWithRequiredPrivilege) a).getRequiredWritePrivilege());
+
 
     //Methods
     default boolean hasGlobalPrivilege(String p, Set<String> globalPrivileges) {
@@ -325,8 +327,8 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
     }
 
     default boolean isSpoofMode() {
-        OrganizationUser user = getLoggedOrganizationUser().get();
-        return user.isSpoofed();
+        Optional<OrganizationUser> user = getLoggedOrganizationUser();
+        return user.map(OrganizationUser::isSpoofed).orElse(false);
     }
 
     default boolean isOrgAdmin(Organization org) {
@@ -353,26 +355,66 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
                 && Predicate.BooleanOperator.OR.equals(search.getOperator()));
     }
 
-    default <T> Predicate toSecurePredicate(Specification<T> specification, Enum requiredPrivilege, Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        debug("[toPredicate] for Entity:{} ", root.getModel().getName());
 
-//                query.distinct(true);
+    enum SecurityScope {
+        ALL(false, false, false), // all data
+        GLOBAL(true, false, false), // orgId == null
+        ORGANIZATION(true, false, true), //orgId == current organization
+        USER(true, true,false), // all entities (GLOBAL and ORGANIZATION) where user has privileges
+        USER_IN_ORGANIZATION(true, true, true); // orgId == current organization and where user has privileges
+
+
+        SecurityScope(boolean requiresUser ,boolean checkUserPrivileges, boolean currentOrganization) {
+            this.checkUserPrivileges = checkUserPrivileges;
+            this.currentOrganization = currentOrganization;
+        }
+
+        private boolean requiresUser;
+        private boolean checkUserPrivileges;
+        private boolean currentOrganization;
+
+
+    }
+
+    default <T> Predicate toSecurePredicate(Specification<T> specification, Enum requiredPrivilege, Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb, SecurityScope scope) {
+        debug("[toPredicate] for Entity:{} ", root.getModel().getName());
 
         Optional<OrganizationUser> optionalUser = UserProvider.getFromContext();
         Class<?> rootJavaType = root.getModel().getJavaType();
 
         Predicate search = specification == null ? cb.conjunction() : specification.toPredicate(root, query, cb);
 
+        //security scope is ALL, returning all by predicate
+        if (scope == SecurityScope.ALL) {
+            return search;
+        }
+
+        //all security scopes except ALL require user
         if(!optionalUser.isPresent()) {
             debug("[toPredicate] No user");
             search = cb.disjunction();
+        }
+
+        boolean isOrganizationEntity = isOrganizationRelated(rootJavaType);
+        if (scope == SecurityScope.GLOBAL) {
+            return isOrganizationEntity ? cb.and(search, cb.isNull(root.get("organizationId"))) : search;
+        }
+
+        if (scope.currentOrganization) {
+            Long currentOrganizationId = TenantResolver.getTenantedResource().organizationId;
+            if (!isOrganizationEntity || currentOrganizationId == null) {
+                search = cb.disjunction();
+            }
+            search = cb.and(search, cb.equal(root.get("organizationId"), currentOrganizationId));
+            if (scope == SecurityScope.ORGANIZATION) {
+                return search;
+            }
         }
 
         if(continueBuildingSearchPredicate(search)) {
             //the code below provide basic security for search
             boolean isEntityWithRequiredPrivilege = requiresPrivilege(rootJavaType);
             boolean isExternalRequiredPrivilege = requiredPrivilege != null;
-            boolean isOrganizationEntity = isOrganizationRelated(rootJavaType);
             boolean hasManyOrganizationsEntity = isManyOrganizationRelated(rootJavaType);
             OrganizationUser user = optionalUser.get();
 
@@ -425,7 +467,7 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
                     requiredPrivilegePath.isNotNull(),
                     requiredPrivilegePath.in(user.getGlobalPrivileges()));
 
-            // check check org level privilege
+            // check org level privilege
             Expression orgsWithPrivilege = cb.function("arrays_suffix", Array.class, organizationIdsPath, requiredPrivilegePath);
             Predicate inAnyOrgCheck = cb.isTrue(cb.function("arrays_overlap", Boolean.class, orgsWithPrivilege, cb.literal(user.getOrganizationWithPrivilegePairs())));
             Predicate organizationEntityCheck = cb.and(organizationIdsPath.isNotNull(), inAnyOrgCheck);

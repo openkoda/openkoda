@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,10 +21,12 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
+import com.openkoda.model.file.File;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -42,6 +44,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.List;
 
 /**
  *
@@ -53,6 +56,7 @@ import java.util.Base64;
  */
 @Service
 @Profile("mailgun")
+@Primary
 public class MailgunEmailSender extends EmailSender {
 
     @Value("${mailgun.apikey:}")
@@ -71,7 +75,7 @@ public class MailgunEmailSender extends EmailSender {
      * {@inheritDoc}
      */
     @Override
-    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL) {
+    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL, List<File> attachments) {
         debug("[sendEmail] {} -> {} Subject: {}", fullFrom, fullTo, subject);
         RestTemplate rTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

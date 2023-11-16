@@ -380,27 +380,29 @@
     </div>
 
     <div th:fragment="file-gallery(generatedFormId, fieldName, label, description, datalistId, addedClass, isDisabled, multipleSelection, entityRelated, allowedContentType, help)" th:class="${addedClass} + ' form-group'">
-        <label th:if="${label != null}" th:for="${fieldName}">
+        <label class="files-upload-label" th:if="${label != null}" th:for="${fieldName}">
             <th:block th:text="${label}" />&nbsp;
             <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
 				<i class="fa fa-question-circle"></i>
 			</span>
         </label>
-        <th:block th:if="${!isDisabled}" th:replace="~{forms::file-upload-base(${generatedFormId}, ${fieldName}, ${label}, ${allowedContentType}, ${multipleSelection}, ${entityRelated}, ${additionalClass}, false)}"/>
-        <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em><br/>
-        <div class="d-flex flex-wrap" th:id="${generatedFormId + '_' + fieldName}">
+        <div th:class="${addedClass} + ' form-group'">
+            <th:block th:if="${!isDisabled}" th:replace="~{forms::file-upload-base(${generatedFormId}, ${fieldName}, ${label}, ${allowedContentType}, ${multipleSelection}, ${entityRelated}, ${additionalClass}, false)}"/>
+            <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em><br/>
+            <div class="d-flex flex-wrap" th:id="${generatedFormId + '_' + fieldName}">
+            </div>
+            <script th:inline="javascript">
+                (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
+                    let selectId = /*[[${generatedFormId + '_' + fieldName}]]*/ '_none_';
+                    let fieldValues = /*[[*{__${ '' + fieldName + '' }__}]]*/ [];
+                    let fieldName = /*[[${ fieldName }]]*/ '';
+                    let multipleSelection = /*[[${ multipleSelection }]]*/ false;
+                    let allowedContentType = /*[[${ allowedContentType }]]*/ '*/*';
+                    let entityRelatedFileGallery = /*[[${entityRelated}]]*/;
+                    app.populateFileGallery(selectId, fieldName, fieldValues, datalistId, allowedContentType, multipleSelection, entityRelatedFileGallery);
+                })();
+            </script>
         </div>
-        <script th:inline="javascript">
-            (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
-                let selectId = /*[[${generatedFormId + '_' + fieldName}]]*/ '_none_';
-                let fieldValues = /*[[*{__${ '' + fieldName + '' }__}]]*/ [];
-                let fieldName = /*[[${ fieldName }]]*/ '';
-                let multipleSelection = /*[[${ multipleSelection }]]*/ false;
-                let allowedContentType = /*[[${ allowedContentType }]]*/ '*/*';
-                let entityRelatedFileGallery = /*[[${entityRelated}]]*/;
-                app.populateFileGallery(selectId, fieldName, fieldValues, datalistId, allowedContentType, multipleSelection, entityRelatedFileGallery);
-            })();
-        </script>
     </div>
 
     <div th:fragment="single-image(generatedFormId, fieldName, fieldLabel, addedClass, isDisabled)" th:class="${addedClass} + ' form-group'"
@@ -494,7 +496,7 @@
                 if(canWrite === 'true'){
                   let textAreaSelector = getSelectorFromId(textAreaId);
                   codemirrorEditors[textAreaSelector] = editor;
-                  $("#controller-endpoints " + textAreaSelector).next(".CodeMirror").find("textarea").on('focus', () => {
+                  $(textAreaSelector).next(".CodeMirror").find("textarea").on('focus', () => {
                      activateEditor(textAreaSelector);
                   })
                 }
@@ -506,7 +508,7 @@
         <div th:replace="~{forms::label-simple(${addedClass}, ${label})}"></div>
         <input th:class="${'form-control ' + addedClass}" th:disabled="${isDisabled}" th:readonly="${isReadonly}"
                th:field="*{__${name}__}" type="hidden" th:id="${name}" th:name="${name}" th:placeholder="${placeholder}"/>
-        <div th:id="'mapid'+${name}" style="height: 500px" th:class="form-control"></div>
+        <div th:id="'mapid'+${name}" style="height: 500px; top: 24px; margin-bottom: 40px;" th:class="form-control"></div>
         <script th:inline="javascript">
             (function(){
                 let mapid = /*[[${ 'mapid' + name + '' }]]*/ '';
@@ -932,15 +934,15 @@
         <script type="text/javascript" src="/vendor/codemirror/addon/search/jump-to-line.js"></script>
         <script type="text/javascript" src="/vendor/codemirror/addon/dialog/dialog.js"></script>
     </th:block>
-    <th:block th:fragment="code-editor-with-autocomplete-prerequisites">
+    <th:block th:fragment="code-editor-with-autocomplete-prerequisites(appType)">
         <script th:inline="javascript">
           if($("#root").length == 0){
             $("body").append('<div id="root" style="height:0px; overflow:hidden;"></div>');
           }
         </script>
-        <script>!function(e){function t(t){for(var n,a,i=t[0],c=t[1],l=t[2],p=0,s=[];p<i.length;p++)a=i[p],Object.prototype.hasOwnProperty.call(o,a)&&o[a]&&s.push(o[a][0]),o[a]=0;for(n in c)Object.prototype.hasOwnProperty.call(c,n)&&(e[n]=c[n]);for(f&&f(t);s.length;)s.shift()();return u.push.apply(u,l||[]),r()}function r(){for(var e,t=0;t<u.length;t++){for(var r=u[t],n=!0,i=1;i<r.length;i++){var c=r[i];0!==o[c]&&(n=!1)}n&&(u.splice(t--,1),e=a(a.s=r[0]))}return e}var n={},o={1:0},u=[];function a(t){if(n[t])return n[t].exports;var r=n[t]={i:t,l:!1,exports:{}};return e[t].call(r.exports,r,r.exports,a),r.l=!0,r.exports}a.e=function(e){var t=[],r=o[e];if(0!==r)if(r)t.push(r[2]);else{var n=new Promise((function(t,n){r=o[e]=[t,n]}));t.push(r[2]=n);var u,i=document.createElement("script");i.charset="utf-8",i.timeout=120,a.nc&&i.setAttribute("nonce",a.nc),i.src=function(e){return a.p+"static/js/"+({}[e]||e)+"."+{3:"614e5d8e"}[e]+".chunk.js"}(e);var c=new Error;u=function(t){i.onerror=i.onload=null,clearTimeout(l);var r=o[e];if(0!==r){if(r){var n=t&&("load"===t.type?"missing":t.type),u=t&&t.target&&t.target.src;c.message="Loading chunk "+e+" failed.\n("+n+": "+u+")",c.name="ChunkLoadError",c.type=n,c.request=u,r[1](c)}o[e]=void 0}};var l=setTimeout((function(){u({type:"timeout",target:i})}),12e4);i.onerror=i.onload=u,document.head.appendChild(i)}return Promise.all(t)},a.m=e,a.c=n,a.d=function(e,t,r){a.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},a.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},a.t=function(e,t){if(1&t&&(e=a(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var r=Object.create(null);if(a.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var n in e)a.d(r,n,function(t){return e[t]}.bind(null,n));return r},a.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return a.d(t,"a",t),t},a.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},a.p="/",a.oe=function(e){throw console.error(e),e};var i=this.webpackJsonpautocomplete=this.webpackJsonpautocomplete||[],c=i.push.bind(i);i.push=t,i=i.slice();for(var l=0;l<i.length;l++)t(i[l]);var f=c;r()}([])</script>
-        <script type="text/javascript" src="/vendor/autocomplete/chunk2.min.js"></script>
-        <script type="text/javascript" src="/vendor/autocomplete/main.min.js"></script>
+        <script type="text/javascript" th:src="${'/vendor/autocomplete/' + appType + '/inline.min.js'}"></script>
+        <script type="text/javascript" th:src="${'/vendor/autocomplete/' + appType + '/chunk2.min.js'}"></script>
+        <script type="text/javascript" th:src="${'/vendor/autocomplete/' + appType + '/main.min.js'}"></script>
         <link href="/vendor/autocomplete/style.css" rel="stylesheet">
         <script th:inline="javascript">
         var autocompleteEditor = null;
@@ -1028,7 +1030,7 @@
         <link href="/vendor/fine-uploader/fine-uploader-gallery.min.css" rel="stylesheet">
         <script src="/vendor/fine-uploader/fine-uploader.min.js"></script>
         <script type="text/template" id="qq-template">
-            <div class="qq-uploader-selector qq-uploader qq-gallery border form-neutral mb-4" style="min-height:auto" th:qq-drop-area-text="#{files.drop}">
+            <div class="qq-uploader-selector qq-uploader qq-gallery border mb-4" style="min-height:auto" th:qq-drop-area-text="#{files.drop}">
                 <div class="qq-total-progress-bar-container-selector qq-total-progress-bar-container">
                     <div role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
                          class="qq-total-progress-bar-selector qq-progress-bar qq-total-progress-bar"></div>
@@ -1107,10 +1109,11 @@
 
 <div th:fragment="color-picker(fieldName, fieldLabel)" th:with="value=*{__${fieldName}__}">
     <label th:for="${fieldName}" th:text="${fieldLabel}"></label>
-    <div class="form-group"><input id="color-picker" class="form-control" type="text" th:name="${fieldName}" th:value="${value == '' || value == null ? '#ffffff' : value}"/></div>
-    <script type="text/javascript">
+    <div class="form-group"><input th:id="${fieldName.replaceAll('[\[\]]', '')}" class="form-control" type="text" th:name="${fieldName}" th:value="${value == '' || value == null ? '#ffffff' : value}"/></div>
+    <script type="text/javascript" th:inline="javascript">
     $(document).ready(function() {
-        var picker = new CP(document.querySelector('#color-picker'));
+        let id = /*[[${fieldName}]]*/;
+        var picker = new CP(document.querySelector('#'+id.replace(/[\[\]']+/g, '')));
         picker.on('change', function(r, g, b, a) {
             updateStyles.apply(this, [r, g, b, a]);
             updateValue(this, this.color(r,g,b,a));

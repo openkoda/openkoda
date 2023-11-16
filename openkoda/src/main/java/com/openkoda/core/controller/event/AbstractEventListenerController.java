@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -33,14 +33,13 @@ import com.openkoda.dto.payment.InvoiceDto;
 import com.openkoda.dto.payment.PaymentDto;
 import com.openkoda.dto.payment.PlanDto;
 import com.openkoda.dto.payment.SubscriptionDto;
-import com.openkoda.dto.system.CmsDto;
+import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
 import com.openkoda.dto.user.BasicUser;
 import com.openkoda.dto.user.UserRoleDto;
 import com.openkoda.form.EventListenerForm;
 import com.openkoda.form.FrontendMappingDefinitions;
 import com.openkoda.form.SendEventForm;
-import com.openkoda.model.Privilege;
 import com.openkoda.model.event.Event;
 import com.openkoda.model.event.EventListenerEntry;
 import org.apache.commons.lang3.StringUtils;
@@ -79,8 +78,7 @@ public class AbstractEventListenerController extends ComponentProvider implement
             Pageable eventListenerPageable) {
         debug("[findListenersFlow]");
         return Flow.init()
-                .thenSet(eventListenerPage, a -> repositories.secure.eventListener.search(eventListenerSearchTerm, eventListenerSpecification,
-                        Privilege.canReadBackend, eventListenerPageable))
+                .thenSet(eventListenerPage, a -> repositories.secure.eventListener.search(eventListenerSearchTerm, null, eventListenerSpecification, eventListenerPageable))
                 .execute();
     }
 
@@ -230,7 +228,7 @@ public class AbstractEventListenerController extends ComponentProvider implement
             case "com.openkoda.dto.payment.SubscriptionDto":
                 return new SendEventForm<>(new SubscriptionDto(), FrontendMappingDefinitions.sendEventSubscriptionDto, event.getEventString());
             case "com.openkoda.dto.system.CmsDto":
-                return new SendEventForm<>(new CmsDto(), FrontendMappingDefinitions.sendEventFrontendResourceDto, event.getEventString());
+                return new SendEventForm<>(new FrontendResourceDto(), FrontendMappingDefinitions.sendEventFrontendResourceDto, event.getEventString());
             case "com.openkoda.dto.system.ScheduledSchedulerDto":
                 return new SendEventForm<>(new ScheduledSchedulerDto(), FrontendMappingDefinitions.sendEventScheduledSchedulerDto, event.getEventString());
             case "com.openkoda.dto.user.BasicUser":

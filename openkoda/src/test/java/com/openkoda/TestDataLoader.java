@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -30,6 +30,7 @@ import com.openkoda.model.*;
 import com.openkoda.model.common.Audit;
 import com.openkoda.model.event.EventListenerEntry;
 import com.openkoda.model.event.Scheduler;
+import com.openkoda.service.export.YamlImportService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,8 +57,9 @@ public class TestDataLoader extends BaseDatabaseInitializer {
 
     public TestDataLoader(
             @Autowired QueryExecutor queryExecutor,
-            @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts) {
-        super(queryExecutor, initializationScripts);
+            @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
+            @Autowired YamlImportService yamlImportService) {
+        super(queryExecutor, initializationScripts, yamlImportService);
     }
 
     @Transactional

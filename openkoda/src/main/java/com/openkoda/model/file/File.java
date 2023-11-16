@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -136,6 +136,13 @@ public class File extends OpenkodaEntity {
         this.storageType = storageType;
     }
 
+    public File(String filename, String contentType, FileService.StorageType storageType) {
+        super(null);
+        this.filename = filename;
+        this.contentType = contentType;
+        this.storageType = storageType;
+    }
+
     /**
      * <p>Constructor for File.</p>
      *
@@ -207,6 +214,10 @@ public class File extends OpenkodaEntity {
 
     public FileDto toFileDto() {
         return toFileDto(this);
+    }
+
+    public String getUrl() {
+        return toFileDto().downloadUrl;
     }
 
     public boolean isImage() {

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,7 +23,8 @@ package com.openkoda.repository;
 
 import com.openkoda.core.helper.ApplicationContextProvider;
 import com.openkoda.core.job.JobsScheduler;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
+import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
@@ -48,8 +49,8 @@ import static com.openkoda.model.common.ModelConstants.UPDATED_ON;
 public class SearchableRepositories {
 
 
-    private static SearchableFunctionalRepositoryWithLongId<?>[] searchableRepositories = {};
-    private static SearchableFunctionalRepositoryWithLongId<?>[] globalSearchableRepositories = {};
+    private static SecureRepository<?>[] searchableRepositories = {};
+    private static SecureRepository<?>[] globalSearchableRepositories = {};
 
     private static boolean discoveryCompleted = false;
 
@@ -68,14 +69,14 @@ public class SearchableRepositories {
         }
         ApplicationContext c = ApplicationContextProvider.getContext();
 
-        Map<String, SearchableFunctionalRepositoryWithLongId> searchableRepositoryBeans =
-                c.getBeansOfType(SearchableFunctionalRepositoryWithLongId.class);
+        Map<String, SecureRepository> searchableRepositoryBeans =
+                c.getBeansOfType(SecureRepository.class);
 
         int searchableRepositoriesCount = 0;
         int globalSearchableRepositoriesCount = 0;
 
         //Count repositories
-        for (Map.Entry<String, SearchableFunctionalRepositoryWithLongId> e : searchableRepositoryBeans.entrySet() ) {
+        for (Map.Entry<String, SecureRepository> e : searchableRepositoryBeans.entrySet() ) {
             //skipping GlobalSearchRepository
             if ("globalSearchRepository".equals(e.getKey())) {
                 continue;
@@ -90,13 +91,13 @@ public class SearchableRepositories {
                 globalSearchableRepositoriesCount++;
             }
         }
-        searchableRepositories = new SearchableFunctionalRepositoryWithLongId[searchableRepositoriesCount];
+        searchableRepositories = new SecureRepository[searchableRepositoriesCount];
         searchIndexUpdates = new String[searchableRepositoriesCount];
-        globalSearchableRepositories = new SearchableFunctionalRepositoryWithLongId[globalSearchableRepositoriesCount];
+        globalSearchableRepositories = new SecureRepository[globalSearchableRepositoriesCount];
 
         int sk = 0;
         int gsk = 0;
-        for (Map.Entry<String, SearchableFunctionalRepositoryWithLongId> e : searchableRepositoryBeans.entrySet() ) {
+        for (Map.Entry<String, SecureRepository> e : searchableRepositoryBeans.entrySet() ) {
             //skipping GlobalSearchRepository
             if ("globalSearchRepository".equals(e.getKey())) {
                 continue;
@@ -123,25 +124,21 @@ public class SearchableRepositories {
     }
 
 
-    public static SearchableFunctionalRepositoryWithLongId<?>[] getSearchableRepositories() {
+    public static ScopedSecureRepository<?>[] getSearchableRepositories() {
         return searchableRepositories;
     }
 
-    public static SearchableRepositoryMetadata getGlobalSearchableRepositoryAnnotation(
-            SearchableFunctionalRepositoryWithLongId r) {
-        Class<?>[] interfaces = r.getClass().getInterfaces();
-        if (interfaces == null || interfaces.length == 0) { return null; }
-        SearchableRepositoryMetadata gsa = interfaces[0].getAnnotation(SearchableRepositoryMetadata.class);
-        return gsa;
+    public static SearchableRepositoryMetadata getGlobalSearchableRepositoryAnnotation(ScopedSecureRepository r) {
+        return r.getSearchableRepositoryMetadata();
     }
 
-    private static final Map<String, SearchableFunctionalRepositoryWithLongId> searchableRepositoryByEntityKey = new HashMap<>();
+    private static final Map<String, SecureRepository> searchableRepositoryByEntityKey = new HashMap<>();
     private static final Map<String, SearchableRepositoryMetadata> searchableRepositoryMetadataByEntityKey = new HashMap<>();
     private static final Map<Class, SearchableRepositoryMetadata> searchableRepositoryMetadataByEntityClass = new HashMap<>();
     private static final Map<String, SearchableRepositoryMetadata> searchableOrganizationRelatedRepositoryMetadataByEntityKey = new HashMap<>();
     private static final Map<Class, SearchableRepositoryMetadata> searchableOrganizationRelatedRepositoryMetadataByEntityClass = new HashMap<>();
-    public static SearchableFunctionalRepositoryWithLongId getSearchableRepository(String entityKey) {
-        return searchableRepositoryByEntityKey.get(entityKey);
+    public static ScopedSecureRepository getSearchableRepository(String entityKey, HasSecurityRules.SecurityScope scope) {
+        return new SecureRepositoryWrapper(searchableRepositoryByEntityKey.get(entityKey), scope);
     }
     public static Class<SearchableEntity> getSearchableRepositoryEntityClass(String entityKey) {
         SearchableRepositoryMetadata gsa = searchableRepositoryMetadataByEntityKey.get(entityKey);

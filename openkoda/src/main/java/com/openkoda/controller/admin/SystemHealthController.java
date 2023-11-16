@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.controller.admin;
 
+import com.openkoda.App;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.FrontendResource;
@@ -71,9 +72,16 @@ public class SystemHealthController extends AbstractSystemHealthController imple
     @GetMapping(_DASHBOARD)
     public Object adminDashboard(@Qualifier("obj") Pageable pageable) {
         return Flow.init()
-                .thenSet(frontendResourcePage, a -> repositories.unsecure.frontendResource.findByType(FrontendResource.Type.UI_COMPONENT,pageable))
+                .thenSet(frontendResourcePage, a -> repositories.unsecure.frontendResource.findByResourceType(FrontendResource.ResourceType.UI_COMPONENT,pageable))
                 .execute()
                 .mav("admin-dashboard");
+
+    }
+    @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
+    @GetMapping("/restart")
+    public Object restart() {
+        App.restart();
+        return null;
 
     }
 }

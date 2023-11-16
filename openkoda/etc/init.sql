@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS file_reference (
     sequence integer NOT NULL,
     field varchar NOT NULL default '',
     PRIMARY KEY (organization_related_entity_id, sequence, field)
-)
+);

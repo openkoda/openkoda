@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.multitenancy;
 
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
+import com.openkoda.model.FrontendResource;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,7 @@ import org.springframework.stereotype.Component;
 public class TenantResolver implements CurrentTenantIdentifierResolver, LoggingComponentWithRequestId {
 
     public static final TenantedResource nonExistingTenantedResource =
-            new TenantedResource(null);
+            new TenantedResource(null, FrontendResource.AccessLevel.PUBLIC);
 
     /**
      * TenantedResource keeps attributes that should determine which datasource and db schema should be used to handle
@@ -74,17 +75,20 @@ public class TenantResolver implements CurrentTenantIdentifierResolver, LoggingC
          */
         public final String method;
 
+        public final FrontendResource.AccessLevel accessLevel;
+
         /**
          * Datasource index, a hint Datasource allocation strategy that this datasource should be selected.
          */
         public final int preselectedDatasourceIndex;
 
-        public TenantedResource(Long organizationId, String host, String entityKey, String method) {
+        public TenantedResource(Long organizationId, String host, String entityKey, String method, FrontendResource.AccessLevel accessLevel) {
             this.organizationId = organizationId;
             this.host = host;
             this.entityKey = entityKey;
             this.method = method;
             this.preselectedDatasourceIndex = -1;
+            this.accessLevel = accessLevel;
         }
 
         public TenantedResource(Long organizationId) {
@@ -93,6 +97,16 @@ public class TenantResolver implements CurrentTenantIdentifierResolver, LoggingC
             this.entityKey = null;
             this.method = null;
             this.preselectedDatasourceIndex = -1;
+            this.accessLevel = FrontendResource.AccessLevel.PUBLIC;
+        }
+
+        public TenantedResource(Long organizationId, FrontendResource.AccessLevel accessLevel) {
+            this.organizationId = organizationId;
+            this.host = null;
+            this.entityKey = null;
+            this.method = null;
+            this.preselectedDatasourceIndex = -1;
+            this.accessLevel = accessLevel;
         }
 
         public TenantedResource(int preselectedDatasourceIndex) {
@@ -101,6 +115,7 @@ public class TenantResolver implements CurrentTenantIdentifierResolver, LoggingC
             this.entityKey = null;
             this.method = null;
             this.preselectedDatasourceIndex = preselectedDatasourceIndex;
+            this.accessLevel = FrontendResource.AccessLevel.PUBLIC;
         }
 
         @Override
@@ -161,4 +176,5 @@ public class TenantResolver implements CurrentTenantIdentifierResolver, LoggingC
     public boolean validateExistingCurrentSessions() {
         return false;
     }
+
 }

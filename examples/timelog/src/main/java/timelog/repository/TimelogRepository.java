@@ -1,7 +1,7 @@
 package timelog.repository;
 
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.repository.SecureRepository;
 import org.springframework.stereotype.Repository;
 import timelog.model.Assignment;
 import timelog.model.Timelog;
@@ -14,14 +14,17 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static timelog.TimelogApp.TIMELOG;
 
 @Repository
 @SearchableRepositoryMetadata(
     entityClass = Timelog.class,
-    entityKey = "timelog"
+    entityKey = TIMELOG
 )
-public interface TimelogRepository extends SearchableFunctionalRepositoryWithLongId<Timelog> {
+public interface TimelogRepository extends SecureRepository<Timelog> {
 
     record Day(List<Timelog> logs, Integer sum, LocalDate date, Boolean isWeekend) {};
     record Week(List<Day> days, Integer sum, LocalDate date) {};
@@ -86,6 +89,21 @@ public interface TimelogRepository extends SearchableFunctionalRepositoryWithLon
             monthSum += weekSum;
         }
         return new Month(weeks, cwAssigmentSums, monthSum, creativeWorkSum, dayStart);
+    }
+
+    default String convertToAssignmentsDescriptionString(Month month){
+
+        return month.cwAssigmentSums().entrySet().stream()
+                .map(entry -> entry.getKey().getDescription() + ": " + convertToHoursString(entry.getValue()))
+                .collect(Collectors.joining(", \n"));
+    }
+
+    default Integer getMonthFromSummary(Month month){
+        return month.date.getMonthValue();
+    }
+
+    default Integer getYearFromSummary(Month month){
+        return month.date.getYear();
     }
 
     private boolean isWeekend(LocalDate localDate) {

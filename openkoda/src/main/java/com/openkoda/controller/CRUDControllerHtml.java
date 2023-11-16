@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -34,6 +34,7 @@ import jakarta.validation.Valid;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,9 @@ import static com.openkoda.core.controller.generic.AbstractController._HTML;
 @RequestMapping({_HTML_ORGANIZATION_ORGANIZATIONID + "/{obj}", _HTML + "/{obj}"})
 public class CRUDControllerHtml extends AbstractController implements HasSecurityRules {
 
+    @Value("${default.layout:main}")
+    String defaultLayoutName;
+
     /** GET request that displays list of instances of entity {@link CRUDControllerConfiguration#getEntityClass()} associated with a generic controller registered under {@param objKey}.
      * The list is restricted to the result of search with the search term {@param search}
      *
@@ -72,13 +76,15 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name=ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey,
             @Qualifier("obj") Pageable aPageable,
-            @RequestParam(required = false, defaultValue = "", name = "obj_search") String search) {
+            @RequestParam(required = false, defaultValue = "", name = "obj_search") String search
+            ) {
         debug("[getAll]");
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
         PrivilegeBase privilege = conf.getGetAllPrivilege();
         if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         return Flow.init(componentProvider)
                 .thenSet((PageAttr<Page<SearchableOrganizationRelatedEntity>>)conf.getEntityPageAttribute(), a -> (Page<SearchableOrganizationRelatedEntity>) conf.getSecureRepository().search(search, organizationId, conf.getAdditionalSpecification(), aPageable))
                 .thenSet(genericTableViewList, a -> ReflectionBasedEntityForm.calculateFieldsValuesWithReadPrivileges(conf.getFrontendMappingDefinition(), a.result, conf.getTableFormFieldNames()))

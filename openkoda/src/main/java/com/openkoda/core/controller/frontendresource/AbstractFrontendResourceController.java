@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -32,10 +32,11 @@ import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.helper.JsonHelper;
+import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.security.UserProvider;
 import com.openkoda.core.service.FrontendResourceService;
-import com.openkoda.dto.system.CmsDto;
+import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.form.FrontendResourceForm;
 import com.openkoda.form.FrontendResourcePageForm;
 import com.openkoda.form.RegisterUserForm;
@@ -46,10 +47,13 @@ import com.openkoda.repository.FrontendResourceRepository;
 import com.openkoda.uicomponent.JsFlowRunner;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -58,6 +62,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
@@ -156,7 +161,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
                 .then(a -> repositories.unsecure.frontendResource.findOne(frontendResourceId))
                 .then(a -> services.frontendResource.clear(a.result))
                 .then(a -> {
-                    a.result.setContent(services.frontendResource.getContentOrDefault(a.result.getType(), a.result.getName()));
+                    a.result.setContent(services.frontendResource.getContentOrDefault(a.result.getType(), a.result.getName(), a.result.getAccessLevel(), a.result.getOrganizationId()));
                     return a.result;
                 })
                 .then(a -> repositories.unsecure.frontendResource.save(a.result))
@@ -175,7 +180,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
         return Flow.init()
                 .then(a -> repositories.unsecure.frontendResource.findOne(frontendResourceId))
                 .then(a -> {
-                    a.result.setDraftContent(services.frontendResource.getContentOrDefault(a.result.getType(), a.result.getName()));
+                    a.result.setDraftContent(services.frontendResource.getContentOrDefault(a.result.getType(), a.result.getName(), a.result.getAccessLevel(), a.result.getOrganizationId()));
                     return a.result;
                 })
                 .then(a -> repositories.unsecure.frontendResource.save(a.result))
@@ -193,8 +198,8 @@ public class AbstractFrontendResourceController extends AbstractController imple
     protected PageModelMap createFrontendResource(FrontendResourceForm frontendResourceFormData, BindingResult br) {
         debug("[createFrontendResource]");
         return Flow.init(frontendResourceForm, frontendResourceFormData)
-                .then(a -> services.frontendResource.checkNameExists(((CmsDto) frontendResourceFormData.dto).name, br))
-                .then(a -> services.frontendResource.validateContent(((CmsDto) frontendResourceFormData.dto).content, br, "dto.content"))
+                .then(a -> services.frontendResource.checkNameExists(((FrontendResourceDto) frontendResourceFormData.dto).name, br))
+                .then(a -> services.frontendResource.validateContent(((FrontendResourceDto) frontendResourceFormData.dto).content, br, "dto.content"))
                 .then(a -> services.validation.validateAndPopulateToEntity(frontendResourceFormData, br, new FrontendResource()))
                 .then(a -> repositories.unsecure.frontendResource.save(((FrontendResource)a.result)))
                 .thenSet(frontendResourceForm, a -> new FrontendResourceForm())
@@ -217,7 +222,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
 
     /**
      * Finds the requested {@link FrontendResource} and prepares model for its display.
-     * For {@link FrontendResource} with {@link FrontendResource.Type} equal to {@link FrontendResource.Type.UI_COMPONENT} it processes
+     * For {@link FrontendResource} with {@link FrontendResource.ResourceType} equal to {@link FrontendResource.ResourceType.UI_COMPONENT} it processes
      * any {@link ControllerEndpoint} assigned to this entity which match the subPath and the {@link com.openkoda.model.ControllerEndpoint.HttpMethod} requested.
      * See also {@link com.openkoda.repository.FrontendResourceRepository}, {@link com.openkoda.repository.ControllerEndpointRepository}
      *
@@ -225,7 +230,6 @@ public class AbstractFrontendResourceController extends AbstractController imple
      * @param frontendResourcePath url path of the {@link FrontendResource}
      * @param subPath              sub path for the resource being invoked
      * @param httpServletRequest   {@link HttpServletRequest}
-     * @param addRegisterForm      should model containt the {@link RegisterUserForm} object
      * @param isPublic             is the requested resource public
      * @param preview              is this triggered in the preview mode
      * @param requestParams        params retrieved from {@link HttpServletRequest}
@@ -234,42 +238,47 @@ public class AbstractFrontendResourceController extends AbstractController imple
      */
     protected Object invokeFrontendResourceEntry(Long organizationId,
                                                  String frontendResourcePath,
+                                                 Long frontendResourceId,
                                                  String subPath,
                                                  HttpServletRequest httpServletRequest,
-                                                 boolean addRegisterForm,
-                                                 boolean isPublic,
+                                                 HttpServletResponse httpServletResponse,
                                                  boolean preview,
                                                  Map<String,String> requestParams,
                                                  AbstractOrganizationRelatedEntityForm form) {
         debug("[invokeFrontendResourceEntry] FrontendResourcePath: {}", frontendResourcePath);
         FrontendResourceRepository fr = repositories.unsecure.frontendResource;
         FrontendResource frontendResource = null;
-        if (isPublic) {
-            frontendResource = fr.findByUrlPathAndIsPublic(frontendResourcePath, isPublic);
-        } else if ( organizationId != null ) {
-            frontendResource = fr.findNonPublicByUrlPathAndOrganizationId(frontendResourcePath, organizationId);
-            if (frontendResource == null) {
-                frontendResource = fr.findNonPublicByUrlPathAndOrganizationIdIsNull(frontendResourcePath);
-            }
-        } else {
-            frontendResource = fr.findNonPublicByUrlPathAndOrganizationIdIsNull(frontendResourcePath);
+        Page<FrontendResource> frontendResources = null;
+        Pageable pageable = PageRequest.of(0,1, Sort.Direction.DESC, "organizationId");
+        TenantResolver.TenantedResource tenantedResource = TenantResolver.getTenantedResource();
+
+
+        frontendResources = fr.findByUrlPathAndAccessLevelAndOrganizationId(
+                frontendResourcePath,
+                frontendResourceId,
+                tenantedResource.accessLevel,
+                organizationId,
+                pageable);
+
+        if(!frontendResources.isEmpty()) {
+            frontendResource = frontendResources.getContent().get(0);
         }
 
         ModelAndView mav = new ModelAndView();
-        if(addRegisterForm) {
+        if(REGISTER.equals(frontendResourcePath)) {
             mav.addObject("registerForm", new RegisterUserForm());
         }
         if (frontendResource != null) {
             mav.setViewName(FrontendResourceService.frontendResourceTemplateNamePrefix + frontendResource.getName());
-            if(frontendResource.getType().equals(FrontendResource.Type.UI_COMPONENT)) {
+            if(frontendResource.getResourceType().equals(FrontendResource.ResourceType.UI_COMPONENT)) {
                 ControllerEndpoint.HttpMethod httpMethod = ControllerEndpoint.HttpMethod.valueOf(httpServletRequest.getMethod());
                 ControllerEndpoint controllerEndpoint = repositories.unsecure.controllerEndpoint.findByFrontendResourceIdAndSubPathAndHttpMethod(
                     frontendResource.getId(),
                     subPath,
                     httpMethod);
                 if(controllerEndpoint != null) {
-                    return evaluateControllerEndpoint(organizationId, frontendResourcePath, subPath, httpServletRequest,
-                            isPublic, mav, frontendResource, httpMethod, controllerEndpoint, preview, requestParams, form);
+                    return evaluateControllerEndpoint(organizationId, frontendResourcePath, subPath, httpServletRequest, httpServletResponse,
+                            mav, frontendResource, httpMethod, controllerEndpoint, preview, requestParams, form);
                 }
             }
         } else {
@@ -287,7 +296,6 @@ public class AbstractFrontendResourceController extends AbstractController imple
      * @param frontendResourcePath url path of the {@link FrontendResource}
      * @param subPath sub path for the resource being invoked
      * @param httpServletRequest {@link HttpServletRequest}
-     * @param isPublic is the requested resource public
      * @param mav {@link ModelAndView}
      * @param frontendResource {@link FrontendResource}
      * @param httpMethod {@link ControllerEndpoint.HttpMethod}
@@ -300,7 +308,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
                                               String frontendResourcePath,
                                               String subPath,
                                               HttpServletRequest httpServletRequest,
-                                              boolean isPublic,
+                                              HttpServletResponse httpServletResponse,
                                               ModelAndView mav,
                                               FrontendResource frontendResource,
                                               ControllerEndpoint.HttpMethod httpMethod,
@@ -308,43 +316,49 @@ public class AbstractFrontendResourceController extends AbstractController imple
                                               boolean preview,
                                               Map<String,String> requestParams,
                                               AbstractOrganizationRelatedEntityForm form) {
-        if(controllerEndpoint.getResponseType().equals(ControllerEndpoint.ResponseType.HTML)){
+        switch (controllerEndpoint.getResponseType()) {
+            case HTML -> {
 //                        display frontend resource normally and run if available
-            debug("[determineFrontendResourceEntry] Run ControllerEndpoint Flow Id {} for HTTP Method {}",
-                    controllerEndpoint.getId(), httpServletRequest.getMethod());
-            long userId = UserProvider.getUserIdOrNotExistingId();
-            PageModelMap pageModelMap = preview
-                    ? jsFlowRunner.runPreviewFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form)
-                    : jsFlowRunner.runLiveFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form);
-            mav.getModelMap().putAll(pageModelMap);
-            boolean isError = Boolean.TRUE.equals(pageModelMap.get(BasePageAttributes.isError));
-            if(pageModelMap.has(redirectUrl)) {
-                mav.setViewName("generic-forms::go-to(url='" + pageModelMap.get(redirectUrl) + "')");
-            } else {
-               if (form == null) {
-                   if (isError) {
-                       mav.setViewName(WEBENDPOINTS + "-" + SETTINGS + "::" + PREVIEW + "-error");
-                   }
-               } else {
-                   mav.getModelMap().put("organizationRelatedForm", form);
-                   if (isError) {
-                       mav.setViewName("generic-settings-entity-form::generic-settings-form-error");
-                   } else {
-                       mav.setViewName("generic-settings-entity-form::generic-settings-form-reload");
-                   }
-               }
+                debug("[evaluateControllerEndpoint] Run ControllerEndpoint Flow Id {} for HTTP Method {}",
+                        controllerEndpoint.getId(), httpServletRequest.getMethod());
+                long userId = UserProvider.getUserIdOrNotExistingId();
+                PageModelMap pageModelMap = preview
+                        ? jsFlowRunner.runPreviewFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form)
+                        : jsFlowRunner.runLiveFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form);
+                mav.getModelMap().putAll(pageModelMap);
+                boolean isError = Boolean.TRUE.equals(pageModelMap.get(BasePageAttributes.isError));
+                if (pageModelMap.has(reload) && !isError) {
+                    mav.setViewName("generic-forms::reload");
+                } else if (pageModelMap.has(redirectUrl) && !isError) {
+                    mav.setViewName("generic-forms::go-to(url='" + pageModelMap.get(redirectUrl) + "')");
+                } else {
+                    if (form == null) {
+                        if (isError) {
+                            mav.setViewName("webendpoint-" + SETTINGS + "::" + PREVIEW + "-error");
+                        }
+                    } else {
+                        mav.getModelMap().put("organizationRelatedForm", form);
+                        if (isError) {
+                            mav.setViewName("generic-settings-entity-form::generic-settings-form-error");
+                        } else {
+                            mav.setViewName("generic-settings-entity-form::generic-settings-form-reload");
+                        }
+                    }
+                }
+                return mav;
             }
-            return mav;
-        } else {
-//                        get controller endpoint result
-            PageModelMap pageModelMap = getControllerEndpointResult(organizationId, frontendResourcePath, subPath, isPublic, frontendResource, controllerEndpoint, httpMethod, preview, requestParams, form);
-            return new ResponseEntity(pageModelMap.get(PageAttributes.controllerEndpointResult), pageModelMap.get(httpHeaders), HttpStatus.OK);
+            default -> {
+                // get controller endpoint result
+                PageModelMap pageModelMap = getControllerEndpointResult(organizationId, frontendResourcePath, subPath, frontendResource, controllerEndpoint, httpMethod, preview, requestParams, form);
+                Object body = pageModelMap.get(PageAttributes.controllerEndpointResult);
+                return new ResponseEntity(body, pageModelMap.get(httpHeaders), HttpStatus.OK);
+            }
         }
     }
 
 
     /**
-     * Retrieves {@link FrontendResource} of type {@link FrontendResource.Type.PAGE} with the given ID and prepares the {@link FrontendResourcePageForm}.
+     * Retrieves {@link FrontendResource} of type {@link FrontendResource.Type}.HTML with the given ID and prepares the {@link FrontendResourcePageForm}.
      * See also {@link FrontendResourceService}
      *
      * @param organizationId
@@ -362,7 +376,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
     }
 
     /**
-     * Validates the data of a {@link FrontendResource} of type {@link FrontendResource.Type.PAGE} and updates the record in the database having the given ID
+     * Validates the data of a {@link FrontendResource} of type {@link FrontendResource.Type}.HTML and updates the record in the database having the given ID
      * See also {@link FrontendResourceService}, {@link com.openkoda.repository.FrontendResourceRepository}, {@link com.openkoda.core.service.ValidationService}
      *
      * @param frontendResourceForm
@@ -390,7 +404,6 @@ public class AbstractFrontendResourceController extends AbstractController imple
      * @param organizationId
      * @param frontendResourceUrl url path of the {@link FrontendResource}
      * @param subPath sub path for the resource being invoked
-     * @param isPublic is the requested resource public
      * @param frontendResource {@link FrontendResource}
      * @param cEndpoint {@link ControllerEndpoint}
      * @param httpMethod {@link ControllerEndpoint.HttpMethod}
@@ -401,7 +414,6 @@ public class AbstractFrontendResourceController extends AbstractController imple
     protected PageModelMap getControllerEndpointResult(Long organizationId,
                                                        String frontendResourceUrl,
                                                        String subPath,
-                                                       boolean isPublic,
                                                        FrontendResource frontendResource,
                                                        ControllerEndpoint cEndpoint,
                                                        ControllerEndpoint.HttpMethod httpMethod,
@@ -418,11 +430,15 @@ public class AbstractFrontendResourceController extends AbstractController imple
                 .thenSet(controllerEndpointResult, a -> {
                     switch (cEndpoint.getResponseType()) {
                         case MODEL_AS_JSON -> {
-                            return getModelAsJsonResult(a.model.get(uiComponentModel), a.model.get(httpHeaders), cEndpoint);
+                            return getModelAsJsonResult(a.model.get(uiComponentModel), a.result, cEndpoint);
                         }
                         case FILE -> {
-                            InputStreamResource file = getFileResult(a.model.get(uiComponentModel), a.model.get(httpHeaders), cEndpoint);
+                            InputStreamResource file = getFileResult(a.model.get(uiComponentModel), a.result, cEndpoint);
                             if (file != null) return file;
+                        }
+                        case STREAM -> {
+                            InputStream stream = (InputStream) a.model.get(uiComponentModel).get(cEndpoint.getPageAttributesNames()[0]);
+                            return new InputStreamResource(stream);
                         }
                     }
                     return null;

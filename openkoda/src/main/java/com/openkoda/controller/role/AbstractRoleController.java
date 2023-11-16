@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,7 +26,6 @@ import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.form.RoleForm;
-import com.openkoda.model.Privilege;
 import com.openkoda.model.Role;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -52,8 +51,7 @@ public class AbstractRoleController extends AbstractController {
             Pageable aPageable) {
         debug("[findRolesFlow] search {}", aSearchTerm);
         return Flow.init()
-                .thenSet(rolePage, a -> repositories.secure.role.search(aSearchTerm, aSpecification, Privilege.canReadBackend,
-                        aPageable))
+                .thenSet(rolePage, a -> repositories.secure.role.search(aSearchTerm, null, aSpecification, aPageable))
                 .execute();
     }
 
@@ -82,7 +80,7 @@ public class AbstractRoleController extends AbstractController {
     }
 
     @Transactional
-    protected PageModelMap deleteRole(long roleId) {
+    public PageModelMap deleteRole(long roleId) {
         debug("[deleteRole] roleId {}", roleId);
         return Flow.init()
                 .then(a -> repositories.unsecure.userRole.deleteUserRoleByRoleId(roleId))

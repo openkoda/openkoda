@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,6 +23,7 @@ package com.openkoda.core.service.event;
 
 import com.hazelcast.topic.Message;
 import com.hazelcast.topic.MessageListener;
+import com.openkoda.core.service.form.FormService;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import jakarta.inject.Inject;
 import org.springframework.context.annotation.Lazy;
@@ -42,6 +43,9 @@ public class ClusterEventListenerService implements MessageListener<ClusterEvent
     @Inject @Lazy
     private EventListenerService eventListenerService;
 
+    @Inject @Lazy
+    private FormService formService;
+
     @Override
     //TODO Rule 2.1: public method must not return void - it's implementation of an interface so can't change the signature of the method
     public void onMessage(Message<ClusterEvent> message) {
@@ -54,6 +58,9 @@ public class ClusterEventListenerService implements MessageListener<ClusterEvent
             case EVENT_LISTENER_ADD: eventListenerService.loadFromDb(m.id); break;
             case EVENT_LISTENER_REMOVE: eventListenerService.unregisterEventListener(m.id); break;
             case EVENT_LISTENER_RELOAD: eventListenerService.removeAndLoadFromDb(m.id); break;
+            case FORM_ADD: formService.addForm(m.id); break;
+            case FORM_RELOAD: formService.reloadForm(m.id); break;
+            case FORM_REMOVE: formService.removeForm(m.id); break;
         }
 
     }

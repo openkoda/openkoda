@@ -40,12 +40,12 @@ $(document).ready(function() {
             function(){ elemsValid[i] = f(); checkValidity(); });
     }
 
-    if(registerAttemptEmail) {
+    if(typeof registerAttemptEmail != 'undefined') {
         $('#email').val(registerAttemptEmail);
         $('#email').trigger("change");
     }
 
-    if(userExists){
+    if(typeof userExists != 'undefined'){
         for (var id in dict)
             if(id != "password" && id != "confirmPassword")
                 $('#' + id).trigger("change");

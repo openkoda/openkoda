@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -126,7 +126,8 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
                            String lastName,
                            String email,
                            Tuple2<String /* roleName */, Long /* orgId */>... orgRoles) {
-        return createUser(firstName, lastName, email, true, null, orgRoles);
+        String[] globalRoles = {roleGlobalUser};
+        return createUser(firstName, lastName, email, true, globalRoles, orgRoles);
     }
 
     public User createUser(String firstName,
@@ -209,8 +210,7 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
         PageModelMap model = new PageModelMap();
 
         if (user == null) {
-            user = createUser(userForm.dto.firstName, userForm.dto.lastName, userForm.dto.email, Tuples.of(userForm.dto.roleName,
-                    orgId));
+            user = createUser(userForm.dto.firstName, userForm.dto.lastName, userForm.dto.email, Tuples.of(userForm.dto.roleName, orgId));
             user.setLoginAndPassword(user.getEmail(), RandomStringUtils.randomAlphanumeric(initialPasswordLength), false);
             repositories.unsecure.loginAndPassword.save(user.getLoginAndPassword());
             user = repositories.unsecure.user.save(user);
@@ -257,30 +257,42 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
     }
 
     public User registerUserOrReturnExisting(RegisterUserForm registerUserForm) {
-        return registerUserOrReturnExisting(registerUserForm, null, "").getT1();
+        return registerUserOrReturnExisting(registerUserForm, null, "", true).getT1();
     }
 
-    public Tuple2<User, Boolean> registerUserOrReturnExisting(RegisterUserForm registerUserForm, Cookie[] cookies, String languagePrefix) {
+    public User registerUserOrReturnExisting(RegisterUserForm registerUserForm, boolean asSystemUser) {
+        return registerUserOrReturnExisting(registerUserForm, null, "", asSystemUser).getT1();
+    }
+
+    public Tuple2<User, Boolean> registerUserOrReturnExisting(RegisterUserForm registerUserForm, Cookie[] cookies, String languagePrefix, boolean asSystemUser) {
         debug("[registerUserOrReturnExisting]");
         try {
             User existingUser = repositories.unsecure.user.findByEmailLowercase(registerUserForm.getLogin());
             boolean userAlreadyExists = existingUser != null;
             if (!userAlreadyExists) {
 
+                List<String> globalRoles = new ArrayList<>();
                 //user with this email does not exist so create a brand new one with new organization
-                UserProvider.setCronJobAuthentication();
+                if (asSystemUser) {
+                    UserProvider.setCronJobAuthentication();
+                    globalRoles = Collections.singletonList(roleGlobalUser);
+                }
                 Organization organization = createOrganizationOrAssignToDefault(registerUserForm);
-                User user = registerUserWithStrategy(registerUserForm, cookies, organization);
+                User user = registerUserWithStrategy(registerUserForm, cookies, organization, globalRoles.toArray(String[]::new));
                 repositories.unsecure.loginAndPassword.save(user.getLoginAndPassword());
                 existingUser = repositories.unsecure.user.save(user);
-                sendAccountVerificationEmail(existingUser, languagePrefix);
+                if (asSystemUser) {
+                    sendAccountVerificationEmail(existingUser, languagePrefix);
+                }
                 debug("[registerUserOrReturnExisting] new user with id {} registered", user.getId());
             }
 
             return Tuples.of(existingUser, userAlreadyExists);
 
         } finally {
-            UserProvider.clearAuthentication();
+            if (asSystemUser) {
+                UserProvider.clearAuthentication();
+            }
         }
     }
 
@@ -339,9 +351,8 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
         return repositories.unsecure.organization.findOne(defaultOrgId);
     }
 
-    private User registerUserWithStrategy(RegisterUserForm registerUserForm, Cookie[] cookies, Organization organization) {
+    private User registerUserWithStrategy(RegisterUserForm registerUserForm, Cookie[] cookies, Organization organization, String[] globalRoles) {
         User user;
-        String[] globalRoles = {roleGlobalUser};
         if (organization == null) {
             if (canCreateUserWithoutOrg) {
                 user = createUser(registerUserForm.getFirstName(), registerUserForm.getLastName(), registerUserForm.getLogin(), globalRoles);
@@ -436,7 +447,7 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
         model.put(accountVerificationLink, getAccountVerificationLink(user));
 
         Email email = services.emailConstructor.prepareEmailWithTitleFromTemplate(
-                user.getEmail(), user.getName(), template, model);
+                user.getEmail(), null, user.getName(), template, model);
 
         repositories.unsecure.email.save(email);
         return user;
@@ -506,6 +517,7 @@ public class UserService extends ComponentProvider implements HasSecurityRules {
 
         Email emailMsg = services.emailConstructor.prepareEmailWithTitleFromTemplate(
                 user.getEmail(),
+                null,
                 user.getName().isEmpty() ? user.getEmail() : user.getName(),
                 StandardEmailTemplates.PASSWORD_RECOVERY,
                 model);

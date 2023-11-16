@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -42,6 +42,11 @@ public interface URLConstants {
     String _SAVE = "/save";
     String _EXIT = "/exit";
     String _ZIP = "/zip";
+    String _YAML = "/yaml";
+    String _EXPORT = "/export";
+    String EXPORT = "export";
+    String _EXPORT_YAML = _EXPORT + _YAML;
+    String EXPORT_YAML = EXPORT + _YAML;
     String _PUBLISH = "/publish";
     String _CLEAR = "/clear";
     String _RELOAD = "/reload";
@@ -58,7 +63,8 @@ public interface URLConstants {
     String _CHANGE = "/change";
     String _VERIFY = "/verify";
     String _LOGIN = "/login";
-    String _FORM = "/form";
+    String FORM = "form";
+    String _FORM = "/" + FORM;
     String _RULE = "/rule";
     String _RULE_LINE = "/rule-line";
     String _LOGOUT = "/logout";
@@ -83,15 +89,21 @@ public interface URLConstants {
     String VERIFY_TOKEN = "verifyToken";
     String KEY = "key";
     String PASSWORD = "password";
-    String FRONTENDRESOURCE = "frontendresource";
-    String WEBENDPOINTS = "webendpoints";
-    String SERVERJS = "serverJs"; //TODO change to serverjs
+    String FRONTENDRESOURCE = "frontendResource";
+    String _FRONTENDRESOURCE = "/" + FRONTENDRESOURCE;
+
+    String UI_COMPONENT = "uiComponent";
+    String _UI_COMPONENT = "/" + UI_COMPONENT;
+    String WEBENDPOINT = "webEndpoint";
+    String PAGEBUILDER = "pageBuilder";
+    String CONTROLLER_ENDPOINT = "controllerEndpoint";
+    String SERVERJS = "serverJs";
     String ROLE = "role";
     String PRIVILEGES = "privileges";
     String MODULE = "module";
     String CONTENT = "content";
     String TYPE = "type";
-    String EVENTLISTENER = "eventlistener";
+    String EVENTLISTENER = "eventListener";
     String SCHEDULER = "scheduler";
     String SPOOF = "spoof";
     String ENTITY = "entity";
@@ -100,12 +112,8 @@ public interface URLConstants {
     String _NEW = "/" + NEW;
     String ALL = "all";
     String AUDIT = "audit";
-    String PAGE = "page";
     String PREVIEW = "preview";
     String _SETTINGS = "/" + SETTINGS;
-    String _NEW_SETTINGS_PAGE = _NEW + _SETTINGS + "-" + PAGE;
-    String _PAGE_SETTINGS = "/" + PAGE + '-' + SETTINGS;
-    String _PAGE = "/" + PAGE;
     String _AUDIT = "/" + AUDIT;
     String _MODULE = "/" + MODULE;
     String MODULENAME = "moduleName";
@@ -121,8 +129,8 @@ public interface URLConstants {
     String _PROFILE = "/" + PROFILE;
     String _MEMBER = "/" + MEMBER;
     String _FILE = "/" + FILE;
-    String _FRONTENDRESOURCE = "/" + FRONTENDRESOURCE;
-    String _WEBENDPOINTS = "/" + WEBENDPOINTS;
+    String _WEBENDPOINT = "/" + WEBENDPOINT;
+    String _PAGEBUILDER = "/" + PAGEBUILDER;
     String _SERVERJS = "/" + SERVERJS;
     String _ORGANIZATION = "/" + ORGANIZATION;
     String _DASHBOARD = "/" + DASHBOARD;
@@ -184,10 +192,13 @@ public interface URLConstants {
     String _EMIT = "/emit";
     String _VERIFICATION = "/verification";
 
-    String FRONTENDRESOURCEREGEX = "[0-9a-z\\-]*(?:\\.css|\\.js)?";
+    String FRONTENDRESOURCEREGEX = "[0-9a-zA-Z\\-]*(?:\\.css|\\.js|\\.xml|\\.txt|\\.csv|\\.json|\\.html)?";
+    String FRONTENDRESOURCE_ORGID_PARAM_REGEX = "(?:\\?organizationId=?.*)?";
+
+    String FRONTENDRESOURCE_AUTH_PARAMS_REGEX = "(\\?(.*=?.*)?(\\&.*=?.*)?)?";
     String LANGUAGEPREFIX = "pl";
     String EXCLUDE_SWAGGER_UI_REGEX = "^(?!.*swagger-ui)";
-    String URL_WITH_DASH_REGEX = "[0-9a-z\\-]+";
+    String URL_WITH_DASH_REGEX = "[0-9a-zA-Z\\-]+";
     String URL_REGEX = "[hH][Tt][Tt][Pp][Ss]?://.*";
     String IP_COMMA_SEPARATED_LIST = "(((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([4-9]|[12][0-9]|3[0-2]))?)([,]|$))*";
 
@@ -217,6 +228,7 @@ public interface URLConstants {
     String _API_V2 = _API + _V2;
     String _API_V2_ANT_EXPRESSION = _API_V2 + "/**";
     String _API_V2_ORGANIZATION = _API_V2 + _ORGANIZATION;
+    String _API_V2_ORGANIZATION_ORGANIZATIONID = _API_V2_ORGANIZATION + _ORGANIZATIONID;
 
     String API_TOKEN = "api-token";
     String EXTERNAL_SESSION_ID = "esid";
@@ -227,5 +239,10 @@ public interface URLConstants {
     String _AFFILIATION_CODE = "/" + AFFILIATION_CODE;
     String AFFILIATION_EVENT = "affiliationEvent";  //TODO change to affiliationevent or remove if not used
     String _AFFILIATION_EVENT = "/" + AFFILIATION_EVENT;
+
+    String CI = "ci";
+    String _CI = "/" + CI;
+    String CN = "cn";
+    String _CN = "/" + CN;
 
 }

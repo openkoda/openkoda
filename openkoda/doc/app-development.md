@@ -4,7 +4,7 @@
 
 ### Frontend
 
-It is possible to create custom webpages within the Openkoda Admin Panel (https://example.com/html/frontendresource/all)
+It is possible to create custom webpages within the Openkoda Admin Panel (https://example.com/html/frontendResource/all)
 
 ```<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
@@ -16,7 +16,7 @@ It is possible to create custom webpages within the Openkoda Admin Panel (https:
 
 ### Simple Services
 
-Openkoda makes it possible to create simple services in the Admin Panel (https://example.com/html/webendpoints/all).
+Openkoda makes it possible to create simple services in the Admin Panel (https://example.com/html/webEndpoint/all).
 
 The below example displays the age count on the basis of date parameter passed with the request.
 
@@ -51,7 +51,7 @@ message `You are 42 years old.`
 ### Simple Integrations
 
 Integration triggers can be configured here:\
-https://example.com/html/eventlistener/new/settings
+https://example.com/html/eventListener/new/settings
 
 Integration channels are available for configuration on organization settings level at\
 https://example.com/html/organization/<organization-id>>/module/integration/settings
@@ -463,9 +463,9 @@ protected List<File> files;
 
 ## Secured Repository
 
-`com.openkoda.core.repository.common.SecuredFunctionalRepositoryWithLongId` is a JPA super-interface for secure repositories.
-It is the default implementation of `com.openkoda.core.repository.common.SecuredRepository`, 
-which exposes a list of available secure operations. All methods which are considered insecure are disabled.
+`com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId` is a JPA super-interface for secure repositories.
+It is the default implementation of `com.openkoda.core.repository.common.UnscopedSecureRepository`, 
+which exposes a list of available secure operations. All methods which are considered insecure are marked deprecated.
 
 ### Secure Read
 
@@ -991,9 +991,9 @@ The UI Components functionality presents the low-code approach in Openkoda, allo
 endpoints in the dashboard without any need of recompilation or system restart.
 
 Useful URLs:
-* `/html/webendpoints/all` - list of all UI Components registered
-* `/html/webendpoints/<uicomponent-ID>/settings` - editor page of a component with the ID `uicomponent-ID`
-* `/html/webendpoints/new/settings` - editor page of a new UI Component
+* `/html/webEndpoint/all` - list of all UI Components registered
+* `/html/webEndpoint/<uicomponent-ID>/settings` - editor page of a component with the ID `uicomponent-ID`
+* `/html/webEndpoint/new/settings` - editor page of a new UI Component
 
 Steps to create a UI Component:
 1. Go to new UI Component editor page

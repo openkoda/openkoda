@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,10 +21,9 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository.user;
 
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
-import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.User;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.repository.SecureRepository;
 import org.springframework.stereotype.Repository;
 
 import static com.openkoda.controller.common.URLConstants.*;
@@ -43,7 +42,7 @@ import static com.openkoda.controller.common.URLConstants.*;
         entityClass = User.class,
         searchIndexFormula =  "lower(coalesce(first_name, '') || ' ' || coalesce(last_name, '') || ' userid:' || COALESCE(CAST (id as text), '') || ' ' || email)"
 )
-public interface SecureUserRepository extends SearchableFunctionalRepositoryWithLongId<User>, HasSecurityRules {
+public interface SecureUserRepository extends SecureRepository<User> {
 
 
 }

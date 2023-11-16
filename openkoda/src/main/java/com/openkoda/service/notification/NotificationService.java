@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -55,7 +55,7 @@ public class NotificationService extends ComponentProvider {
      */
     public int getUsersUnreadNotificationsNumber(Long userId, Set<Long> organizationIds) {
         debug("[getUsersUnreadNotificationsNumber]");
-        return Math.toIntExact(secureNotificationRepository.countBy(allUnreadForUser(userId, organizationIds)));
+        return Math.toIntExact(secureNotificationRepository.count(allUnreadForUser(userId, organizationIds)));
     }
 
     /**
@@ -156,7 +156,7 @@ public class NotificationService extends ComponentProvider {
             } else if(user.getOrganizationIds() != null) {
                 orgsId = Set.of(user.getOrganizationIds());
             }
-            List<Notification> allUnreadForUser = repositories.secure.notification.findBy(allUnreadForUser(userId, orgsId));
+            List<Notification> allUnreadForUser = repositories.secure.notification.search(allUnreadForUser(userId, orgsId));
             repositories.unsecure.readNotification.saveAll(allUnreadForUser.stream().map(notification -> new ReadNotification(userId, notification.getId())).collect(Collectors.toSet()));
             return true;
         }

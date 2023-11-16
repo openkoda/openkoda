@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -72,8 +72,11 @@ public abstract class Form implements PostExecuteProcessablePageAttr, LoggingCom
     public boolean requiresCodeEditor() {
         return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditor(this));
     }
-    public boolean requiresCodeEditorWithAutocomplete(){
-        return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditorWithAutocomplete(this));
+    public boolean requiresCodeEditorWithWebendpointAutocomplete(){
+        return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditorWithWebendpointAutocomplete(this));
+    }
+    public boolean requiresCodeEditorWithFormAutocomplete(){
+        return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isCodeEditorWithFormAutocomplete(this));
     }
     public boolean requiresMap() {
         return Arrays.stream(frontendMappingDefinition.fields).anyMatch(a -> a.isMap(this));

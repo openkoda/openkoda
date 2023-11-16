@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,14 +22,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda;
 
 import com.openkoda.core.helper.SpringProfilesHelper;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +51,8 @@ import java.util.Arrays;
 @EnableJpaRepositories
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class })
 public class App extends SpringBootServletInitializer {
+    private static ConfigurableApplicationContext context;
+
     /**
      * <p>main.</p>
      *
@@ -63,7 +66,7 @@ public class App extends SpringBootServletInitializer {
         boolean isForce = args != null && Arrays.stream(args).anyMatch(a -> "--force".equals(a));
         initializationSafetyCheck(isForce);
         System.setProperty("jakarta.xml.bind.JAXBContextFactory", "com.sun.xml.bind.v2.ContextFactory");
-        SpringApplication.run(appClass, args);
+        context = SpringApplication.run(appClass, args);
     }
 
     protected static void initializationSafetyCheck(boolean isforce) {
@@ -87,6 +90,18 @@ public class App extends SpringBootServletInitializer {
         } catch (Exception e) {
             System.exit(1);
         }
+    }
+
+    public static void restart() {
+        ApplicationArguments args = context.getBean(ApplicationArguments.class);
+
+        Thread thread = new Thread(() -> {
+            context.close();
+            context = SpringApplication.run(App.class, args.getSourceArgs());
+        });
+
+        thread.setDaemon(false);
+        thread.start();
     }
 
 }

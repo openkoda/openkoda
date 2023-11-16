@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -83,6 +83,8 @@ public class ModelEnricherInterceptor implements ReadableCode, LoggingComponentW
     CaptchaService captchaService;
     @Value("${default.layout:main}")
     String defaultLayoutName;
+    @Value("${default.layout.plain:plain}")
+    String plainLayoutName;
 
     @Inject
     SessionService sessionService;
@@ -198,7 +200,14 @@ public class ModelEnricherInterceptor implements ReadableCode, LoggingComponentW
         Optional<OrganizationUser> user = UserProvider.getFromContext();
         boolean isUser = user.map(a -> a.getUser()).map(a -> a.getId()).isPresent();
         boolean userIsInOrg = orgId != null && isUser && user.get().getOrganizationIds().contains(orgId);
-
+        String pageLayoutParameter = request.getParameter("__view");
+        String pageLayout;
+        if (pageLayoutParameter != null) {
+            pageLayout = "plain".equals(pageLayoutParameter) ? plainLayoutName : defaultLayoutName;
+        } else {
+            String referer = request.getHeader("Referer");
+            pageLayout = (referer != null && referer.contains("__view=plain")) ? plainLayoutName : defaultLayoutName;
+        }
         MutableUserInOrganization userInOrg = ApplicationContextProvider.getContext().getBean(MutableUserInOrganization.class);
 
         if (isUser) {
@@ -214,7 +223,7 @@ public class ModelEnricherInterceptor implements ReadableCode, LoggingComponentW
 
         model.put(commonDictionaries.name, secureEntityDictionaryRepository.getCommonDictionaries());
         model.put(commonDictionariesNames.name, secureEntityDictionaryRepository.getCommonDictionariesNames());
-        model.put(defaultLayout.name, defaultLayoutName);
+        model.put(defaultLayout.name, pageLayout);
         model.put(PageAttributes.resourcesVersion.name, resourcesVersion);
         model.put(PageAttributes.modelAndView.name, modelAndView);
 

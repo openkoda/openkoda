@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns: lang="en" class="plain-view">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}">
+
+    <title><th:block th:text="${@environment.getProperty('application.name')}"></th:block> - Dashboard</title>
+
+    <!-- Custom CSS -->
+    <th:block th:replace="~{frontend-resource/head-customization::css}"></th:block>
+
+    <!-- Custom fonts -->
+    <link href="/vendor/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- App css -->
+    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script th:src="@{/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
+
+    <!-- Custom head scripts -->
+    <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>
+
+    <!--Chart scripts-->
+    <script src="/vendor/chart.js/chart.min.js"></script>
+
+    <!--Form scripts-->
+    <script src="/vendor/jquery-dirty/jquery.dirty.js"></script>
+    <script>
+        let refresh = document.baseURI + (document.baseURI.indexOf("__view=plain") > 0 ? "" : (document.location.search.startsWith('?') ? "&__view=plain" : "?__view=plain"));
+        window.history.pushState({ path: refresh }, '', refresh);
+    </script>
+
+</head>
+
+<body id="page-top">
+
+<script th:if="${organizationDictionariesJson != null}" th:inline="javascript">
+    var organizationDictionaries = [(${organizationDictionariesJson})];
+</script>
+<script th:if="${commonDictionaries != null}" th:inline="javascript">
+    var commonDictionaries = [(${commonDictionaries})];
+    var commonDictionariesHeaders = {};
+</script>
+<script th:each="k : ${commonDictionariesNames}" th:if="${#messages.msgOrNull('commonDictionaries.' + k + '.headers') != null }"
+          th:utext="${'commonDictionariesHeaders[''' + k + '''] = ''' + #messages.msg('commonDictionaries.' + k + '.headers') + '''.split('','');'}"/>
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid pl-0 pr-0">
+
+                <!-- Page Heading -->
+                <h1 class="page-header h3 mb-0 text-gray-800" layout:fragment="title"></h1>
+                <div layout:fragment="content"></div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Bootstrap core JavaScript-->
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>
+
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,20 +21,19 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository;
 
-import com.openkoda.controller.AbstractServerJsController;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
-import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.ServerJs;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
 import org.springframework.stereotype.Repository;
 
+import static com.openkoda.controller.common.URLConstants.SERVERJS;
+
 @Repository
 @SearchableRepositoryMetadata(
-        entityKey = AbstractServerJsController.serverJsUrl,
+        entityKey = SERVERJS,
         descriptionFormula = "(''||name)",
         entityClass = ServerJs.class
 )
-public interface SecureServerJsRepository extends SearchableFunctionalRepositoryWithLongId<ServerJs>, HasSecurityRules {
+public interface SecureServerJsRepository extends SecureRepository<ServerJs> {
 
 
 }

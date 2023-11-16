@@ -1,17 +1,18 @@
 package timelog.repository;
 
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.repository.SecureRepository;
 import org.springframework.stereotype.Repository;
 import timelog.model.Assignment;
 
+import static timelog.TimelogApp.ASSIGNMENT;
 import static timelog.model.Assignment.descriptionFormula;
 
 @Repository
 @SearchableRepositoryMetadata(
     entityClass = Assignment.class,
-    entityKey = "assignment",
+    entityKey = ASSIGNMENT,
     descriptionFormula = descriptionFormula
 )
-public interface AssignmentRepository extends SearchableFunctionalRepositoryWithLongId<Assignment> {
+public interface AssignmentRepository extends SecureRepository<Assignment> {
 }

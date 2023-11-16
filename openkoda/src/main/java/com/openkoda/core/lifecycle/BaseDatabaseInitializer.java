@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -29,6 +29,7 @@ import com.openkoda.model.GlobalRole;
 import com.openkoda.model.OrganizationRole;
 import com.openkoda.model.ServerJs;
 import com.openkoda.model.User;
+import com.openkoda.service.export.YamlImportService;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,13 +110,17 @@ public class BaseDatabaseInitializer extends ComponentProvider {
 
     private QueryExecutor queryExecutor;
 
+    private YamlImportService yamlImportService;
+
     public BaseDatabaseInitializer(
             @Autowired QueryExecutor queryExecutor,
-            @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts) {
+            @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
+            @Autowired YamlImportService yamlImportService) {
         this.queryExecutor = queryExecutor;
         if (StringUtils.isNotBlank(initializationScripts)) {
             globalInitializationScripts = Arrays.stream(initializationScripts.split(",")).map(a -> StringUtils.trim(a)).collect(Collectors.toList());
         }
+        this.yamlImportService = yamlImportService;
     }
 
     /**
@@ -137,6 +142,7 @@ public class BaseDatabaseInitializer extends ComponentProvider {
             createInitialRoles();
             createRegistrationFormServerJs();
             runInitializationScripts();
+            yamlImportService.loadResourcesFromFiles();
             alreadySetup = true;
         } finally {
             UserProvider.clearAuthentication();

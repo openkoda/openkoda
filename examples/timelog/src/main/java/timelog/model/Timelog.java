@@ -3,6 +3,7 @@ package timelog.model;
 import com.openkoda.model.PrivilegeNames;
 import com.openkoda.model.common.ModelConstants;
 import com.openkoda.model.common.OpenkodaEntity;
+import com.openkoda.uicomponent.annotation.AiHint;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -10,12 +11,7 @@ import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.Formula;
 import timelog.repository.TimelogRepository;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Entity
 public class Timelog extends OpenkodaEntity {
@@ -29,6 +25,7 @@ public class Timelog extends OpenkodaEntity {
 
     private String description;
 
+    @AiHint("duration is in seconds")
     private Integer duration; //in seconds
 
     private LocalDate startedOn = LocalDate.now();

@@ -1,0 +1,8 @@
+---
+!!com.openkoda.service.export.dto.FrontendResourceConversionDto
+includeInSitemap: false
+name: "main-page-fragments"
+requiredPrivilege: null
+type: "HTML"
+resourceType : "RESOURCE"
+content: "templates/frontend-resource/global/main-page-fragments.html"

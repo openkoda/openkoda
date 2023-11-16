@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,11 +21,14 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
+import com.openkoda.model.file.File;
 import jakarta.inject.Inject;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
+
+import java.util.List;
 
 /**
  * <p>Sending mail locally to terminal.</p>
@@ -44,7 +47,7 @@ public class FakeSysoutEmailSender extends EmailSender {
 
     /** {@inheritDoc} */
     @Override
-    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentUrl) {
+    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentUrl, List<File> attachments) {
         info("[sendEmail] from {} to {} subject: {}", fullFrom, fullTo, subject);
         info(String.format("%s -> %s\nSubject:%s\n%s\nAttachment: %s",
                 fullFrom, fullTo, subject, html, attachmentUrl));

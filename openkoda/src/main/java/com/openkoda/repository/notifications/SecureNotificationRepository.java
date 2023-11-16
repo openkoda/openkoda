@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,9 +21,9 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository.notifications;
 
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
 import com.openkoda.model.notification.Notification;
+import com.openkoda.repository.SecureRepository;
 
 import static com.openkoda.controller.common.URLConstants.NOTIFICATION;
 
@@ -35,7 +35,7 @@ import static com.openkoda.controller.common.URLConstants.NOTIFICATION;
                 + " || ' orgid:' || COALESCE(CAST (organization_id as text), '')"
                 + " || ' userid:' || COALESCE(CAST (user_id as text), ''))"
 )
-public interface SecureNotificationRepository extends SearchableFunctionalRepositoryWithLongId<Notification> {
+public interface SecureNotificationRepository extends SecureRepository<Notification> {
 
 
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns: lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <title>Openkoda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}"/>
+
+    <!-- Custom CSS -->
+    <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
+    <!-- App css -->
+    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css"/>
+    <style> body {background-color: #18B2C6;} </style>
+</head>
+<body class="h-100 home">
+<div class="container h-100">
+    <div class="h-100 d-flex flex-column align-items-center justify-content-center">
+        <div class="mb-5">
+            <th:block th:replace="~{/frontend-resource/global/main-page-fragments::logo}"></th:block>
+        </div>
+        <div class="d-block">
+            <a class="btn btn-info d-block ml-auto mr-auto mb-2" href="/login">Login</a>
+            <a class="btn btn-primary d-block m-auto " href="/register">Register</a>
+        </div>
+    </div>
+</div>
+</body>

@@ -11,7 +11,7 @@
     <th:block th:each="field: ${genericForm.frontendMappingDefinition.fields}">
         <th:block th:if="${field.datalistSupplier != null AND field.datalistId != null}">
             <script th:inline="javascript">
-                commonDictionaries[ [[${field.datalistId}]] ] = [( ${ @json.to(field.datalistSupplier.apply(genericForm)) } )];
+                commonDictionaries[ [[${field.datalistId}]] ] = [( ${ @json.to(field.datalistSupplier.apply(genericForm, @secureEntityDictionaryRepository)) } )];
             </script>
         </th:block>
     </th:block>
@@ -35,8 +35,11 @@
         <th:block th:if="${genericForm.requiresCodeEditor()}">
             <th:block th:replace="~{forms::code-editor-prerequisites}"/>
         </th:block>
-        <th:block th:if="${genericForm.requiresCodeEditorWithAutocomplete()}">
-            <th:block th:replace="forms::code-editor-with-autocomplete-prerequisites"/>
+        <th:block th:if="${genericForm.requiresCodeEditorWithWebendpointAutocomplete()}">
+            <th:block th:replace="forms::code-editor-with-autocomplete-prerequisites('webendpoint')"/>
+        </th:block>
+        <th:block th:if="${genericForm.requiresCodeEditorWithFormAutocomplete()}">
+            <th:block th:replace="forms::code-editor-with-autocomplete-prerequisites('form')"/>
         </th:block>
         <th:block th:if="${genericForm.requiresDocumentEditor()}">
             <!--When code editor is ready, put the required scripts here-->
@@ -69,9 +72,11 @@
 
                 <div th:if="${message!=''}" th:class="${'form-alert alert ' + formClass}" role="alert">
                     <div th:text="${message}"/>
-                    <ul th:if="${genericForm.bindingResult != null}">
-                       <li th:each="err : ${genericForm.bindingResult.fieldErrors}" th:text="${@messages.getFieldLabel(form.extractFieldName(err.field), form.extractFieldName(err.field)) + ': ' + #messages.msg(err.code)}"></li>
-                    </ul>
+                    <th:block th:if="${genericForm instanceof T(com.openkoda.core.form.AbstractEntityForm)}">
+                        <ul th:if="${genericForm.bindingResult != null}">
+                           <li th:each="err : ${genericForm.bindingResult.fieldErrors}" th:text="${@messages.getFieldLabel(form.extractFieldName(err.field), form.extractFieldName(err.field)) + ': ' + #messages.msg(err.code)}"></li>
+                        </ul>
+                    </th:block>
                 </div>
                 <input type="hidden" name="frontendMappingDefinition" th:value="${genericForm.frontendMappingDefinition.name}"/>
                 <th:block th:each="field,iter: ${genericForm.frontendMappingDefinition.fields}">
@@ -178,7 +183,7 @@
                                 <textarea
                                         th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})}"/>
                             </th:block>
-                            <th:block th:if="${fieldType=='code_with_autocomplete'}">
+                            <th:block th:if="${fieldType=='code_with_webendpoint_autocomplete' OR fieldType=='code_with_form_autocomplete'}">
                                 <textarea
                                         th:replace="forms::textarea-code-with-autocomplete-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})"/>
                             </th:block>
@@ -260,6 +265,10 @@
                 </th:block>
             </th:block>
         </form>
+        <script th:inline="javascript">
+            const generatedFormId = /*[[${generatedFormId}]]*/;
+            window.dirtyForm = $(`#${generatedFormId}`).dirty({preventLeaving:true});
+        </script>
     </div>
 </div>
 </body>

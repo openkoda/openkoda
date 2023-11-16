@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.stream.Stream;
+
+import static com.openkoda.service.export.FolderPathConstants.SUBDIR_ORGANIZATION_PREFIX;
 
 @Service
 /**
@@ -141,11 +143,11 @@ public class FrontendResourceService extends ComponentProvider {
         return result;
     }
 
-    public String getContentOrDefault(FrontendResource.Type type, String frontendResourceName) {
+    public String getContentOrDefault(FrontendResource.Type type, String frontendResourceName, FrontendResource.AccessLevel accessLevel, Long organizationId) {
         debug("[getContent] {}", frontendResourceName);
-        String resourceName = StringUtils.isBlank(frontendResourceName) ?
-                frontendResourceFolderClasspath + "default-frontend-resource" + type.getExtension() :
-                frontendResourceFolderClasspath + frontendResourceName + type.getExtension();
+        String resourceName = organizationId == null ?
+                frontendResourceFolderClasspath + accessLevel.getPath() + frontendResourceName + type.getExtension() :
+                frontendResourceFolderClasspath + accessLevel.getPath() + SUBDIR_ORGANIZATION_PREFIX + organizationId + "/" + frontendResourceName + type.getExtension();
         try {
             InputStream resourceIO = this.getClass().getResourceAsStream(resourceName);
             if (resourceIO != null) {
@@ -188,7 +190,7 @@ public class FrontendResourceService extends ComponentProvider {
     }
 
     public String resourceHash(FrontendResource frontendResource) {
-        String content = getContentOrDefault(frontendResource.getType(), frontendResource.getName());
+        String content = getContentOrDefault(frontendResource.getType(), frontendResource.getName(), frontendResource.getAccessLevel(), frontendResource.getOrganizationId());
         String md5 = DigestUtils.md5Hex(content);
         return StringUtils.substring(md5, 0, FrontendResource.HASH_TRUNCATED_LENGTH);
     }

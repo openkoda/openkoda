@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -85,6 +85,7 @@ public class UnsecureRepositories {
     @Inject public MapEntityRepository mapEntity;
     @Inject public FileRepository file;
     @Inject public IntegrationRepository integration;
+    @Inject public FormRepository form;
 
 
 

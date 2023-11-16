@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.form;
 
 import com.openkoda.core.helper.PrivilegeHelper;
+import com.openkoda.model.common.LongIdEntity;
 import com.openkoda.repository.SecureEntityDictionaryRepository;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,9 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -42,14 +45,14 @@ import java.util.function.Function;
  *
  * @author Arkadiusz Drysch (adrysch@stratoflow.com)
  */
-public abstract class AbstractForm<D> extends Form {
+public abstract class AbstractForm<D> extends Form implements DtoAndEntity<D, LongIdEntity> {
 
     /**
      * {@link SecureEntityDictionaryRepository}
      * Repository which provides dictionaries
      * (in other words lists of enums, strings and objects available for form HTML generation)
      */
-    private static SecureEntityDictionaryRepository dictionaryRepository = null;
+    protected static SecureEntityDictionaryRepository dictionaryRepository = null;
 
     /**
      * DTO object of the form
@@ -68,6 +71,8 @@ public abstract class AbstractForm<D> extends Form {
      * The value is another map containing all field names in a particular form as keys and functions to retrieve values for those fields as map values.
      */
     private static Map<String, Map<String, Function>> fieldMapping = new HashMap<>();
+
+    private static Set<String> dirtyFrontendMapping = new HashSet<>();
 
 
     public AbstractForm(D dto, FrontendMappingDefinition frontendMappingDefinition) {
@@ -137,6 +142,10 @@ public abstract class AbstractForm<D> extends Form {
         AbstractForm.dictionaryRepository = dictionaryRepository;
     }
 
+    public static void markDirty(String frontendMappingDefinitionName) {
+        AbstractForm.dirtyFrontendMapping.add(frontendMappingDefinitionName);
+    }
+
     /**
      * Returns dictionaries available to generate the form
      *
@@ -156,7 +165,7 @@ public abstract class AbstractForm<D> extends Form {
         if(dto == null) { return; }
         Class c = dto.getClass();
         Map<String, Function> m = fieldMapping.get(frontendMappingDefinition.name + "#" + c.getCanonicalName());
-        if(m != null) { return; }
+        if(m != null && !AbstractForm.dirtyFrontendMapping.contains(frontendMappingDefinition.name)) { return; }
 
         //this should be done only once per form class
         m = new HashMap<>(frontendMappingDefinition.fields.length);
@@ -198,8 +207,10 @@ public abstract class AbstractForm<D> extends Form {
                 warn("No field reader for form {} field {}", frontendMappingDefinition.name, ffdName);
             }
         }
+        AbstractForm.dirtyFrontendMapping.remove(frontendMappingDefinition.name);
     }
 
+    @Override
     public D getDto() {
         return dto;
     }

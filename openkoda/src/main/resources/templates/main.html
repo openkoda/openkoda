@@ -13,7 +13,7 @@
     <title><th:block th:text="${@environment.getProperty('application.name')}"></th:block> - Dashboard</title>
 
     <!-- Custom CSS -->
-    <th:block th:replace="~{frontend-resource/head-customization::css}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
 
     <!-- Custom fonts -->
     <link href="/vendor/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
@@ -38,10 +38,13 @@
     <script th:src="@{/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
 
     <!-- Custom head scripts -->
-    <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::scripts}"></th:block>
 
     <!--Chart scripts-->
     <script src="/vendor/chart.js/chart.min.js"></script>
+
+    <!--Form scripts-->
+    <script src="/vendor/jquery-dirty/jquery.dirty.js"></script>
 
 </head>
 
@@ -57,26 +60,23 @@
 <script th:each="k : ${commonDictionariesNames}" th:if="${#messages.msgOrNull('commonDictionaries.' + k + '.headers') != null }"
           th:utext="${'commonDictionariesHeaders[''' + k + '''] = ''' + #messages.msg('commonDictionaries.' + k + '.headers') + '''.split('','');'}"/>
 <!-- Page Wrapper -->
-<div id="wrapper">
+<div id="wrapper" class="main-view">
 
     <!-- Sidebar -->
-    <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+    <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="${@url.logoImageUrl(organizationEntity != null ? organizationEntity.id : null)}">
             <div class="sidebar-brand-icon">
-                <th:block th:replace="~{/frontend-resource/main-page-fragments::logo}"></th:block>
+                <th:block th:replace="~{/frontend-resource/global/main-page-fragments::logo}"></th:block>
             </div>
         </a>
 
-        <th:block th:if="${@user.hasOrganizations()}" th:replace="/frontend-resource/menu::users-menu">
-
-        </th:block>
-
-        <!--<div th:replace="~{snippets::cmsEntry('LEFT_ENTRY')}" />-->
+        <th:block th:if="${@user.hasOrganizations()}" th:replace="frontend-resource/global/menu::users-menu"/>
+        <th:block th:replace="submenus::admin-menu"/>
 
         <!-- Sidebar Toggler (Sidebar) -->
-        <div class="text-center d-none d-md-inline">
+        <div class="mt-1 text-center d-none d-md-inline">
             <button class="rounded-circle border-0" id="sidebarToggle"></button>
         </div>
 
@@ -84,7 +84,7 @@
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content-wrapper" class="d-flex flex-column main-view">
 
         <!-- Main Content -->
         <div id="content">
@@ -101,12 +101,12 @@
                 <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
                       id="top-search" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
                     <div class="input-group">
-                        <input type="text" class="form-control simple-control form-neutral border-0 small"
+                        <input type="text" class="form-control simple-control border-0 small  bg-white"
                                placeholder="Search..."
                                th:placeholder="#{search.placeholder}"
                                aria-label="Search" aria-describedby="basic-addon2" name="search_search">
                         <div class="input-group-append">
-                            <button class="input-group-text form-neutral border-0" type="submit" form="top-search" formmethod="get"
+                            <button class="input-group-text border-0" type="submit" form="top-search" formmethod="get"
                                     formaction="/html/search">
                                 <i class="fas fa-search fa-sm"></i>
                             </button>
@@ -142,7 +142,7 @@
                     </li>
 
                     <!-- Spinner -->
-                    <th:block th:replace="~{frontend-resource/main-page-fragments::navbar-spinner}"></th:block>
+                    <th:block th:replace="~{frontend-resource/global/main-page-fragments::navbar-spinner}"></th:block>
 
                     <!-- Nav Item - Alerts -->
                     <div th:replace="~{notification-dropdown :: notifications(${readNotificationsList}, ${unreadNotificationsList}, ${userEntityId})}"></div>
@@ -201,7 +201,7 @@
         <!-- End of Main Content -->
 
         <!-- Footer -->
-        <footer class="sticky-footer bg-white">
+        <footer class="sticky-footer">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
                     <span>Copyright &copy; <th:block th:text="${@environment.getProperty('application.name')}"></th:block> 2023</span>
@@ -230,7 +230,7 @@
 <!-- Custom scripts for all pages-->
 <script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>
 
-<th:block th:replace="~{frontend-resource/bottom-customization::sbadmin}"></th:block>
+<th:block th:replace="~{frontend-resource/global/bottom-customization::sbadmin}"></th:block>
 
 </body>
 

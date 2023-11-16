@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -38,6 +38,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -137,12 +138,26 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
         return entity == null ? dtoValue : getConverter(entity, ffd).apply(dtoValue);
     }
 
-    private static Function getConverter(SearchableOrganizationRelatedEntity entity, FrontendMappingFieldDefinition f) {
+    private Function getConverter(SearchableOrganizationRelatedEntity entity, FrontendMappingFieldDefinition f) {
         Function converter = f.dtoToEntityValueConverter;
         if (converter == null) {
             Field field = ReflectionUtils.findField(entity.getClass(), f.getPlainName());
             if (field.getType().isEnum()) {
                 converter = a -> (a == null || StringUtils.isBlank(a + "")) ? null : Enum.valueOf(((Class<? extends Enum>) field.getType()), (String) a);
+            } else if ("java.util.List<java.lang.Long>".equals(field.getGenericType().getTypeName())) {
+                converter = a -> {
+                    if (a == null) { return null; }
+                    if (String.class.equals(a.getClass())) {
+                        return new ArrayList<Long>(List.of(Long.parseLong((String)a)));
+                    }
+                    if (String[].class.equals(a.getClass())) {
+                        List<Long> collect = Arrays.stream((String[]) a)
+                                .map(Long::parseLong)
+                                .collect(Collectors.toList());
+                        return collect;
+                    }
+                    return a;
+                };
             } else {
                 converter = converters.getOrDefault(field.getType(), Function.identity());
             }
@@ -166,13 +181,20 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
 
     public static List<Object[]> calculateFieldsValuesWithReadPrivileges(FrontendMappingDefinition fd, Page<? extends SearchableOrganizationRelatedEntity> entities, String[] fieldNames) {
         List<Object[]> result = new ArrayList<>(entities.getNumberOfElements());
+        Map<String, Map> dictionaries = new HashMap<>();
+        for (FrontendMappingFieldDefinition field : fd.fields) {
+            if (field.datalistSupplier != null && !field.formBasedDatalistSupplier) {
+                dictionaries.put(field.datalistId, (Map) field.datalistSupplier.apply(null, dictionaryRepository));
+            }
+        }
+
         for (SearchableOrganizationRelatedEntity se: entities) {
-            result.add(calculateFieldValuesWithReadPrivileges(fd, se, fieldNames));
+            result.add(calculateFieldValuesWithReadPrivileges(fd, se, fieldNames, dictionaries));
         }
         return result;
     }
 
-    public static Object[] calculateFieldValuesWithReadPrivileges(FrontendMappingDefinition fd, SearchableOrganizationRelatedEntity entity, String[] fieldNames) {
+    public static Object[] calculateFieldValuesWithReadPrivileges(FrontendMappingDefinition fd, SearchableOrganizationRelatedEntity entity, String[] fieldNames, Map<String, Map> dictionaries) {
         if (fieldNames == null) {return new String[0];}
         Object[] result = new Object[fieldNames.length];
         try {
@@ -180,6 +202,9 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
                 FrontendMappingFieldDefinition f = fd.findField(fieldNames[k]);
                 boolean canRead = PrivilegeHelper.getInstance().canReadField(f, entity);
                 result[k] = canRead ? PropertyUtils.getProperty(entity, fieldNames[k]) : "";
+                if (f.datalistId != null && dictionaries.containsKey(f.datalistId)) {
+                    result[k] = dictionaries.get(f.datalistId).get(result[k]);
+                }
             }
         } catch (Exception e) {
             LoggingComponent.debugLogger.warn("Could not read entity property", e);
@@ -249,7 +274,7 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
     /**
      * Explicitly casts dto values to string with toString() method.
      * That's necessary for field validators {@link FormFieldDefinitionBuilder#validate} - in case a dto value can't be cast to String as ((String) value) it throws exception.
-     * See for instance "type" field in frontendResourceForm - this value is an enum {@link FrontendResource.Type}
+     * See for instance "type" field in frontendResourceForm - this value is an enum {@link com.openkoda.model.FrontendResource}.Type
      */
     private void castToString(){
         dto.forEach((fieldName, fieldValue) -> {

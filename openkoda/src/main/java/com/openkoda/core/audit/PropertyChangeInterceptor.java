@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -28,8 +28,8 @@ import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation of Hibernate's Interceptor.
@@ -54,7 +54,7 @@ public class PropertyChangeInterceptor implements Interceptor, LoggingComponent 
     * Map to store audit information for all entities modified within transaction.
     * Each hibernate session gets its own instance of PropertyChangeInterceptor therefor non-static field is safe.
     */
-   private Map<Object, AuditedObjectState> auditMap = new HashMap<>();
+   private Map<Object, AuditedObjectState> auditMap = new ConcurrentHashMap<>();
 
 
    /**
@@ -88,7 +88,7 @@ public class PropertyChangeInterceptor implements Interceptor, LoggingComponent 
 
    /**
     * Invoked by hibernate just before transaction.
-    * At this state we are ready to save the Autid in the database.
+    * At this state we are ready to save the Audit in the database.
     */
    @Override
    public void beforeTransactionCompletion(Transaction tx) {

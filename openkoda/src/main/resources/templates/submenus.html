@@ -13,10 +13,10 @@
                 <a th:attr="data-sidebar-menu-item='users'" th:if="${@auth.hasGlobalPrivilege('readUserData')}" class="collapse-item" th:href="${@url.users()}"><span th:text="#{template.users}">Users</span></a>
                 <a th:attr="data-sidebar-menu-item='organizations'" th:if="${@auth.hasGlobalPrivilege('readOrgData')}" class="collapse-item" th:href="${@url.allOrganizations()}"><span th:text="#{template.organizations}">Organizations</span></a>
                 <a th:attr="data-sidebar-menu-item='roles'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allRoles()}"><span th:text="#{template.roles}">Roles</span></a>
-                <a th:attr="data-sidebar-menu-item='frontendresource'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allFrontendResource()}"><span th:text="#{template.frontendResources}">Frontend Resources</span></a>
                 <a th:attr="data-sidebar-menu-item='files'" class="collapse-item" th:href="${@url.allFiles()}"><span th:text="#{template.files}">Files</span></a>
-                <a th:attr="data-sidebar-menu-item='frontend-elements'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allUIComponents()}"><span th:text="#{template.frontendElements}">Web Endpoints</span></a>
-                <a th:attr="data-sidebar-menu-item='serverJs'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allServerJs()}"><span th:text="#{template.serverJs}">Server-Side Code</span></a>
+                <a th:attr="data-sidebar-menu-item='frontendresource'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allFrontendResource()}"><span th:text="#{template.frontendResources}">Frontend Resources</span></a>
+                <a th:attr="data-sidebar-menu-item='pageBuilder'"
+                   th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allPageBuilder()}"><span th:text="#{template.pageBuilder}">Server-Side Code</span></a>
                 <a th:attr="data-sidebar-menu-item='event-listeners'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allEventListeners()}"><span th:text="#{template.eventListeners}">Event Listeners</span></a>
                 <a th:attr="data-sidebar-menu-item='schedulers'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allSchedulers()}"><span th:text="#{template.schedulers}">Schedulers</span></a>
                 <a th:attr="data-sidebar-menu-item='admin-dashboard'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.adminDashboard()}"><span th:text="#{template.dashboard}">Dashboard</span></a>
@@ -24,6 +24,14 @@
                 <a th:attr="data-sidebar-menu-item='audit'" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" class="collapse-item" th:href="${@url.allAudit()}"><span th:text="#{template.audit}">Audit</span></a>
                 <a th:attr="data-sidebar-menu-item='threads'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allThreads()}"><span th:text="#{template.threads}">Threads</span></a>
                 <a th:attr="data-sidebar-menu-item='logs'" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" class="collapse-item" th:href="${@url.allLogs()}"><span th:text="#{template.logs}">Logs</span></a>
+                <a th:attr="data-sidebar-menu-item='menu'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" href="/html/frontendResource/all?obj_search=menu"><span th:text="#{template.customizeMenu}">Menu</span></a>
+                <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'development')}">
+                    <a th:attr="data-sidebar-menu-item='form'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allForm()}"><span th:text="#{template.forms}">Form</span></a>
+                    <a th:attr="data-sidebar-menu-item='server-js'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${@url.allServerJs()}"><span th:text="#{template.serverJs}">Server-Side Code</span></a>
+                    <a th:attr="data-sidebar-menu-item='frontend-elements'" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" class="collapse-item" th:href="${@url.allUIComponents()}"><span th:text="#{template.frontendElements}">Web Endpoints</span></a>
+                    <a th:attr="data-sidebar-menu-item='/html/webEndpoint/ai'" th:if="${@environment.getProperty('chat.gpt.api.key') != '' && @auth.hasGlobalPrivilege('canReadBackend')}" class="collapse-item" th:href="${'/html/webEndpoint/ai'}"><span th:text="#{template.ai}">AI Companion</span></a>
+                </th:block>
+
             </div>
         </div>
     </li>

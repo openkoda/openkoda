@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -31,7 +31,6 @@ import com.openkoda.form.GlobalOrgRoleForm;
 import com.openkoda.form.InviteUserForm;
 import com.openkoda.form.OrganizationForm;
 import com.openkoda.model.Organization;
-import com.openkoda.model.Privilege;
 import com.openkoda.repository.specifications.UserSpecifications;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +38,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.validation.BindingResult;
 import reactor.util.function.Tuples;
-
-import static com.openkoda.model.Privilege.readUserData;
 
 /**
  * <p>AbstractOrganizationController class.</p>
@@ -64,7 +61,7 @@ public class AbstractOrganizationController extends AbstractController implement
         Pageable finalAPageable = aPageable;
         return Flow.init()
                 .thenSet(organizationPage, a -> repositories.secure.organization.search(
-                        aSearchTerm, aSpecification, Privilege.readOrgData, finalAPageable))
+                        aSearchTerm, null, aSpecification, finalAPageable))
                 .execute();
     }
 
@@ -89,8 +86,7 @@ public class AbstractOrganizationController extends AbstractController implement
     protected PageModelMap getOrganizationSettings(Long organizationId, String userSearch, Pageable userPageable){
         return findOrganizationWithSettingsFlow(organizationId)
                 .thenSet(organizationEntityId, a -> organizationId)
-                .thenSet(userPage, a -> repositories.secure.user.search(userSearch, UserSpecifications.searchSpecification(organizationId), readUserData, userPageable))
-                //.thenSet(userPage, a -> repositories.secure.userRole.search(userSearch, organizationId, UserRoleSpecification.getUserRolesForUsers(), readUserData, userPageable).map(ur -> ur.getUser()))
+                .thenSet(userPage, a -> repositories.secure.user.search(userSearch, null, UserSpecifications.searchSpecification(organizationId), userPageable))
                 .thenSet(inviteUserForm, a -> new InviteUserForm())
                 .thenSet(globalOrgRoleForm, a -> new GlobalOrgRoleForm(services.organization.getNamesOfGlobalOrgRolesInOrganization(organizationId)))
                 .execute();
@@ -99,8 +95,7 @@ public class AbstractOrganizationController extends AbstractController implement
     protected PageModelMap getNewOrganizationSettings(Pageable userPageable) {
         return findOrganizationWithSettingsFlow(-1L)
                 .thenSet(userPage, a -> repositories.secure.user.search(
-                        "",  UserSpecifications.searchSpecification(-1L),
-                        readUserData, userPageable))
+                        "",  null, UserSpecifications.searchSpecification(-1L), userPageable))
                 .thenSet(inviteUserForm, a -> new InviteUserForm())
                 .execute();
     }

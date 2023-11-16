@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -27,11 +27,11 @@ import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.FrontendResource;
 import com.openkoda.model.PrivilegeBase;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCE;
+import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCEREGEX;
+import static com.openkoda.controller.common.URLConstants.ORGANIZATION;
 import static com.openkoda.core.form.FrontendMappingDefinition.createFrontendMappingDefinition;
 import static com.openkoda.model.Privilege.*;
 
@@ -42,13 +42,16 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     String ROLE_FORM = "roleForm";
     String ORGANIZATION_FORM = "organizationForm";
     String LOGGER_FORM = "loggerForm";
-    String FRONTEND_RESOURCE_FORM = "frontendResourceForm";
+    String FRONTEND_RESOURCE_FORM = "frontendResource";
+    String PAGE_BUILDER_FORM = "pageBuilder";
     String FRONTEND_RESOURCE_PAGE_FORM = "frontendResourcePageForm";
-    String CONTROLLER_ENDPOINT_FORM = "controllerEndpoint";
+    String UI_COMPONENT_FRONTEND_RESOURCE_FORM = "uiComponentFrontendResource";
+    String CONTROLLER_ENDPOINT_FORM = "controllerEndpointForm";
     String EVENT_LISTENER_FORM = "eventListenerForm";
     String SEND_EVENT_FORM = "sendEventForm";
     String ATTRIBUTE_DEFINITION_FORM = "attributeDefinitionForm";
     String EDIT_USER_FORM = "editUserForm";
+    String GLOBAL_ORG_ROLE_FORM = "globalOrgRoleForm";
     String INVITE_USER_FORM_NAME = "inviteUserForm";
     String TABLE_COMPACT_CSS = "table-compact ";
 
@@ -68,7 +71,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
         a -> a  .dropdown(ROLE_NAME_, ORGANIZATION_ROLES_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IS_NEW_USER_OR_OWNER)
     );
 
-    FrontendMappingDefinition globalOrgFrom = createFrontendMappingDefinition("globalOrgForm", canAccessGlobalSettings, canAccessGlobalSettings,
+    FrontendMappingDefinition globalOrgRoleForm = createFrontendMappingDefinition(GLOBAL_ORG_ROLE_FORM, canAccessGlobalSettings, canAccessGlobalSettings,
             a -> a.checkboxList("globalOrganizationRoles", "globalOrganizationRoles"));
 
     FrontendMappingDefinition editUserForm = createFrontendMappingDefinition(EDIT_USER_FORM, readUserData, manageUserData, FrontendMappingDefinitions.userForm.fields,
@@ -98,7 +101,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 
     FrontendMappingDefinition loggerForm = createFrontendMappingDefinition(LOGGER_FORM, canReadSupportData, canManageSupportData,
             a -> a  .text(BUFFER_SIZE_FIELD_)
-                    .checkboxList(LOGGING_CLASSES_, f -> f.getDictionaryRepository().getLoggersDictionary()).additionalCss(TABLE_COMPACT_CSS)
+                    .checkboxList(LOGGING_CLASSES_, (f, d) -> d.getLoggersDictionary()).additionalCss(TABLE_COMPACT_CSS)
     );
 
     FrontendMappingDefinition eventListenerForm = createFrontendMappingDefinition(EVENT_LISTENER_FORM, canReadBackend, canManageBackend,
@@ -112,62 +115,35 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 
     );
 
-    FrontendMappingDefinition frontendResourceForm = createFrontendMappingDefinition(FRONTENDRESOURCE, readFrontendResource, manageFrontendResource,
+    FrontendMappingDefinition frontendResourceForm = createFrontendMappingDefinition(FRONTEND_RESOURCE_FORM, readFrontendResource, manageFrontendResource,
             a -> a  .text(NAME_)
-                        .validate(v -> StringUtils.isBlank(v) ? "not.empty" : null)
+                        .validate(v -> v.matches(FRONTENDRESOURCEREGEX) ? null : "not.matching.name")
                     .organizationSelect(ORGANIZATION_ID_)
-                    .text(URL_PATH_)
-                        .validate(v -> v.matches("[0-9a-z\\-/]*(?:\\.css|\\.js)?") ? null : "not.matching.urlpath.frontendreosurce")
                     .dropdown(REQUIRED_PRIVILEGE_, PRIVILEGES_, true)
                     .sectionWithDropdown(TYPE_, FRONTEND_RESOURCE_TYPE_)
                         //.valueType(FrontendResource.Type.class)
                         .additionalCss("frontendResourceType").validate(v -> v != null ? null : "not.empty")
                     .checkbox(INCLUDE_IN_SITEMAP_)
+                    .checkbox(EMBEDDABLE_)
+                    .datalist(ACCESS_LEVELS, d -> d.enumDictionary(FrontendResource.AccessLevel.values()))
+                    .dropdown(ACCESS_LEVEL, ACCESS_LEVELS)
                     .customFieldType(DRAFT_CONTENT_,  f -> FrontendResourceForm.getCodeType(((ReflectionBasedEntityForm)f).dto.get(TYPE_)))
                     .valueSupplier(f -> {
                         FrontendResource ce = (FrontendResource) ((ReflectionBasedEntityForm) f).entity;
                         return ce == null ? "" : (ce.isDraft() ? ce.getDraftContent() : ce.getContent());
                     })
                     .validateForm((ReflectionBasedEntityForm f) ->
-                        (f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name()) && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension())) ||
-                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.CSS.getExtension()) && !f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name())) ||
-                        ((f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name())) && !f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension())) ||
-                        (f.dto.get(URL_PATH_).toString().endsWith(FrontendResource.Type.JS.getExtension()) && (!f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name()))) ?
-                                Map.of(TYPE_, "incompatible.frontend-resource.types", URL_PATH_, "incompatible.frontend-resource.types") : null)
-    );
-    FrontendMappingDefinition uiComponentFrontendResourceForm = createFrontendMappingDefinition(FRONTENDRESOURCE, readFrontendResource, manageFrontendResource,
-            a -> a  .text(URL_PATH_)
-                    .codeHtml(CONTENT_)
-                    .checkbox(IS_PUBLIC)
-    );
-
-    FrontendMappingDefinition uiComponentControllerEndpointForm = createFrontendMappingDefinition(CONTROLLER_ENDPOINT_FORM, readFrontendResource, manageFrontendResource,
-            a -> a  .text(SUB_PATH)
-                    .dropdown(HTTP_METHOD, HTTP_METHOD)
-                    .sectionWithDropdown(RESPONSE_TYPE, RESPONSE_TYPE)
-                    .codeWithAutocomplete(CODE)
-                    .textarea(HTTP_HEADERS)
-                    .textarea(MODEL_ATTRIBUTES)
+                        (f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name()) && !f.dto.get(NAME_).toString().endsWith(FrontendResource.Type.CSS.getExtension())) ||
+                        (f.dto.get(NAME_).toString().endsWith(FrontendResource.Type.CSS.getExtension()) && !f.dto.get(TYPE_).toString().equals(FrontendResource.Type.CSS.name())) ||
+                        ((f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name())) && !f.dto.get(NAME_).toString().endsWith(FrontendResource.Type.JS.getExtension())) ||
+                        (f.dto.get(NAME_).toString().endsWith(FrontendResource.Type.JS.getExtension()) && (!f.dto.get(TYPE_).toString().equals(FrontendResource.Type.JS.name()))) ?
+                                Map.of(TYPE_, "incompatible.frontend-resource.types", NAME_, "incompatible.frontend-resource.types") : null)
     );
 
     FrontendMappingDefinition frontendResourcePageForm = createFrontendMappingDefinition(FRONTEND_RESOURCE_PAGE_FORM, readFrontendResource, manageFrontendResource,
             a -> a
                     .text(URL_PATH_)
                     .textarea(CONTENT_EDITABLE_)
-    );
-
-    FrontendMappingDefinition attributeFormNew = createFrontendMappingDefinition(ATTRIBUTE_DEFINITION_FORM, canSeeAttributes, canDefineAttributes,
-            a -> a  .text(NAME_)
-                    .text(DEFAULT_VALUE_)
-                    .dropdown(LEVEL_, ATTRIBUTE_LEVEL_)
-                    .checkbox(READ_ONLY_)
-    );
-
-    FrontendMappingDefinition attributeFormModify = createFrontendMappingDefinition(ATTRIBUTE_DEFINITION_FORM, canSeeAttributes, canDefineAttributes,
-            a -> a  .text(NAME_).additionalPrivileges(canSeeAttributes, null)
-                    .text(DEFAULT_VALUE_)
-                    .dropdown(LEVEL_, ATTRIBUTE_LEVEL_).additionalPrivileges(canSeeAttributes, null)
-                    .checkbox(READ_ONLY_)
     );
 
     FrontendMappingDefinition sendEventForm = createFrontendMappingDefinition(SEND_EVENT_FORM, canReadBackend, canManageBackend,
@@ -233,7 +209,6 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
             a -> a  .dropdownNonDto(EVENT_, EVENTS_)
                     .text(NAME_)
                     .text(ORGANIZATION_ID_)
-                    .text(URL_PATH_)
                     .text(CONTENT_)
                     .text(TEST_DATA_)
                     .text(REQUIRED_PRIVILEGE_)
@@ -284,7 +259,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
                     .checkbox(SETUP_TRIAL)
     );
 
-    FrontendMappingDefinition organizationsApi = createFrontendMappingDefinition("organization", readOrgData, manageOrgData,
+    FrontendMappingDefinition organizationsApi = createFrontendMappingDefinition(ORGANIZATION, readOrgData, manageOrgData,
             a -> a.hidden(ID_)
                   .text(NAME_)
     );

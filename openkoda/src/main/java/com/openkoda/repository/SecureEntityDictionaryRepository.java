@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,6 +26,7 @@ import com.openkoda.core.flow.Tuple;
 import com.openkoda.core.form.AbstractForm;
 import com.openkoda.core.helper.JsonHelper;
 import com.openkoda.core.helper.PrivilegeHelper;
+import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.tracker.DebugLogsDecoratorWithRequestId;
 import com.openkoda.dto.file.FileDto;
@@ -38,8 +39,8 @@ import com.openkoda.model.common.ModelConstants;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.model.file.EntityWithFiles;
 import com.openkoda.model.file.File;
-import com.openkoda.model.file.TimestampedEntityWithFiles;
 import com.openkoda.service.user.RoleService;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
@@ -77,14 +78,12 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
     @PersistenceContext
     private EntityManager em;
 
-
+    private static SecureEntityDictionaryRepository instance;
 
     protected Map<String, Object> commonDictionaries = new HashMap<>();
     private Map<String, String> languages = new LinkedHashMap<>();
     public static HashMap<String, String> countries;
     private static Map<String, Map<Object, String>> moduleDictionaries = new HashMap<>();
-
-
 
     static {
         LinkedHashMap<String, String> tempMap = new LinkedHashMap<>();
@@ -100,6 +99,9 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
+    public static SecureEntityDictionaryRepository getInstance() {
+        return instance;
+    }
 
     public Map dictionary(String entityKey) {
         SearchableRepositoryMetadata gsa = SearchableRepositories.getSearchableRepositoryMetadata(entityKey);
@@ -119,7 +121,8 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         CriteriaQuery<Long> q = cb.createQuery(Long.class).distinct(true);
         Root root = q.from(gsa.entityClass());
         q.select(root.get(ID));
-        q.where(toSecurePredicate(null, null, root, q, cb));
+        Long organizationId = TenantResolver.getTenantedResource().organizationId;
+        q.where(toSecurePredicate((r, query, c) -> organizationId == null || !isOrganizationRelated(r.getModel().getJavaType())? c.conjunction() : c.equal(r.get("organizationId"), organizationId),null, root, q, cb, SecurityScope.USER));
         List<Long> result = em.createQuery(q).getResultList();
         String tableName = SearchableRepositories.discoverTableName(gsa.entityClass());
         Query query = em.createNativeQuery("select id, " + gsa.descriptionFormula() + " from " +  tableName + " where id in (:ids) order by " + gsa.descriptionFormula());
@@ -172,7 +175,7 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         CriteriaQuery<Tuple> q = cb.createQuery(Tuple.class);
         Root<T> root = q.from(entityClass);
         q.select(cb.construct(Tuple.class, root.get(keyField), root.get(labelField)));
-        q.where(toSecurePredicate(null, null, root, q, cb));
+        q.where(toSecurePredicate(null, null, root, q, cb, SecurityScope.USER));
         if (sortField != null) {
             q.orderBy(cb.asc(root.get(sortField)));
         }
@@ -185,10 +188,7 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
             languages.put(lang, locale.getDisplayLanguage(locale));
         }
         AbstractForm.setSecureEntityDictionaryRepositoryOnce(this);
-    }
-
-    public SecureEntityDictionaryRepository getInstance() {
-        return this;
+        instance = this;
     }
 
     public Map<String, String> getLoggersDictionary() {
@@ -362,7 +362,7 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         return result;
     }
 
-    public final Map<Long, FileDto> getFileDtos(TimestampedEntityWithFiles entity)  {
+    public final Map<Long, FileDto> getFileDtos(EntityWithFiles entity)  {
         if (entity == null || entity.getFiles() == null) {
             return Collections.emptyMap();
         }

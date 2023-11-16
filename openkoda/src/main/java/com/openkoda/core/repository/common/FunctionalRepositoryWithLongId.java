@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -21,7 +21,6 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.repository.common;
 
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -35,10 +34,10 @@ import org.springframework.data.repository.NoRepositoryBean;
  * 
  */
 @NoRepositoryBean
-public interface FunctionalRepositoryWithLongId<T> extends FunctionalRepository, JpaRepository<T, Long> {
-    default Specification<T> idSpecification(Long id) {
-        return (root, query, cb) -> cb.equal(root.get("id"), id);
-    }
+public interface FunctionalRepositoryWithLongId<T> extends JpaRepository<T, Long> {
+//    default Specification<T> idSpecification(Long id) {
+//        return (root, query, cb) -> cb.equal(root.get("id"), id);
+//    }
 
     default T findOne(Integer aLong) {
         return findById(aLong.longValue()).orElse(null);

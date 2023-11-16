@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -43,7 +43,9 @@ import java.util.List;
  */
 @Table (
     name = "frontend_resource",
-    uniqueConstraints = @UniqueConstraint(columnNames = "name")
+    uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"name", "access_level", "organization_id"})
+    }
 )
 public class FrontendResource extends OpenkodaEntity {
 
@@ -51,8 +53,13 @@ public class FrontendResource extends OpenkodaEntity {
     public static final int HASH_TRUNCATED_LENGTH = 15;
 
     public enum Type {
-        HTML(".html"), CSS(".css"), JS(".js"), XML(".xml"), PAGE(".html"), UI_COMPONENT(".html");
-
+        JS(".js"),
+        CSS(".css"),
+        JSON(".json"),
+        CSV(".csv"),
+        TEXT(".txt"),
+        XML(".xml"),
+        HTML(".html");
         private String extension;
 
         Type(String extension) {
@@ -64,24 +71,48 @@ public class FrontendResource extends OpenkodaEntity {
         }
 
         public static Type getEntryTypeFromPath(String path) {
-            if (path.endsWith(".js")) {
-                return Type.JS;
-            }
-            if (path.endsWith(".css")) {
-                return Type.CSS;
-            }
-            if (path.endsWith(".xml")) {
-                return Type.XML;
+            for(Type t : values()) {
+                if (path.endsWith(t.extension)) {
+                    return t;
+                }
             }
             return Type.HTML;
         }
     }
 
+    public enum ResourceType{
+        RESOURCE("resource"),
+        UI_COMPONENT("uiComponent"),
+        DASHBOARD("dashboard");
+
+        private String fieldName;
+
+        ResourceType(String fieldName) {this.fieldName = fieldName;}
+    }
+
+    public enum AccessLevel {
+        PUBLIC("public/"),
+        GLOBAL("global/"),
+        ORGANIZATION("organization/"),
+        INTERNAL("internal/");
+
+        private String path;
+
+        AccessLevel(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
+        }
+    }
+
     @NotNull
     private String name;
-
-    @Column(name = "url_path")
-    private String urlPath;
 
     @Column(length = 65536 * 4)
     private String content;
@@ -95,7 +126,7 @@ public class FrontendResource extends OpenkodaEntity {
     @Column(name = "include_in_sitemap")
     private boolean includeInSitemap;
 
-    @Formula(" (url_path is not null) ")
+    @Formula(" (name is not null) ")
     private boolean isPage;
 
     @Formula(" (required_privilege is null) ")
@@ -107,6 +138,9 @@ public class FrontendResource extends OpenkodaEntity {
     @Formula(" (content is not null) ")
     private boolean contentExists;
 
+    @Column(name = "embeddable", columnDefinition = "boolean default false")
+    private boolean embeddable;
+
     @Formula(" (LEFT(MD5(content), " + HASH_TRUNCATED_LENGTH + " )) ")
     private String contentHash;
 
@@ -117,8 +151,14 @@ public class FrontendResource extends OpenkodaEntity {
     @NotNull
     private Type type = Type.HTML;
 
-    @Column(columnDefinition = "boolean default false")
-    private boolean isPublic;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resource_type")
+    @NotNull
+    private ResourceType resourceType = ResourceType.RESOURCE;
+
+    @Column(name = "access_level")
+    @Enumerated(EnumType.STRING)
+    private AccessLevel accessLevel = AccessLevel.PUBLIC;
 
     @Formula("( '" + PrivilegeNames._readFrontendResource + "' )")
     private String requiredReadPrivilege;
@@ -129,7 +169,6 @@ public class FrontendResource extends OpenkodaEntity {
     public FrontendResource(String name, String urlPath, String content, Enum requiredPrivilege, Type type) {
         super(null);
         this.name = name;
-        this.urlPath = urlPath;
         this.content = content;
         this.type = type;
         this.requiredPrivilege = requiredPrivilege == null ? null : requiredPrivilege.name();
@@ -178,14 +217,6 @@ public class FrontendResource extends OpenkodaEntity {
         return isPage;
     }
 
-    public String getUrlPath() {
-        return urlPath;
-    }
-
-    public void setUrlPath(String urlPath) {
-        this.urlPath = urlPath;
-    }
-
     public boolean getIncludeInSitemap() {
         return includeInSitemap;
     }
@@ -219,6 +250,18 @@ public class FrontendResource extends OpenkodaEntity {
     public void setType(Type type) {
         this.type = type;
     }
+    public void setType(String type) {
+        this.type = Type.valueOf(type);
+    }
+
+    public ResourceType getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(ResourceType resourceType) {
+        this.resourceType = resourceType;
+    }
+    public void setResourceType(String resourceType){ this.resourceType = ResourceType.valueOf(resourceType);}
 
     @Override
     public Collection<String> contentProperties() {
@@ -258,12 +301,20 @@ public class FrontendResource extends OpenkodaEntity {
     public String getRequiredWritePrivilege() {
         return requiredWritePrivilege;
     }
-    public boolean isPublic() {
-        return isPublic;
+
+    public boolean isEmbeddable() {
+        return embeddable;
     }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
+    public void setEmbeddable(boolean embeddable) {
+        this.embeddable = embeddable;
     }
 
+    public AccessLevel getAccessLevel() {
+        return accessLevel;
+    }
+
+    public void setAccessLevel(AccessLevel accessLevel) {
+        this.accessLevel = accessLevel;
+    }
 }

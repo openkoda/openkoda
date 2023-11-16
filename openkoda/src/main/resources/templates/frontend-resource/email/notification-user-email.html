@@ -6,7 +6,7 @@
 </head>
 <body>
 <div>
-    <th:block th:replace="~{frontend-resource/email-fragments::hello-text}"/>
+    <th:block th:replace="~{frontend-resource/public/email-fragments::hello-text}"/>
     <th:block th:if="${!#strings.isEmpty(userEntity.firstName) && !#strings.isEmpty(userEntity.lastName)}"
               th:text="${' ' + userEntity.firstName + ' ' + userEntity.lastName}"/>!
 </div>
@@ -16,7 +16,7 @@
 </div>
 <br/>
 <div>
-    <th:block th:replace="~{frontend-resource/email-fragments::goodbye-text}"/>,
+    <th:block th:replace="~{frontend-resource/public/email-fragments::goodbye-text}"/>,
 </div>
 <div>
     Michal

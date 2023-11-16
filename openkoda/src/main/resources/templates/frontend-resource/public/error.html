@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns: lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <title>Openkoda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}">
+
+    <!-- Custom CSS -->
+    <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
+    <!-- App css -->
+    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+    <!-- Custom head scripts -->
+    <th:block th:replace="~{frontend-resource/global/head-customization::scripts}"></th:block>
+</head>
+<body class="h-100 home">
+<div class="container h-100">
+    <div class="h-50 d-flex flex-column align-items-center justify-content-center">
+        <div class="mb-5">
+            <th:block th:replace="~{/frontend-resource/global/main-page-fragments::logo}"></th:block>
+        </div>
+        <h1 th:text="${'Error ' + errorHttpStatus.value}"></h1>
+        <th:block th:if="${requestId != null}">
+            <span>The unique id of this issue is <a th:text="${requestId}" th:href="${'/html/audit/all?audit_search=' + #strings.substring(requestId, 15)}"></a></span>
+        </th:block>
+    </div>
+</div>
+</body>

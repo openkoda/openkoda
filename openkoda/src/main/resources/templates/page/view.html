@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+    <div layout:fragment="content" th:attr="data-menu-item='admin-dashboard'">
+        <h2 class="ml-2" th:text="${frontendResourceEntity.name}"></h2>
+        <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
+        <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
+        <style>
+            .grid-stack { }
+            .grid-stack-item-content { }
+            iframe.embedded-iframe {border: 0; padding: 0; margin: 0; width: 100%; height: 100%;}
+            img.embedded-image {border: 0; padding: 0; margin: 0; max-height:100%; max-width:100%; object-fit: contain;}
+            .grid-stack>.grid-stack-item>.grid-stack-item-content {overflow-y: hidden;}
+        </style>
+        <div class="grid-stack"></div>
+        <script type="text/javascript" th:inline="javascript">
+            let items = /*[[${ frontendResourceEntity.content }]]*/ '';
+            items = JSON.parse(items);
+            var grid = GridStack.init({styleInHead: true, staticGrid: true});
+            grid.load(items);
+        </script>
+    </div>
+</div>
+</body>
+</html>

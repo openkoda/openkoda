@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -47,7 +47,7 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
 
     String FRONTEND_RESOURCES = "frontendResources";
 
-    @Query("select c from FrontendResource c where c.unsecured = TRUE and c.isPage = TRUE and c.includeInSitemap = TRUE and (c.type = 'HTML' or c.type = 'PAGE')")
+    @Query("select c from FrontendResource c where c.unsecured = TRUE and c.isPage = TRUE and c.includeInSitemap = TRUE and c.type = 'HTML'")
     Collection<FrontendResource> getEntriesToSitemap();
 
     @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
@@ -55,27 +55,30 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
             "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
     FrontendResource findByName(@Param("name") String name);
 
+    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
+    @Query("select dbFrontendResource from FrontendResource dbFrontendResource " +
+            "where dbFrontendResource.name = :urlPath and " +
+            "(:orgId is null and dbFrontendResource.organizationId is null or :orgId is not null and dbFrontendResource.organizationId = :orgId) and " +
+            "dbFrontendResource.accessLevel = :accessLevel and " +
+            "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
+    FrontendResource findByNameOrUrlPathAndOrganizationId(@Param("urlPath") String urlPath,
+                                                          @Param("orgId") Long organizationId,
+                                                          @Param("accessLevel") FrontendResource.AccessLevel accessLevel);
+
     @Query("select c from FrontendResource c where c.name = :name")
     FrontendResource findByNameUnsecured(@Param("name") String name);
 
-
     @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
     @Query("select dbFrontendResource from FrontendResource dbFrontendResource where dbFrontendResource.isPage = TRUE and " +
-            "dbFrontendResource.urlPath = :urlPath and dbFrontendResource.isPublic = :isPublic and " +
+            "((:urlPath is not null and dbFrontendResource.name = :urlPath) or (:frontendResourceId is not null and dbFrontendResource.id = :frontendResourceId)) " +
+            "and dbFrontendResource.accessLevel = :accessLevel " +
+            "and (dbFrontendResource.organizationId = :orgId or dbFrontendResource.organizationId is null ) and " +
             "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
-    FrontendResource findByUrlPathAndIsPublic(@Param("urlPath") String urlPath, @Param("isPublic") Boolean isPublic);
-
-    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
-    @Query("select dbFrontendResource from FrontendResource dbFrontendResource where dbFrontendResource.isPage = TRUE and " +
-            "dbFrontendResource.urlPath = :urlPath and dbFrontendResource.isPublic = FALSE and dbFrontendResource.organizationId = :orgId and " +
-            "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
-    FrontendResource findNonPublicByUrlPathAndOrganizationId(@Param("urlPath") String urlPath, @Param("orgId") Long organizationId);
-
-    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
-    @Query("select dbFrontendResource from FrontendResource dbFrontendResource where dbFrontendResource.isPage = TRUE and " +
-            "dbFrontendResource.urlPath = :urlPath and dbFrontendResource.isPublic = FALSE and dbFrontendResource.organizationId is null and " +
-            "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
-    FrontendResource findNonPublicByUrlPathAndOrganizationIdIsNull(@Param("urlPath") String urlPath);
+    Page<FrontendResource> findByUrlPathAndAccessLevelAndOrganizationId(@Param("urlPath") String urlPath,
+                                                                        @Param("frontendResourceId") Long frontendResourceId,
+                                                                        @Param("accessLevel") FrontendResource.AccessLevel accessLevel,
+                                                                        @Param("orgId") Long organizationId,
+                                                                        Pageable pageable);
 
     @Query("select fr from FrontendResource fr where fr.draft = TRUE")
     Stream<FrontendResource> findAllAsStreamByIsDraftTrue();
@@ -88,9 +91,9 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
 
     Page<FrontendResource> findByType(FrontendResource.Type type, Pageable pageable);
 
-    List<FrontendResource> findByTypeOrderByCreatedOnDesc(FrontendResource.Type type);
+    Page<FrontendResource> findByResourceType(FrontendResource.ResourceType resourceType, Pageable pageable);
 
-    FrontendResource findByTypeAndUrlPath(FrontendResource.Type type, String urlPath);
+    List<FrontendResource> findByTypeOrderByCreatedOnDesc(FrontendResource.Type type);
 
     @Modifying
     @PreAuthorize(CHECK_CAN_MANAGE_FRONTEND_RESOURCES)
@@ -102,6 +105,16 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
         return findOne(id);
     }
 
-    @Query("select new com.openkoda.core.flow.Tuple(fr.id, fr.name) FROM FrontendResource fr order by name")
+    @Query("select new com.openkoda.core.flow.Tuple(fr.id, fr.name) FROM FrontendResource fr order by fr.name")
     List<Tuple> findAllAsTuple();
+
+    @Query("select new com.openkoda.core.flow.Tuple(fr.id, fr.name) FROM FrontendResource fr where fr.embeddable = TRUE and fr.resourceType = 'RESOURCE' order by fr.name")
+    List<Tuple> findAllEmbeddableResources();
+
+    @Query("select new com.openkoda.core.flow.Tuple(fr.id, fr.name) FROM FrontendResource fr where fr.embeddable = TRUE and fr.resourceType = 'UI_COMPONENT' order by fr.name")
+    List<Tuple> findAllEmbeddableUiComponents();
+
+    @Query("select fr FROM FrontendResource fr where fr.id = :id and fr.resourceType = 'DASHBOARD'")
+    FrontendResource findDashboardDefinition(@Param("id") Long id);
+
 }

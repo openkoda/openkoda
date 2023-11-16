@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -35,7 +35,7 @@ import com.openkoda.core.lifecycle.BaseDatabaseInitializer;
 import com.openkoda.core.lifecycle.SearchViewCreator;
 import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.core.repository.common.ProfileSettingsRepository;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.security.UserProvider;
 import com.openkoda.core.service.BackupService;
 import com.openkoda.core.service.FrontendMappingDefinitionService;
@@ -50,6 +50,7 @@ import com.openkoda.dto.NotificationDto;
 import com.openkoda.dto.OrganizationRelatedObject;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
 import com.openkoda.integration.service.PushNotificationService;
+import com.openkoda.model.Privilege;
 import com.openkoda.model.User;
 import com.openkoda.model.common.AuditableEntity;
 import com.openkoda.model.common.SearchableEntity;
@@ -177,6 +178,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
             services.eventListener.setAllAvailableAppConsumers();
             services.eventListener.registerAllEventListenersFromDb();
             services.scheduler.scheduleAllFromDb();
+            services.form.loadAllFormsFromDb();
             for (Consumer<CustomisationService> c : onApplicationStartListeners) {
                 c.accept(this);
             }
@@ -251,20 +253,45 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
     }
 
     @Override
-    public synchronized void registerFrontendMapping(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
+    public synchronized void registerFrontendMapping(FrontendMappingDefinition definition, ScopedSecureRepository repository) {
 
         String uniqueName = definition.name;
         frontendMappingMap.put(uniqueName, new FrontendMapping(definition, repository));
     }
 
     @Override
-    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
-        return htmlCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class);
+    public void unregisterFrontendMapping(String name) {
+        frontendMappingMap.remove(name);
     }
 
     @Override
-    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository) {
+    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository) {
+        return htmlCrudControllerConfigurationMap.registerAndExposeCRUDController(definition, repository, ReflectionBasedEntityForm.class);
+    }
+
+    @Override
+    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege) {
+        return htmlCrudControllerConfigurationMap.registerAndExposeCRUDController(definition, repository, ReflectionBasedEntityForm.class, readPrivilege, writePrivilege);
+    }
+
+    @Override
+    public void unregisterHtmlCrudController(String key) {
+        htmlCrudControllerConfigurationMap.unregisterCRUDController(key);
+    }
+
+    @Override
+    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository) {
         return apiCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class);
+    }
+
+    @Override
+    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege) {
+        return apiCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class, readPrivilege, writePrivilege);
+    }
+
+    @Override
+    public void unregisterApiCrudController(String key) {
+        apiCrudControllerConfigurationMap.unregisterCRUDController(key);
     }
 
     @EventListener(ContextRefreshedEvent.class)

@@ -1,0 +1,8 @@
+---
+!!com.openkoda.service.export.dto.FrontendResourceConversionDto
+includeInSitemap: false
+name: "head-customization"
+requiredPrivilege: null
+type: "HTML"
+resourceType : "RESOURCE"
+content: "templates/frontend-resource/global/head-customization.html"

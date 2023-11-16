@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,7 +26,6 @@ import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.form.SchedulerForm;
-import com.openkoda.model.Privilege;
 import com.openkoda.model.event.Scheduler;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -58,8 +57,7 @@ public class AbstractSchedulerController extends ComponentProvider implements Ha
             Pageable schedulerPageable) {
         debug("[findSchedulersFlow] search {}", schedulerSearchTerm);
         return Flow.init()
-                .thenSet(schedulerPage, a -> repositories.secure.scheduler.search(schedulerSearchTerm, schedulerSpecification,
-                        Privilege.canReadBackend, schedulerPageable))
+                .thenSet(schedulerPage, a -> repositories.secure.scheduler.search(schedulerSearchTerm, null, schedulerSpecification, schedulerPageable))
                 .execute();
     }
 

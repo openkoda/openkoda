@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,7 +22,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.form;
 
 import com.openkoda.controller.common.PageAttributes;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.flow.PageAttr;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.dto.OrganizationRelatedObject;
 import com.openkoda.model.MapEntity;
 import com.openkoda.model.Privilege;
@@ -31,7 +32,6 @@ import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.repository.SearchableRepositories;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import com.openkoda.core.flow.PageAttr;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -41,7 +41,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private final FrontendMappingDefinition frontendMappingDefinition;
         private final Class<E> entityClass;
         private final boolean isMapEntity;
-        private final SearchableFunctionalRepositoryWithLongId<E> secureRepository;
+        private final ScopedSecureRepository<E> secureRepository;
         private final Constructor<E> entityConstructor;
         private Class<F> formClass;
 
@@ -49,7 +49,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private Constructor<F> formConstructor;
         private Constructor<F> formEntityConstructor;
         private Class<D> dtoClass = (Class<D>) OrganizationRelatedMap.class;
-        private PrivilegeBase defaultControllerPrivilege = Privilege.canAccessGlobalSettings;
+        private PrivilegeBase defaultControllerPrivilege = Privilege.isUser;
         private PrivilegeBase getAllPrivilege;
         private PrivilegeBase getNewPrivilege;
         private PrivilegeBase getSettingsPrivilege;
@@ -69,7 +69,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private String[] genericTableFields;
 
         private CRUDControllerConfiguration(String key, FrontendMappingDefinition frontendMappingDefinition,
-                                            SearchableFunctionalRepositoryWithLongId<E> secureRepository,
+                                            ScopedSecureRepository<E> secureRepository,
                                             Class<F> formClass) {
                 try {
                         this.key = key;
@@ -85,13 +85,13 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
                 }
         }
         private CRUDControllerConfiguration(String key, FrontendMappingDefinition frontendMappingDefinition,
-                                            SearchableFunctionalRepositoryWithLongId<E> secureRepository,
+                                            ScopedSecureRepository<E> secureRepository,
                                             Class<F> formClass, Privilege readPrivilege, Privilege writePrivilege) {
                 try {
                         this.key = key;
                         this.frontendMappingDefinition = frontendMappingDefinition;
                         this.secureRepository = secureRepository;
-                        this.entityClass = (Class<E>) SearchableRepositories.getSearchableRepositoryMetadata(key).entityClass();
+                        this.entityClass = (Class<E>) SearchableRepositories.getGlobalSearchableRepositoryAnnotation(secureRepository).entityClass();
                         this.isMapEntity = this.entityClass.equals(MapEntity.class);
                         this.entityConstructor = this.entityClass.getConstructor(Long.class);
                         this.formClass = formClass;
@@ -109,7 +109,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         public static CRUDControllerConfiguration getBuilder(
                 String key,
                 FrontendMappingDefinition frontendMappingDefinition,
-                SearchableFunctionalRepositoryWithLongId secureRepository,
+                ScopedSecureRepository secureRepository,
                 Class formClass) {
                 return new CRUDControllerConfiguration(key, frontendMappingDefinition,
                         secureRepository, formClass);
@@ -118,7 +118,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         public static CRUDControllerConfiguration getBuilder(
                 String key,
                 FrontendMappingDefinition frontendMappingDefinition,
-                SearchableFunctionalRepositoryWithLongId secureRepository,
+                ScopedSecureRepository secureRepository,
                 Class formClass,
                 Privilege readPrivilege,
                 Privilege writePrivilege){
@@ -287,7 +287,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         }
 
 
-        public SearchableFunctionalRepositoryWithLongId<E> getSecureRepository() {
+        public ScopedSecureRepository<E> getSecureRepository() {
                 return secureRepository;
         }
 

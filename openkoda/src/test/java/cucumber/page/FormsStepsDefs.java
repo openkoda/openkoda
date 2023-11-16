@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -100,8 +100,16 @@ public class FormsStepsDefs extends StepsBase implements LoggingComponent {
 
     @And("I submit form {string}")
     public void iSubmitForm(String formName) {
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.className(formName)));
-        WebElement form = driver.findElement(By.className(formName));
+        WebElement form;
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(15)).until(ExpectedConditions.visibilityOfElementLocated(By.className(formName)));
+            form = driver.findElement(By.className(formName));
+        } catch (Exception e) {
+            System.out.println("Couldn't find className " + formName + ". Trying again. Page Source for debug:");
+            System.out.println(driver.getPageSource());
+            new WebDriverWait(driver, Duration.ofSeconds(15)).until(ExpectedConditions.visibilityOfElementLocated(By.className(formName)));
+            form = driver.findElement(By.className(formName));
+        }
         WebElement button = page.waitFor(form.findElement(By.className("btn-submit")));
         page.click(button);
         page.sleep(2000);

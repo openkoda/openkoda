@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -186,6 +186,7 @@ public class WebSecurityConfig implements URLConstants {
         return http.securityMatcher(_HTML + "/**")
                 .addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(loginAndPasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .headers().frameOptions().sameOrigin().and()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicPages).permitAll()
                         .requestMatchers(_HTML + _ADMIN + _ANY).hasRole("_ADMIN")
@@ -202,7 +203,8 @@ public class WebSecurityConfig implements URLConstants {
                         .rememberMeCookieName(rememberMeCookieName)
                         .rememberMeParameter(rememberMeParameter)
                         .key(rememberMeKey)
-                );
+                )
+                ;
     }
     public HttpSecurity apiAuthHttpSecurity(HttpSecurity http) throws Exception {
         return http.securityMatcher(_API_AUTH_ANT_EXPRESSION)
@@ -244,12 +246,14 @@ public class WebSecurityConfig implements URLConstants {
         return http.securityMatcher("/**")
                 .addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(loginAndPasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .headers().frameOptions().sameOrigin().and()
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(csrfDisabledPages)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicPages).permitAll()
-                        .requestMatchers(regexMatcher("/" + FRONTENDRESOURCEREGEX)).permitAll()
+                        .requestMatchers(regexMatcher("/" + FRONTENDRESOURCEREGEX + FRONTENDRESOURCE_ORGID_PARAM_REGEX)).permitAll()
+                        .requestMatchers(regexMatcher("/" + FRONTENDRESOURCEREGEX + FRONTENDRESOURCE_AUTH_PARAMS_REGEX)).authenticated()
                         .requestMatchers(_PASSWORD + "/**").authenticated()
                 )
                 .logout(logout -> logout

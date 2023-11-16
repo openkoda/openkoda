@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,13 +26,13 @@ import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.flow.form.JsFlow;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.uicomponent.live.LiveComponentProvider;
-import com.openkoda.uicomponent.preview.PreviewComponentProvider;
 import jakarta.inject.Inject;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.util.function.Tuples;
 
@@ -56,8 +56,8 @@ public class JsFlowRunner {
     @Inject
     private LiveComponentProvider componentProvider;
 
-    @Inject
-    private PreviewComponentProvider previewComponentProvider;
+    @Autowired(required = false)
+    private PreviewComponentProviderInterface previewComponentProviderInterface;
 
     private Flow evaluateJsFlow(String jsFlow, Flow initializedFlow) {
         Context c = contextBuilder.build();
@@ -81,19 +81,11 @@ public class JsFlowRunner {
     }
 
     private PageModelMap executeFlow(Flow f) {
-        try {
-            return f.execute();
-        } catch (PolyglotException e) {
-            Throwable hostException = e.asHostException();
-            if (RuntimeException.class.isAssignableFrom(hostException.getClass())) {
-                throw (RuntimeException)hostException;
-            }
-            throw e;
-        }
+        return f.execute();
     }
 
     public PageModelMap runPreviewFlow(String jsFlow, Map<String, String> params, Long organizationId, long userId, AbstractOrganizationRelatedEntityForm form) {
-        Flow f = JsFlow.init(previewComponentProvider, params, form)
+        Flow f = JsFlow.init(previewComponentProviderInterface, params, form)
                 .thenSet(organizationEntityId, userEntityId, a -> Tuples.of(organizationId, userId));
 
         try {

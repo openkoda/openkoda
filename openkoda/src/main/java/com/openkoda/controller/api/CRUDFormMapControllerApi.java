@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -30,6 +30,7 @@ import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -108,7 +109,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
                 .thenSet(isValid,a -> services.validation.validateAndPopulateToEntity((ReflectionBasedEntityForm) a.model.get(conf.getFormAttribute()), (E) a.model.get(conf.getEntityPageAttribute())))
                 .then( a -> {
                     if(a.result) {
-                        conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()));
+                        conf.getSecureRepository().saveOne((SearchableEntity) a.model.get(conf.getEntityPageAttribute()));
                     }
                     return 1;
                 })
@@ -133,7 +134,7 @@ abstract public class CRUDFormMapControllerApi<E extends SearchableOrganizationR
                 .thenSet(isValid,a -> services.validation.validateAndPopulateToEntity((ReflectionBasedEntityForm) a.model.get(conf.getFormAttribute()), (E) a.model.get(conf.getEntityPageAttribute())))
                 .then( a -> {
                     if(a.result) {
-                        conf.getSecureRepository().saveOne(a.model.get(conf.getEntityPageAttribute()));
+                        conf.getSecureRepository().saveOne((SearchableEntity) a.model.get(conf.getEntityPageAttribute()));
                     }
                     return 1;
                 })

@@ -5,17 +5,15 @@
 <div class="container-fluid">
     <div layout:fragment="content" th:attr="data-menu-item='admin-dashboard'">
         <div class="row" id="registered-cruds">
-            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.entrySet()}">
-                <div class="col-lg-3">
+            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposed()}">
+                <div class="col-lg-2">
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(entry.key, entry.key)}"></h6>
-                        </div>
                         <div class="card-body">
-                            <ul>
-                                <li><a th:href="${@url.all(organizationEntityId, entry.key)}">All</a></li>
-                                <li><a th:href="${@url.form(organizationEntityId, entry.key)}">New</a></li>
-                            </ul>
+                            <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(entry.key, entry.key)}"></h6>
+                            <div class="m-0 justify-content-end">
+                                <a class="mr-1" th:href="${@url.all(organizationEntityId, entry.key)}">All</a>
+                                <a th:href="${@url.form(organizationEntityId, entry.key)}">New</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -24,6 +22,7 @@
         <div id="web-endpoints">
             <div th:replace="~{tables::frontend-element-dashboard(${frontendResourcePage}, #{template.frontendElements})}"/>
         </div>
+        <a class="btn-primary btn btn-sm" th:href="${@url.exportAllYamlResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export Everything</a>
     </div>
 </div>
 </body>

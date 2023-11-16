@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -240,6 +240,99 @@ public class ServerJSProcessRunner implements LoggingComponent {
     }
 
     /**
+     * See commandToInputStream
+     */
+    public InputStream runCommandToInputStream(String command) {
+        return commandToInputStream(command);
+    }
+
+    /**
+     * See commandToString
+     */
+    public String runCommandToString(String command) {
+        return commandToString(command);
+    }
+
+    /**
+     * See commandToInputStream
+     */
+    public byte[] runCommandToByteArray(String command) {
+        return commandToByteArray(command);
+    }
+
+    /**
+     * Runs system command and returns the standard output as stream.
+     * @param command linux command
+     */
+    public static InputStream commandToInputStream(String command) {
+        Process process = null;
+        try {
+            process = startProcess(command);
+            return process.getInputStream();
+        } catch (IOException e) {
+            if (process != null) {
+                process.destroy();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Runs system command and waits for completion and returns the standard output as byte array.
+     * This should not be used for commands that might produce large outputs.
+     * @param command linux command
+     */
+    public static byte[] commandToByteArray(String command) {
+
+        try {
+            Process process = startProcess(command);
+            try (InputStream is = process.getInputStream()) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = is.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return null;
+                    }
+                    baos.write(buffer, 0, len);
+                }
+                return baos.toByteArray();
+            }
+        } catch (IOException e) {
+            return null;
+        }
+
+    }
+
+    /**
+     * Runs system command and waits for completion and returns the standard output as String.
+     * This should not be used for commands that might produce large outputs.
+     * @param command linux command
+     */
+    public static String commandToString(String command) {
+
+        try {
+            Process process = startProcess(command);
+            try (InputStreamReader sr = new InputStreamReader(process.getInputStream())) {
+
+                StringWriter sw = new StringWriter();
+                char[] buffer = new char[1024];
+                int len;
+                while ((len = sr.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return null;
+                    }
+                    sw.write(buffer, 0, len);
+                }
+                return sw.toString();
+            }
+        } catch (IOException e) {
+            return null;
+        }
+
+    }
+
+    /**
      * Helper method to invoke a command line process and wait until the process writes an output
      * that contains expectedOutput.
      * An example use case would be to 'tail /var/log/auth.log' and run a function that waits for particular user login.
@@ -277,7 +370,7 @@ public class ServerJSProcessRunner implements LoggingComponent {
      * On Windows, the command is attempted to be executed under bash in WSL.
      * @return started {@link Process} object
      */
-    private Process startProcess(String commandString) throws IOException {
+    private static Process startProcess(String commandString) throws IOException {
         Process process;
         String [] command = isWindows ?
                 new String[] {"c:/Windows/System32/wsl.exe", "bash", "-c", commandString} :

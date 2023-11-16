@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -60,7 +60,7 @@ public interface ModelConstants {
            "(LPAD(coalesce(" + ORGANIZATION_ID + ", 0)||'', 5, '0') || '/' || id)";
 
    int INITIAL_GLOBAL_VALUE = 10000;
-   int INITIAL_ORGANIZATION_VALUE = 121;
+   int INITIAL_ORGANIZATION_VALUE = 122;
    int INITIAL_ORGANIZATION_RELATED_VALUE = 120150;
 
    String USER_ID_PLACEHOLDER = "##userId##";

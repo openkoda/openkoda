@@ -249,6 +249,10 @@ public class Flow<I, O, CP> implements Function <ResultAndModel<I, CP>, O>, Base
         return new Flow<>(initParamsMap(null), services, a -> Tuples.of(a1, a2, a3, a4, a5, a6));
     }
 
+    public static <A1,CP> Flow<A1, A1, CP> init(PageAttr<A1> a1, A1 t) {
+        return Flow.init(null, a1, t);
+    }
+
     public static <A1,CP> Flow<A1, A1, CP> init(CP services, PageAttr<A1> a1, A1 t) {
         return Flow.init(services, t).thenSet(a1, a -> a.result);
     }
@@ -307,14 +311,17 @@ public class Flow<I, O, CP> implements Function <ResultAndModel<I, CP>, O>, Base
             logError(e);
             model.put(isError, message, error, exception, true, getSimpleErrorMessage(e), getMessageString(e), e);
         } catch (PolyglotException e) {
-            Throwable hostException = e.asHostException();
-            if (ValidationException.class.isAssignableFrom(hostException.getClass())) {
-                ValidationException ve = (ValidationException) hostException;
-                logError(ve);
-                model.put(isError, message, error, exception, true, getSimpleErrorMessage(e), getMessageString(e), ve);
+            String simpleMessage = getSimpleErrorMessage(e);
+            JsFlowExecutionException jsException;
+            if (e.getSourceLocation() != null) {
+                String code = e.getSourceLocation().getCharacters() != null ? e.getSourceLocation().getCharacters().toString() : null;
+                String location = e.getSourceLocation().toString();
+                jsException = new JsFlowExecutionException(simpleMessage, code, location);
             } else {
-                throw e;
+                jsException = new JsFlowExecutionException(simpleMessage, "N/A", "N/A");
             }
+            model.put(isError, message, error, exception, true, getSimpleErrorMessage(jsException), getMessageString(jsException), jsException);
+            throw jsException;
         } catch (Exception e) {
             logError(e);
             throw e;

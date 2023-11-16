@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -43,9 +43,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping({_HTML_ORGANIZATION_ORGANIZATIONID + _FRONTENDRESOURCE, _HTML + _FRONTENDRESOURCE})
 public class FrontendResourceControllerHtml extends AbstractFrontendResourceController {
 
-
     /**
-     * The default resource name of a content for {@link com.openkoda.model.FrontendResource} with type {@link FrontendResource.Type.PAGE}
+     * The default resource name of a content for {@link com.openkoda.model.FrontendResource} with type {@link FrontendResource.Type}.HTML
      */
     @Value("${default.frontendResourcePage.template.name:frontend-resource-template}")
     String defaultFrontendResourcePageTemplate;

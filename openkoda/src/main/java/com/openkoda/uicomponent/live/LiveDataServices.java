@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -27,7 +27,8 @@ import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.core.multitenancy.TenantResolver;
-import com.openkoda.core.repository.common.SecuredRepository;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
+import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.service.ValidationService;
 import com.openkoda.form.RegisterUserForm;
 import com.openkoda.model.User;
@@ -37,6 +38,7 @@ import com.openkoda.service.user.UserService;
 import com.openkoda.uicomponent.DataServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 @Component
 public class LiveDataServices implements DataServices {
@@ -49,8 +51,14 @@ public class LiveDataServices implements DataServices {
     @Inject
     private UserService userService;
 
-    public SecuredRepository<?> getRepository(String entityKey) {
-        return SearchableRepositories.getSearchableRepository(entityKey);
+    public ScopedSecureRepository<?> getRepository(String entityKey) {
+        return SearchableRepositories.getSearchableRepository(entityKey, HasSecurityRules.SecurityScope.USER_IN_ORGANIZATION);
+    }
+    public ScopedSecureRepository<?> getRepository(String entityKey, HasSecurityRules.SecurityScope securityScope) {
+        return SearchableRepositories.getSearchableRepository(entityKey, securityScope);
+    }
+    public ScopedSecureRepository<?> getRepository(String entityKey, String securityScope) {
+        return SearchableRepositories.getSearchableRepository(entityKey, HasSecurityRules.SecurityScope.valueOf(securityScope));
     }
     public AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName, SearchableOrganizationRelatedEntity entity) {
         FrontendMapping frontendMapping = frontendMappingMap.get(frontendMappingName);
@@ -60,6 +68,11 @@ public class LiveDataServices implements DataServices {
             entity = conf.createNewEntity(orgId);
         }
         ReflectionBasedEntityForm result = (ReflectionBasedEntityForm) conf.createNewForm(orgId, entity);
+
+        if(result.getBindingResult() == null){
+            result.setBindingResult(new BeanPropertyBindingResult(result, result.getFrontendMappingDefinition().name));
+        }
+
         return result;
     }
 
@@ -69,7 +82,7 @@ public class LiveDataServices implements DataServices {
         form.setLogin(email);
         form.setFirstName(firstName);
         form.setLastName(lastName);
-        return userService.registerUserOrReturnExisting(form);
+        return userService.registerUserOrReturnExisting(form, false);
     }
 
     public AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName) {

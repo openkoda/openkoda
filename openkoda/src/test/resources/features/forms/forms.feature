@@ -13,7 +13,7 @@ Feature: Forms
     And I should find "<expectedTableColumnValues>" in the visible table
     Examples:
       | formPageUrl                          | targetPageUrl               | formName             | setFormValues                             |  expectedTableColumnValues | newFormName |
-      | /html/frontendresource/new/settings  | /html/frontendresource/all  | frontendResourceForm | name=ddd;urlPath=www                      |  ?;ddd;www;                | organizationRelatedForm |
+      | /html/frontendResource/new/settings  | /html/frontendResource/all  | frontendResourceForm | name=ddd;urlPath=www;type=HTML            | ?;ddd;www;                 | organizationRelatedForm |
       | /html/scheduler/new/settings         | /html/scheduler/all         | schedulerForm        | cronExpression=3 2 1 * * *;eventData=Boo  | ?;3 2 1 * * *;Boo          | schedulerForm |
       | /html/role/new/settings              | /html/role/all              | roleForm             | name=ROLE_TEST;type=ORG                   | ?;ROLE_TEST;ORG            | roleForm      |
 

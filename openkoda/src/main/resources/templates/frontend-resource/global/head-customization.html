@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns: lang="en">
+
+<th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'prod')}" th:fragment="scripts">
+<!--    <th:block th:replace="~{analytics::google-tracking('put google analytics tracking id here')}"></th:block>-->
+</th:block>
+
+<th:block th:fragment="public-pages-scripts">
+
+</th:block>
+
+<th:block th:fragment="css">
+    <link href="/vendor/sb-admin/css/sb-admin-2.min.css" rel="stylesheet">
+</th:block>

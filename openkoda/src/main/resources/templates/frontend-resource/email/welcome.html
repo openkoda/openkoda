@@ -6,7 +6,7 @@
 </head>
 <body>
 <div>
-    <th:block th:replace="~{frontend-resource/email-fragments::hello-text}"/>!
+    <th:block th:replace="~{frontend-resource/public/email-fragments::hello-text}"/>!
 </div>
 <br/>
 <div th:text="${'It is so great you joined us, welcome to ' + applicationName + '!'}">
@@ -20,7 +20,7 @@
 </div>
 <br/>
 <div>
-    <th:block th:replace="~{frontend-resource/email-fragments::goodbye-text}"/>,
+    <th:block th:replace="~{frontend-resource/public/email-fragments::goodbye-text}"/>,
 </div>
 <div>
     Michal

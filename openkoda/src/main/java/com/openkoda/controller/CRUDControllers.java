@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,9 +23,10 @@ package com.openkoda.controller;
 
 import com.openkoda.core.customisation.CustomisationService;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
-import com.openkoda.dto.ServerJsDto;
-import com.openkoda.form.ServerJsForm;
+import com.openkoda.form.PageBuilderForm;
+import com.openkoda.model.FrontendResource;
 import com.openkoda.model.Privilege;
+import com.openkoda.repository.SecureFormRepository;
 import com.openkoda.repository.SecureFrontendResourceRepository;
 import com.openkoda.repository.SecureServerJsRepository;
 import com.openkoda.repository.organization.SecureOrganizationRepository;
@@ -35,9 +36,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
-import static com.openkoda.form.FrontendMappingDefinitions.frontendResourceForm;
-import static com.openkoda.form.FrontendMappingDefinitions.organizationsApi;
-import static com.openkoda.form.ServerJsFrontendMappingDefinitions.serverJsFrontendMappingDefinition;
+import static com.openkoda.form.FrontendMappingDefinitions.*;
 
 /**
  * Used for registration of generic controllers configurations {@link com.openkoda.core.form.CRUDControllerConfiguration} on application start.
@@ -57,6 +56,8 @@ public class CRUDControllers {
     SecureFrontendResourceRepository frontendResourceRepository;
     @Inject
     SecureOrganizationRepository secureOrganizationRepository;
+    @Inject
+    SecureFormRepository formRepository;
 
     /**
      * Registers generic controllers using {@link CustomisationService#registerOnApplicationStartListener(Consumer)}
@@ -66,21 +67,18 @@ public class CRUDControllers {
 
         customisationService.registerOnApplicationStartListener(
                 a -> htmlCrudControllerConfigurationMap.registerCRUDController(
-                                serverJsFrontendMappingDefinition, serverJsRepository, ReflectionBasedEntityForm.class)
-                        .setDtoClass(ServerJsDto.class)
-                        .setFormClass(ServerJsForm.class)
-                        .setGenericTableFields("name"));
-
+                                organizationsApi, secureOrganizationRepository, ReflectionBasedEntityForm.class, Privilege.readOrgData,Privilege.manageOrgData)
+                        .setGenericTableFields("id","name"));
+        customisationService.registerOnApplicationStartListener(
+                a -> htmlCrudControllerConfigurationMap.registerCRUDController(PAGE_BUILDER_FORM,
+                                PageBuilderForm.pageBuilderForm, frontendResourceRepository, PageBuilderForm.class, Privilege.canAccessGlobalSettings,Privilege.canAccessGlobalSettings)
+                        .setGenericTableFields("name","urlPath")
+                        .setAdditionalPredicate((r, q, cb) -> cb.equal(r.get("resourceType"), FrontendResource.ResourceType.DASHBOARD)));
         customisationService.registerOnApplicationStartListener(
                 a -> htmlCrudControllerConfigurationMap.registerCRUDController(
                                 frontendResourceForm, frontendResourceRepository, ReflectionBasedEntityForm.class)
                         .setGenericTableFields("name","includeInSitemap","type","urlPath")
                         .setTableView("frontend-resource-all"));
-
-        customisationService.registerOnApplicationStartListener(
-                a -> htmlCrudControllerConfigurationMap.registerCRUDController(
-                                organizationsApi, secureOrganizationRepository, ReflectionBasedEntityForm.class, Privilege.readOrgData,Privilege.manageOrgData)
-                        .setGenericTableFields("id","name"));
 
     }
 

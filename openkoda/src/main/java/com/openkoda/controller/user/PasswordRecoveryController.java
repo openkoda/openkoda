@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,6 +26,7 @@ import com.openkoda.core.security.OrganizationUser;
 import com.openkoda.form.PasswordChangeForm;
 import com.openkoda.model.User;
 import com.openkoda.model.authentication.LoggedUser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -106,7 +107,7 @@ public class PasswordRecoveryController extends AbstractController {
 
     @GetMapping(_RECOVERY + _VERIFY)
     @ResponseBody
-    public Object passwordRecoveryTokenCheck() {
+    public Object passwordRecoveryTokenCheck(HttpServletRequest request) {
         debug("[passwordRecoveryTokenCheck]");
         ModelAndView mav = new ModelAndView(
                 !passwordChangePageCustomUrl.isEmpty() ?
@@ -120,8 +121,7 @@ public class PasswordRecoveryController extends AbstractController {
     public Object passwordChangeForm() {
         debug("[passwordChangeForm]");
         ModelAndView mav = new ModelAndView(frontendResourceTemplateNamePrefix + "password-recovery");
-        Object user = SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (user instanceof OrganizationUser) {
             mav.addObject("passwordChangeForm", new PasswordChangeForm(((OrganizationUser) user).getUser().getId()));
         }
@@ -132,6 +132,14 @@ public class PasswordRecoveryController extends AbstractController {
     @ResponseBody
     public Object passwordChange(@Valid @ModelAttribute PasswordChangeForm passwordChangeForm) {
         debug("[passwordChange]");
+        OrganizationUser organizationUser = (OrganizationUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (organizationUser.getUserId() != passwordChangeForm.getUserId()) {
+            warn("[passwordChange] possible hacker attack - blocking password change");
+            SecurityContextHolder.clearContext();
+            ModelAndView mav =  new ModelAndView(frontendResourceTemplateNamePrefix + "password-recovery");
+            mav.addObject("passwordChangeForm", null);
+            return mav;
+        }
         User user = repositories.unsecure.user.findOne(passwordChangeForm.getUserId());
         services.user.changePassword(user, passwordChangeForm.getPassword());
         SecurityContextHolder.clearContext();

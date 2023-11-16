@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -33,6 +33,7 @@ import com.openkoda.core.helper.UrlHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.model.MutableUserInOrganization;
+import com.openkoda.service.export.YamlImportService;
 import jakarta.inject.Inject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +92,8 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
     @Inject
     private SlashEndingUrlInterceptor slashEndingUrlInterceptor;
 
+    @Inject
+    public YamlImportService yamlImportService;
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -136,7 +139,12 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
     @Description("Thymeleaf template resolver serving HTML 5")
     public ClassLoaderTemplateResolver templateResolver(QueryExecutor queryExecutor, FrontendResourceService frontendResourceService) {
 
-        FrontendResourceOrClassLoaderTemplateResolver templateResolver = new FrontendResourceOrClassLoaderTemplateResolver(queryExecutor, frontendResourceService, frontendResourceLoadAlwaysFromResources, frontendResourceCreateIfNotExist);
+        FrontendResourceOrClassLoaderTemplateResolver templateResolver = new FrontendResourceOrClassLoaderTemplateResolver(
+                queryExecutor,
+                frontendResourceService,
+                yamlImportService,
+                frontendResourceLoadAlwaysFromResources,
+                frontendResourceCreateIfNotExist);
         templateResolver.setPrefix("templates/");
         templateResolver.setCacheable(false);
         templateResolver.setSuffix(".html");

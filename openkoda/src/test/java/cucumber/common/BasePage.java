@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -45,9 +45,16 @@ public abstract class BasePage implements LoggingComponent {
     public void setValueFieldDefinition(FrontendMappingFieldDefinition field, String value) {
 
         String expr = "//*[starts-with(@name, 'dto') and contains(@name, '"+field.getName()+"')]";
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(expr)));
-        WebElement element = this.driver.findElement(By.xpath(expr));
-
+        WebElement element;
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(15)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(expr)));
+            element = this.driver.findElement(By.xpath(expr));
+        } catch (Exception e) {
+            System.out.println("Couldn't find expr " + expr + ". Trying again. Page Source for debug:");
+            System.out.println(driver.getPageSource());
+            new WebDriverWait(driver, Duration.ofSeconds(15)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath(expr)));
+            element = this.driver.findElement(By.xpath(expr));
+        }
         switch (field.type) {
             case dropdown_with_disable:
             case dropdown:

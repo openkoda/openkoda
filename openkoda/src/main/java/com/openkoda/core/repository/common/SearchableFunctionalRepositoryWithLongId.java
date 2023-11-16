@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,15 +21,29 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.repository.common;
 
-import com.openkoda.model.common.SearchableEntity;
-import jakarta.persistence.criteria.Predicate;
+import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.multitenancy.TenantResolver;
+import com.openkoda.core.security.HasSecurityRules;
+import com.openkoda.core.security.OrganizationUser;
+import com.openkoda.core.security.UserProvider;
+import com.openkoda.core.tracker.LoggingComponentWithRequestId;
+import com.openkoda.model.common.*;
+import com.openkoda.repository.SearchableRepositories;
+import jakarta.persistence.criteria.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
+import org.springframework.security.access.AccessDeniedException;
+
+import java.lang.reflect.Constructor;
+import java.util.*;
 
 /**
  * Most of the entities in Openkoda have Long ID.
@@ -43,7 +57,29 @@ import org.springframework.data.repository.query.Param;
  *
  */
 @NoRepositoryBean
-public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEntity> extends SecuredFunctionalRepositoryWithLongId<T> {
+public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEntity> extends FunctionalRepositoryWithLongId<T>, UnscopedSecureRepository<T>, ScopedSecureRepository<T>, JpaSpecificationExecutor<T>, ModelConstants, HasSecurityRules, LoggingComponentWithRequestId {
+
+    default <S extends T> boolean hasWritePrivilegeForEntity(SecurityScope scope, S s){
+        if(requiresPrivilege(s.getClass())){
+            String requiredPrivilege = ((EntityWithRequiredPrivilege) s).getRequiredWritePrivilege();
+            if (requiredPrivilege == null) {
+                return true;
+            }
+            Optional<OrganizationUser> userOptional = UserProvider.getFromContext();
+            if(userOptional.isPresent()){
+                OrganizationUser user = userOptional.get();
+                if(user.hasGlobalPrivilege(requiredPrivilege)){
+                    return true;
+                } else if(isOrganizationRelated(s.getClass())){
+                    Long organizationId = ((OrganizationRelatedEntity) s).getOrganizationId();
+                    return user.hasOrgPrivilege(requiredPrivilege, organizationId);
+                }
+            }
+        } else {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Constructs search specification using `LIKE` clause on 'indexString' field for each search term provided.
@@ -65,79 +101,271 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
     }
 
     /**
-     * Returns a result page for provided search term filtered by secure specification.
+     * Constructs search specification for organizationId field of the mapped repository entity.
      */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Pageable pageable) {
-        return this.findAll(searchSpecification(searchTerm), null, pageable);
+    default Specification<T> organizationIdSpecification(Long organizationId) {
+        return (root, query, cb) -> organizationId == null ? cb.conjunction() : cb.equal(root.get("organizationId"), organizationId);
     }
 
     /**
-     * Returns a result page for provided search term filtered by secure specification and privilege.
-     * The privilege filter works like that:
-     * - if the entity is not organization related then check if user has global requiredPrivilege
-     * - if the entity is organization related, then check if user had this privilege in that organization
-     * - if the entity is related to many organizations, then check if user had this privilege in any of these related organizations
+     * Specification that matches "id" (Long) for entities
      */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Enum requiredPrivilege, Pageable pageable) {
-        return this.findAll(searchSpecification(searchTerm), requiredPrivilege, pageable);
+    default Specification<T> idSpecification(Long id) {
+        return (root, query, cb) -> cb.equal(root.get("id"), id);
+    }
+
+    default Specification<T> idsSpecification(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return (root, query, cb) -> cb.disjunction();
+        }
+        return (root, query, cb) -> root.get("id").in(ids);
+    }
+
+    default Specification<T> fieldSpecification(String fieldName, Object value) {
+        return (root, query, cb) -> {
+            Expression<String> rr = (value instanceof String) ? cb.toString(root.get(fieldName)) : root.get(fieldName);
+            return cb.equal(rr, value);
+        };
     }
 
     /**
-     * Returns a result page for provided search term filtered by secure specification and provided additional specification.
+     * Specification that wraps provided specification with security checks
      */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Specification<T> additionalSpecification, Pageable pageable) {
-        Specification<T> specification = Specification.where(searchSpecification(searchTerm)).and(additionalSpecification);
-        return this.findAll(specification, null, pageable);
+    default Specification<T> secureSpecification(SecurityScope scope, Specification<T> specification, Enum requiredPrivilege) {
+
+        return new Specification<T>() {
+            @Override
+            public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                return toSecurePredicate(specification, requiredPrivilege, root, query, cb, scope);
+            }
+        };
+
     }
 
     /**
-     * Returns a result page for provided search term filtered by additional requiredPrivilege, secure specification and provided additional specification.
-     * For requiredPrivilege contract, see {@link #search(String, Enum, Pageable)}
+     * Specification that wraps provided specification with security checks and imposes constraints on organization
      */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Specification<T> additionalSpecification, Enum requiredPrivilege, Pageable pageable) {
-        Specification<T> specification = Specification.where(searchSpecification(searchTerm)).and(additionalSpecification);
-        return this.findAll(specification, requiredPrivilege, pageable);
+    default Specification<T> secureSpecification(SecurityScope scope, Specification<T> specification, Enum requiredPrivilege, Long organizationId){
+        return secureSpecification(scope, Specification.where(specification).and(organizationIdSpecification(organizationId)), requiredPrivilege);
     }
 
-    /**
-     * Returns a result page related to specified organization for provided search term filtered by secure specification.
-     */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Long organizationId, Pageable pageable) {
-        return this.findAll(searchSpecification(searchTerm), null, organizationId, pageable);
-    }
-
-    /**
-     * Returns a result page related to specified organization for provided additional requiredPrivilege and search term filtered by secure specification.
-     * For requiredPrivilege contract, see {@link #search(String, Enum, Pageable)}
-     */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Long organizationId, Enum requiredPrivilege, Pageable pageable) {
-        return this.findAll(searchSpecification(searchTerm), requiredPrivilege, organizationId, pageable);
-    }
-
-    /**
-     * Returns a result page related to specified organization for provided additional specification and search term filtered by secure specification.
-     */
-    default Page<T> search(String searchTerm, Long organizationId, Specification<T> additionalSpecification, Pageable pageable) {
-        return search(searchTerm.split(" "), organizationId, additionalSpecification, pageable);
-    }
-
-    /**
-     * Returns a result page related to specified organization for provided additional specification and search terms filtered by secure specification.
-     * See {@link #searchSpecification(String...)} for search term filtering routine.
-     */
-    default Page<T> search(String[] searchTerms, Long organizationId, Specification<T> additionalSpecification, Pageable pageable) {
-        Specification<T> specification = Specification.where(searchSpecification(searchTerms)).and(additionalSpecification);
-        return this.findAll(specification, null, organizationId, pageable);
-    }
-
-    /**
-     * Returns a result page related to specified organization for provided additional requiredPrivilege, additional specification and search term filtered by secure specification.
-     * For requiredPrivilege contract, see {@link #search(String, Enum, Pageable)}
-     */
-    default Page<T> search(@Param("searchTerm") String searchTerm, Long organizationId, Specification<T> additionalSpecification, Enum requiredPrivilege, Pageable pageable) {
-        Specification<T> specification = Specification.where(searchSpecification(searchTerm)).and(additionalSpecification);
-        return this.findAll(specification, requiredPrivilege, organizationId, pageable);
+    @Override
+    default List<T> search(SecurityScope scope, String fieldName, Object value) {
+        Specification<T> s = fieldSpecification(fieldName, value);
+        return this.findAll(secureSpecification(scope, s, null));
     }
 
 
+    @Override
+    default List<T> search(SecurityScope scope, Specification<T> specification) {
+        return this.findAll(secureSpecification(scope, specification, null));
+    }
+
+    @Override
+    default List<T> search(SecurityScope scope, Long organizationId) {
+        return this.findAll(secureSpecification(scope, null, null, organizationId));
+    }
+
+    @Override
+    default List<T> search(SecurityScope scope, Long organizationId, Specification<T> specification) {
+        return this.findAll(secureSpecification(scope, specification, null, organizationId));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, null, null), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, Specification<T> specification, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, specification, null), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, Long organizationId, Specification<T> specification, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, specification, null, organizationId), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm), null), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, Specification<T> specification, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification), null), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, int page, int size, String sortField, String sortDirection) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm), null, organizationId), PageRequest.of(page, size, Sort.Direction.valueOf(sortDirection), sortField));
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification), null, organizationId), pageable);
+    }
+
+    @Override
+    default T findOne(SecurityScope scope, Object idOrEntityOrSpecification) {
+        if (idOrEntityOrSpecification == null) { return null; }
+        Long id = extractEntityId(idOrEntityOrSpecification);
+        if (idOrEntityOrSpecification instanceof Specification s) {
+            return findOne(secureSpecification(scope, (Specification<T>)s, null)).orElse(null);
+        }
+        return findOne(secureSpecification(scope, idSpecification(id), null)).orElse(null);
+    }
+
+    @Nullable
+    private static Long extractEntityId(Object idOrEntityOrSpecification) {
+        Long id = null;
+        if (idOrEntityOrSpecification instanceof Number n) {
+            id = n.longValue();
+        } else if (idOrEntityOrSpecification instanceof String s) {
+            id = Long.parseLong(s);
+        } else if (idOrEntityOrSpecification instanceof LongIdEntity e) {
+            id = e.getId();
+        }
+        return id;
+    }
+
+    @Override
+    default List<T> findAll(SecurityScope scope) {
+        return findAll(secureSpecification(scope, null, null));
+    }
+
+    @Override
+    default <S extends T> S saveOne(SecurityScope scope, S entity) {
+        if(hasWritePrivilegeForEntity(scope, entity)){
+            return save(entity);
+        }
+        throw new AccessDeniedException("Operation not allowed");
+    }
+
+    @Override
+    default <S extends T> S saveForm(SecurityScope scope, S entity, AbstractEntityForm form) {
+        form.populateToEntity((LongIdEntity) entity);
+        return saveOne(scope, entity);
+    }
+
+    @Override
+    default <S extends T> List<S> saveAll(SecurityScope scope, Object entitiesCollection) {
+        Iterable<S> iterable = null;
+        if (entitiesCollection == null) {
+            return null;
+        }
+        if (entitiesCollection.getClass().isArray()) {
+            iterable = Arrays.asList((S[]) entitiesCollection);
+        } else if (entitiesCollection instanceof Iterable i) {
+            iterable = i;
+        }
+        for (S s : iterable) {
+            if(!hasWritePrivilegeForEntity(scope, s)){
+                throw new AccessDeniedException("Operation not allowed");
+            }
+        }
+        return saveAll(iterable);
+    }
+
+    @Override
+    default boolean deleteOne(SecurityScope scope, Object idOrEntity) {
+        if (idOrEntity == null) {return false;}
+        Long entityId = extractEntityId(idOrEntity);
+        //TODO: check writePrivilege
+//        if(hasWritePrivilegeForEntity(t)){
+        long deletedCount = delete(idSpecification(entityId));
+        return deletedCount > 0;
+//            return true;
+//        }
+//        throw new AccessDeniedException("Operation not allowed");
+    }
+
+    @Override
+    default long deleteAll(SecurityScope scope, Object idsOrEntitiesCollectionOrSpecification) {
+        if (idsOrEntitiesCollectionOrSpecification == null) {
+            return 0;
+        }
+        if (idsOrEntitiesCollectionOrSpecification instanceof Specification<?> s) {
+            return delete(secureSpecification(scope, (Specification<T>) s, null));
+        }
+        List<Long> ids = toIdList(idsOrEntitiesCollectionOrSpecification);
+        return delete(secureSpecification(scope, idsSpecification(ids), null));
+    }
+
+    @Override
+    default boolean existsOne(SecurityScope scope, Object idOrEntity) {
+        if (idOrEntity == null) {return false;}
+        Long entityId = extractEntityId(idOrEntity);
+        boolean entityExists = exists(secureSpecification(scope, idSpecification(entityId), null));
+        return entityExists;
+    }
+
+    @Override
+    default boolean existsAny(SecurityScope scope, Object idsOrEntitiesCollectionOrSpecification) {
+        if (idsOrEntitiesCollectionOrSpecification == null) {
+            return false;
+        }
+        if (idsOrEntitiesCollectionOrSpecification instanceof Specification<?> s) {
+            return exists(secureSpecification(scope, (Specification<T>) s, null));
+        }
+        List<Long> ids = toIdList(idsOrEntitiesCollectionOrSpecification);
+        return exists(secureSpecification(scope, idsSpecification(ids), null));
+    }
+
+    private static List<Long> toIdList(Object idsOrEntitiesCollection) {
+        Iterable iterable = null;
+        if (idsOrEntitiesCollection.getClass().isArray()) {
+            iterable = Arrays.asList((Object[]) idsOrEntitiesCollection);
+        } else if (idsOrEntitiesCollection instanceof Iterable i) {
+            iterable = i;
+        }
+        if (iterable != null) {
+            List<Long> ids = new ArrayList<>();
+            for (Object i : iterable) {
+                Long id = extractEntityId(i);
+                if (id != null) { ids.add(id); }
+            }
+            return ids;
+        }
+        return null;
+    }
+
+    @Override
+    default long count(SecurityScope scope) {
+        return count(secureSpecification(scope, null, null));
+    }
+
+    @Override
+    default long count(SecurityScope scope, String fieldName, Object value) {
+        return count(secureSpecification(scope, fieldSpecification(fieldName, value), null));
+    }
+
+    @Override
+    default long count(SecurityScope scope, Specification<T> specification) {
+        return count(secureSpecification(scope, specification, null));
+    }
+
+    @Override
+    default long count(SecurityScope scope, Long organizationId, Specification<T> specification) {
+        return count(secureSpecification(scope, specification, null, organizationId));
+    }
+    @Override
+    default T getNew() {
+        try {
+            Class entityClass = SearchableRepositories.getGlobalSearchableRepositoryAnnotation(this).entityClass();
+            Constructor c = entityClass.getConstructor(Long.class);
+            T obj = (T) c.newInstance(TenantResolver.getTenantedResource().organizationId);
+            return obj;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    default SearchableRepositoryMetadata getSearchableRepositoryMetadata() {
+        Class<?>[] interfaces = this.getClass().getInterfaces();
+        if (interfaces == null || interfaces.length == 0) { return null; }
+        SearchableRepositoryMetadata gsa = interfaces[0].getAnnotation(SearchableRepositoryMetadata.class);
+        return gsa;
+    }
 }

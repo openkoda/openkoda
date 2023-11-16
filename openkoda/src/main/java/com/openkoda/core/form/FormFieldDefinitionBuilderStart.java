@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -24,6 +24,7 @@ package com.openkoda.core.form;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.openkoda.model.Organization;
 import com.openkoda.model.PrivilegeBase;
+import com.openkoda.repository.SecureEntityDictionaryRepository;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDate;
@@ -31,10 +32,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.openkoda.core.form.FieldType.*;
 import static com.openkoda.core.form.FrontendMappingFieldDefinition.createFormFieldDefinition;
+import static com.openkoda.core.form.FrontendMappingFieldDefinition.createNonDtoFormFieldDefinition;
 
 public class FormFieldDefinitionBuilderStart {
     private static final String DATALIST_PREFIX = "__datalist_";
@@ -58,7 +61,12 @@ public class FormFieldDefinitionBuilderStart {
         this.defaultWritePrivilege = defaultWritePrivilege;
     }
 
-    public FormFieldDefinitionBuilder<Object> datalist(String datalistId, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<Object> datalist(String datalistId, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
+        fields.add(lastField = createFormFieldDefinition(formName, DATALIST_PREFIX + datalistId, datalistId, datalist, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<Object>)this;
+    }
+
+    public FormFieldDefinitionBuilder<Object> datalist(String datalistId, Function<SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, DATALIST_PREFIX + datalistId, datalistId, datalist, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
@@ -98,6 +106,7 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
+
 //    public FormFieldDefinitionBuilder<Object> oneToMany(String fieldName, String urlToAddObjectToList, String datalistId, Function<AbstractForm, Object> datalistSupplier, String componentFragmentName) {
 //        fields.add( lastField = createFormFieldDefinition(formName, fieldName, one_to_many, defaultReadPrivilege, defaultWritePrivilege, urlToAddObjectToList, datalistId, datalistSupplier, componentFragmentName));
 //        return (FormFieldDefinitionBuilder<Object>)this;
@@ -113,7 +122,7 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
-    public FormFieldDefinitionBuilder<String> dropdown(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<String> dropdown(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, dropdown, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
@@ -128,7 +137,7 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
-    public FormFieldDefinitionBuilder<String> dropdownWithDisable(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<String> dropdownWithDisable(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, dropdown_with_disable, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
@@ -138,17 +147,17 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
-    public FormFieldDefinitionBuilder<String> sectionWithDropdown(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<String> sectionWithDropdown(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, section_with_dropdown, null, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
     public FormFieldDefinitionBuilder<String> dropdownNonDto(String fieldName, String datalistId) {
-        fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, dropdown, defaultReadPrivilege, defaultWritePrivilege));
+        fields.add(lastField = createNonDtoFormFieldDefinition(formName, fieldName, datalistId, dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
-    public FormFieldDefinitionBuilder<String> checkboxList(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<String> checkboxList(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, fieldName, checkbox_list, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
@@ -159,7 +168,7 @@ public class FormFieldDefinitionBuilderStart {
     }
 
     public FormFieldDefinitionBuilder<Long> organizationSelect(String fieldName) {
-        datalist("organizations", f -> f.getDictionaryRepository().dictionary(Organization.class));
+        datalist("organizations", d -> d.dictionary(Organization.class));
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, "organizations", true, organization_select, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Long>)this;
     }
@@ -168,7 +177,7 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<Object>)this;
     }
 
-    public FormFieldDefinitionBuilder<Object> radioListNoLabel(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<Object> radioListNoLabel(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, radio_list_no_label, null, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
@@ -203,8 +212,12 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
-    public FormFieldDefinitionBuilder<String> codeWithAutocomplete(String fieldName) {
-        fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_with_autocomplete, defaultReadPrivilege, defaultWritePrivilege));
+    public FormFieldDefinitionBuilder<String> codeWithWebendpointAutocomplete(String fieldName) {
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_with_webendpoint_autocomplete, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<String>)this;
+    }
+    public FormFieldDefinitionBuilder<String> codeWithFormAutocomplete(String fieldName) {
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_with_form_autocomplete, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
@@ -253,17 +266,23 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<Object>)this;
     }
 
-    public FormFieldDefinitionBuilder<Object> imagesLibrary(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<Object> map(String fieldName) {
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, map, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<Object>) this;
+    }
+
+
+    public FormFieldDefinitionBuilder<Object> imagesLibrary(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, files_library, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, "image/png,image/jpeg", filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
 
-    public FormFieldDefinitionBuilder<Object> imageLibrary(String fieldName, Function<AbstractForm, Object> datalistSupplier) {
+    public FormFieldDefinitionBuilder<Object> imageLibrary(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, file_library, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, "image/png,image/jpeg", filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
 
-    public FormFieldDefinitionBuilder<Object> files(String fieldName, Function<AbstractForm, Object> datalistSupplier, String mimeType) {
+    public FormFieldDefinitionBuilder<Object> files(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier, String mimeType) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, files, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, mimeType, filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
@@ -288,7 +307,7 @@ public class FormFieldDefinitionBuilderStart {
         return (FormFieldDefinitionBuilder<Object>)this;
     }
 
-    public FormFieldDefinitionBuilder<Object> ruleThen(String fieldName, Function<AbstractForm, Object> datalistSupplier, String url) {
+    public FormFieldDefinitionBuilder<Object> ruleThen(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier, String url) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName,null, url, rule_then, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }

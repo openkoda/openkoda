@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -28,7 +28,7 @@ import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FieldType;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.service.FrontendResourceService;
-import com.openkoda.dto.system.CmsDto;
+import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.model.FrontendResource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -37,11 +37,11 @@ import org.springframework.validation.BindingResult;
  * @author Martyna Litkowska (mlitkowska@stratoflow.com)
  * @since 2019-02-19
  */
-public class FrontendResourceForm<CD extends CmsDto> extends AbstractOrganizationRelatedEntityForm<CD, FrontendResource> {
+public class FrontendResourceForm<CD extends FrontendResourceDto> extends AbstractOrganizationRelatedEntityForm<CD, FrontendResource> {
 
 
     public FrontendResourceForm() {
-        super(null, (CD)new CmsDto(), null, FrontendMappingDefinitions.frontendResourceForm);
+        super(null, (CD)new FrontendResourceDto(), null, FrontendMappingDefinitions.frontendResourceForm);
     }
 
     public FrontendResourceForm(FrontendMappingDefinition frontendMappingDefinition) {
@@ -57,7 +57,7 @@ public class FrontendResourceForm<CD extends CmsDto> extends AbstractOrganizatio
     }
 
     public FrontendResourceForm(Long organizationId, FrontendResource entity, FrontendMappingDefinition frontendMappingDefinition) {
-        super(organizationId, (CD)new CmsDto(), entity, frontendMappingDefinition);
+        super(organizationId, (CD)new FrontendResourceDto(), entity, frontendMappingDefinition);
     }
 
     public FrontendResourceForm(Long organizationId, CD dto, FrontendResource entity, FrontendMappingDefinition frontendMappingDefinition) {
@@ -69,12 +69,13 @@ public class FrontendResourceForm<CD extends CmsDto> extends AbstractOrganizatio
         debug("[populateFrom] {}", entity);
         dto.name = entity.getName();
         dto.organizationId = entity.getOrganizationId();
-        dto.urlPath = entity.getUrlPath();
         dto.content = entity.isDraft() ? entity.getDraftContent() : entity.getContent();
         dto.contentEditable = FrontendResourceService.CONTENT_EDITABLE_BEGIN + StringUtils.substringBetween(dto.content, FrontendResourceService.CONTENT_EDITABLE_BEGIN, FrontendResourceService.CONTENT_EDITABLE_END) + FrontendResourceService.CONTENT_EDITABLE_END;
         dto.requiredPrivilege = entity.getRequiredPrivilege();
         dto.includeInSitemap = entity.getIncludeInSitemap();
         dto.type = entity.getType();
+        dto.embeddable = entity.isEmbeddable();
+        dto.accessLevel = entity.getAccessLevel();
         return this;
     }
 
@@ -96,11 +97,14 @@ public class FrontendResourceForm<CD extends CmsDto> extends AbstractOrganizatio
     protected FrontendResource populateTo(FrontendResource entity) {
         entity.setName(getSafeValue(entity.getName(), NAME_));
         entity.setOrganizationId(getSafeValue(entity.getOrganizationId(), ORGANIZATION_ID_));
-        entity.setUrlPath(getSafeValue(entity.getUrlPath(), URL_PATH_, nullIfBlank));
         entity.setDraftContent(getSafeValue(entity.getDraftContent(), CONTENT_, nullIfBlank));
         entity.setType(getSafeValue(entity.getType(), TYPE_));
         entity.setIncludeInSitemap(getSafeValue(entity.getIncludeInSitemap(), INCLUDE_IN_SITEMAP_));
+        entity.setEmbeddable(getSafeValue(entity.isEmbeddable(), EMBEDDABLE_));
+        entity.setOrganizationId(getSafeValue(entity.getOrganizationId(), ORGANIZATION_ID_));
+        entity.setAccessLevel(getSafeValue(entity.getAccessLevel(), ACCESS_LEVEL));
         entity.setRequiredPrivilege(getSafeValue(entity.getRequiredPrivilege(), REQUIRED_PRIVILEGE_, nullIfBlank));
+        entity.setResourceType(FrontendResource.ResourceType.RESOURCE);
         return entity;
     }
 

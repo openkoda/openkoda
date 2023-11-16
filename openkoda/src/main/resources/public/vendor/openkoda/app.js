@@ -59,6 +59,7 @@ app.confirmThenSubmitAsyncAndCallback = function( domForm, confirm, callback, fa
 };
 
 app.submitToUrlAndCallback = function( domForm, targetUrl, callback ) {
+    $(domForm).dirty("setAsClean");
     let form = $(domForm);
     let isPostMethod = 'post' === form.get(0).method;
     let params = {
@@ -81,6 +82,7 @@ app.submitToUrlAndCallback = function( domForm, targetUrl, callback ) {
 };
 
 app.submitToUrlAsync = function( domForm, targetUrl ) {
+    $(domForm).dirty("setAsClean");
     let form = $(domForm);
     let postParam = {
         url : targetUrl,
@@ -90,6 +92,7 @@ app.submitToUrlAsync = function( domForm, targetUrl ) {
 };
 
 app.submitJsonToUrlAndCallback = function( domForm, targetUrl, callback ) {
+    $(domForm).dirty("setAsClean");
     let form = $(domForm);
     let postParam = {
         url : targetUrl,
@@ -109,6 +112,7 @@ app.submitJsonToUrlAndCallback = function( domForm, targetUrl, callback ) {
 };
 
 app.submitToUrlToNewTab = function( domForm, targetUrl ) {
+    $(domForm).dirty("setAsClean");
     let currentAction = domForm.action;
     let currentTarget = domForm.target;
     domForm.action = targetUrl;
@@ -126,7 +130,7 @@ app.submitToUrlAndCallbackOrElseFailure = function( domForm, callback, failureCa
             failureCallback(error, form);
         },
         success: function(data) {
-            if (app.assertNotRedirectToLogin(data) && app.assertNotRedirectToLoginOrError(data)) {
+            if (!data.isError && app.assertNotRedirectToLogin(data) && app.assertNotRedirectToLoginOrError(data)) {
                 if(typeof callback == "function") {
                     callback( data, form );
                 }
@@ -182,6 +186,7 @@ app.submitCheckboxAndCallback = function( element, formId, callback) {
 
 
 app.submitToUrlAndReplace = function( domForm , targetUrl) {
+    $(domForm).dirty("setAsClean");
     let form = $(domForm);
     let formParent = form.closest('.form-parent');
     let postParam = {
@@ -197,6 +202,7 @@ app.submitToUrlAndReplace = function( domForm , targetUrl) {
 };
 
 app.confirmAndSubmitAndCallback = function(confirmText, domForm, callback ) {
+  $(domForm).dirty("setAsClean");
   var confirmation = confirm(confirmText);
   if(confirmation){
       let form = $(domForm);
@@ -296,22 +302,22 @@ app.createFileGalleryCard = function(fieldName, file, selected, multipleSelectio
     let confirmationText = "Are you sure?";
     let callback = "data => app.removeElemOnSuccess(&quot;" + cardId + "&quot;, data, function() {alert(&quot;File could not be deleted.&quot;)})";
 
-    return "<div id='" + cardId + "' class='card' style='height:fit-content; width:12%; margin: 0 0.5% 4px; padding:0; overflow:hidden; text-align:center'>"
+    return "<div id='" + cardId + "' class='card file-card'>"
            + (entityRelated? "" : "<div style='padding:5px;' class=''><span style='display:inline-block;vertical-align: baseline; width:1.25em;'><input type='" + fieldType + "' name='" + fieldName + "' value='" + file.id + "'" + selectedPart + "/></span>Select<br/>")
            + (entityRelated? "<input type='checkbox' name='" + fieldName + "' value='" + file.id + "'" + " checked='checked' " +"style='visibility:hidden;'/>" : "")
            + "<p class='card-text' style='font-size:0.75em'>" + file.filename + "</p>"
-           + (isImage ? "<img class='' style='object-fit: cover; width:100%; height:100px;margin: 0 auto;' src='" + file.downloadUrl + "'/>" :
-                (isVideo ? "<video controls width='100%' height='100'><source src='" + file.downloadUrl + "'/></video>" : ""))
+           + (isImage ? "<img class='' style='object-fit: cover; width:100%; height:150px;margin: 0 auto;' src='" + file.downloadUrl + "'/>" :
+                (isVideo ? "<video controls width='100%' height='150'><source src='" + file.downloadUrl + "'/></video>" : ""))
            + (entityRelated? "" : "</div>")
            + "<div>"
-           + "<button class='btn btn-i btn-sm m-1' onclick='app.swapWithPrev(&quot;file-card-" + file.id + "&quot;)' type='button'>"
+           + "<button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithPrev(&quot;file-card-" + file.id + "&quot;)' type='button'>"
            + "<i class='fas fa-chevron-left'></i></button>"
-           + "<button class='btn btn-i btn-sm m-1' onclick='app.swapWithNext(&quot;file-card-" + file.id + "&quot;)' type='button'>"
+           + "<button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithNext(&quot;file-card-" + file.id + "&quot;)' type='button'>"
            + "<i class='fas fa-chevron-right'></i></button>"
            + "</div>"
            + "<div>"
-           + "<a class='btn btn-i btn-sm m-1' href='" + file.downloadUrl + "' download='" + file.filename + "'><i class='fas fa-download'></i></a>"
-           + (entityRelated? "<button type='button' class='btn btn-i btn-sm mr-1' onclick='app.confirmSubmitToUrlAndCallback(&quot;" + confirmationText + "&quot;, this.form, &quot;" + file.deleteUrl + "&quot;," + callback + ")'><i class='fas fa-trash-alt'></i></button>" : "")
+           + "<a class='files-btn btn btn-i btn-sm m-1' href='" + file.downloadUrl + "' download='" + file.filename + "'><i class='fas fa-download'></i></a>"
+           + (entityRelated? "<button type='button' class='files-btn btn btn-i btn-sm mr-1' onclick='app.confirmSubmitToUrlAndCallback(&quot;" + confirmationText + "&quot;, this.form, &quot;" + file.deleteUrl + "&quot;," + callback + ")'><i class='fas fa-trash-alt'></i></button>" : "")
            + "</div>"
            + "</div>"
            ;
@@ -760,3 +766,4 @@ app.initHtmlIdHolder = function(frontendResourceId, editorId, selector) {
     idHolder.setAttribute('data-restored', false);
     document.querySelector(selector).appendChild(idHolder);
 }
+

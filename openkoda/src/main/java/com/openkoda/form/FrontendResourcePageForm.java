@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -26,7 +26,7 @@ package com.openkoda.form;
 
 import com.openkoda.core.helper.ReadableCode;
 import com.openkoda.core.helper.UrlHelper;
-import com.openkoda.dto.CmsPageDto;
+import com.openkoda.dto.FrontendResourcePageDto;
 import com.openkoda.dto.file.FileDto;
 import com.openkoda.model.FrontendResource;
 import com.openkoda.model.file.File;
@@ -35,26 +35,26 @@ import org.springframework.validation.BindingResult;
 
 import java.util.regex.Pattern;
 
-public class FrontendResourcePageForm extends FrontendResourceForm<CmsPageDto> implements ReadableCode {
+public class FrontendResourcePageForm extends FrontendResourceForm<FrontendResourcePageDto> implements ReadableCode {
 
     public FrontendResourcePageForm() {
         super(FrontendMappingDefinitions.frontendResourcePageForm);
     }
 
     public FrontendResourcePageForm(Long organizationId, FrontendResource frontendResource) {
-        super(organizationId, new CmsPageDto(), frontendResource, FrontendMappingDefinitions.frontendResourcePageForm);
+        super(organizationId, new FrontendResourcePageDto(), frontendResource, FrontendMappingDefinitions.frontendResourcePageForm);
     }
 
     @Override
     public FrontendResourcePageForm validate(BindingResult br) {
-        if (StringUtils.isBlank(dto.urlPath)) {
-            br.rejectValue("dto.urlPath", "not.empty");
+        if (StringUtils.isBlank(dto.name)) {
+            br.rejectValue("dto.name", "not.empty");
         }
-        if (not(Pattern.matches("[a-z\\-\\/0-9]+", dto.urlPath))) {
-            br.rejectValue("dto.urlPath", "simple.path");
+        if (not(Pattern.matches("[a-z\\-\\/0-9]+", dto.name))) {
+            br.rejectValue("dto.name", "simple.path");
         }
-        if (StringUtils.startsWith(dto.urlPath, "/")) {
-            br.rejectValue("dto.urlPath", "not.slash.prefix");
+        if (StringUtils.startsWith(dto.name, "/")) {
+            br.rejectValue("dto.name", "not.slash.prefix");
         }
         return this;
     }
@@ -65,9 +65,8 @@ public class FrontendResourcePageForm extends FrontendResourceForm<CmsPageDto> i
 
     @Override
     protected FrontendResource populateTo(FrontendResource entity) {
-        entity.setUrlPath(getSafeValue(entity.getUrlPath(), URL_PATH_, nullIfBlank));
         entity.setName(getSafeValue(entity.getName(), URL_PATH_));
-        entity.setType(FrontendResource.Type.PAGE);
+        entity.setType(FrontendResource.Type.HTML);
         entity.setIncludeInSitemap(true);
         return entity;
     }

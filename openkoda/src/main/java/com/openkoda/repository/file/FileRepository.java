@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -29,6 +29,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 /**
  *
@@ -37,6 +39,8 @@ import org.springframework.stereotype.Repository;
 public interface FileRepository extends UnsecuredFunctionalRepositoryWithLongId<File>, HasSecurityRules {
 
     File findByUploadUuid(String uploadUuid);
+
+    List<File> findByContentTypeStartsWith(String contentTypePrefix);
 
     File findByIdAndPublicFileTrue(Long fileId);
 

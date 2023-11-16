@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
  and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -26,6 +26,7 @@ package com.openkoda.core.helper;
 
 import com.openkoda.controller.common.URLConstants;
 import com.openkoda.core.multitenancy.TenantResolver;
+import com.openkoda.model.FrontendResource;
 import com.openkoda.model.Organization;
 import com.openkoda.model.common.LongIdEntity;
 import com.openkoda.model.event.EventListenerEntry;
@@ -359,24 +360,32 @@ public class UrlHelper implements URLConstants, ReadableCode {
     public String zipFrontendResource() {
         return operation(FRONTENDRESOURCE, _ZIP);
     }
-
 //    FRONTEND ELEMENTS
 
     public String allUIComponents() {
-        return all(WEBENDPOINTS);
+        return all(WEBENDPOINT);
     }
 
     public String newUIComponent() {
-        return form(WEBENDPOINTS);
+        return form(WEBENDPOINT);
     }
 
     public String UIComponentSettings(long UIComponentId) {
-        return form(WEBENDPOINTS, UIComponentId);
+        return form(WEBENDPOINT, UIComponentId);
     }
 
-//    SERVER JS URLS
+//    FORM URLS
+    public String allForm() {
+        return all(FORM);
+    }
+
+
+    //    SERVER JS URLS
     public String allServerJs() {
         return all(SERVERJS);
+    }
+    public String allPageBuilder() {
+        return all(PAGEBUILDER);
     }
 
     public String allThreads() {
@@ -441,7 +450,6 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return operation(LOGS, _SETTINGS);
     }
 
-    //    PAGE URLS
 
 //   NOTIFICATIONS
 
@@ -474,6 +482,53 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String getAffiliationLink(String affiliationCode) {
         return baseUrl + "?aff_code=" + affiliationCode;
+    }
+
+//  YAML EXPORT
+
+    public String exportAllYamlResources(){
+        return operation(ORGANIZATION, _EXPORT_YAML + _ALL);
+    }
+    public String exportAllYamlResourcesForOrg(long id) {
+        return operation(ORGANIZATION, id, _EXPORT_YAML + _ALL);
+    }
+    public String yamlAllFrontendResources(){
+        return operation(FRONTENDRESOURCE, _EXPORT_YAML);
+    }
+
+    public String yamlAllUiComponents(){
+        return operation(UI_COMPONENT,  _EXPORT_YAML);
+    }
+
+    public String yamlAllFormResources(){
+        return operation(FORM, _EXPORT_YAML);
+    }
+    public String yamlAllServerJsResources(){
+        return operation(SERVERJS, _EXPORT_YAML);
+    }
+
+    public String yamlAllEventResources(){
+        return operation(EVENTLISTENER, _EXPORT_YAML);
+    }
+
+    public String yamlAllSchedulerResources(){
+        return operation(SCHEDULER, _EXPORT_YAML);
+    }
+
+    public String yamlFrontendResource(long id){
+        return operation(FRONTENDRESOURCE, id, _EXPORT_YAML);
+    }
+    public String yamlServerJs(long id){
+        return operation(SERVERJS, id, _EXPORT_YAML);
+    }
+    public String yamlForm(long id){
+        return operation(FORM, id, _EXPORT_YAML);
+    }
+    public String yamlEventListener(long id){
+        return operation(EVENTLISTENER, id, _EXPORT_YAML);
+    }
+    public String yamlScheduler(long id){
+        return operation(SCHEDULER, id, _EXPORT_YAML);
     }
 
 //    OTHER
@@ -592,30 +647,67 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public TenantResolver.TenantedResource getTenantedResource(HttpServletRequest request) {
         Matcher m = organizationIdAndEntityKeyPath.matcher(request.getServletPath());
+        String orgIdParam = request.getParameter(ORGANIZATIONID);
+        String orgIdString;
 
         if (not(m.matches())) {
             return TenantResolver.nonExistingTenantedResource;
+        } else {
+            orgIdString = m.group(2);
         }
 
-        String orgIdString = m.group(2);
+        if(StringUtils.isEmpty(orgIdString)) {
+            orgIdString = orgIdParam;
+        }
+
+        if(!StringUtils.isEmpty(orgIdParam)) {
+            if(!orgIdString.equals(orgIdParam)) {
+                throw new RuntimeException("Access denied");
+            }
+        }
+
         Long orgId = orgIdString == null ? null : Long.parseLong(orgIdString);
         String entityKey = m.group(3);
-        return new TenantResolver.TenantedResource(orgId, request.getLocalAddr(), entityKey, request.getMethod());
+
+        if(entityKey.equals(CN) || entityKey.equals(CI)) {
+            entityKey = null;
+        }
+
+        FrontendResource.AccessLevel accessLevel = null;
+
+        if (!request.getRequestURI().contains(_HTML)) {
+            accessLevel = FrontendResource.AccessLevel.PUBLIC;
+        } else if (request.getRequestURI().contains(_HTML) && !request.getRequestURI().contains(_ORGANIZATION)) {
+            accessLevel = FrontendResource.AccessLevel.GLOBAL;
+        } else if (request.getRequestURI().contains(_HTML_ORGANIZATION)) {
+            accessLevel = FrontendResource.AccessLevel.ORGANIZATION;
+        }
+
+        return new TenantResolver.TenantedResource(orgId, request.getLocalAddr(), entityKey, request.getMethod(), accessLevel);
     }
 
     public int randomInt(int fromInclusive, int toExclusive) {
         return fromInclusive + random.nextInt(toExclusive - fromInclusive);
     }
 
-    public String getUiComponentPreviewUrl(Long organizationId, String frontendResourceUrl, boolean isPublic) {
-        return baseUrl + (isPublic ? "" :
-                (organizationId == null ? _HTML + _WEBENDPOINTS : _HTML_ORGANIZATION + "/" + organizationId + _WEBENDPOINTS))
-                + "/" + frontendResourceUrl + "?draft=true";
+    public String getUiComponentPreviewUrl(Long organizationId, String frontendResourceUrl, FrontendResource.AccessLevel accessLevel) {
+        String accessLevelPath = "";
+        String orgIdParam = (organizationId != null ? "&organizationId=" + organizationId : "");
+
+        if (accessLevel.equals(FrontendResource.AccessLevel.GLOBAL)) {
+            accessLevelPath = _HTML;
+        } else if (accessLevel.equals(FrontendResource.AccessLevel.ORGANIZATION)) {
+            accessLevelPath = _HTML_ORGANIZATION + (organizationId != null ? "/" + organizationId : "");
+            orgIdParam = "";
+        }
+
+        return accessLevelPath + _CN + "/" + frontendResourceUrl + "?draft=true" + orgIdParam;
     }
 
     public String getUiComponentSettingsUrl(Long organizationId, Long frontendResourceId) {
         return baseUrl +
-                (organizationId == null ? _HTML + _WEBENDPOINTS : _HTML_ORGANIZATION + "/" + organizationId + _WEBENDPOINTS)
+                (organizationId == null ? _HTML + _WEBENDPOINT : _HTML_ORGANIZATION + "/" + organizationId + _WEBENDPOINT)
                 + "/" + frontendResourceId + _SETTINGS;
     }
+
 }

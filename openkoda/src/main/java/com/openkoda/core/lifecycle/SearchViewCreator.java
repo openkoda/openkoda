@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -23,7 +23,7 @@ package com.openkoda.core.lifecycle;
 
 import com.openkoda.core.helper.SpringProfilesHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.model.Organization;
 import com.openkoda.model.common.*;
@@ -53,13 +53,13 @@ public class SearchViewCreator implements LoggingComponentWithRequestId {
             queryString = "DROP VIEW IF EXISTS global_search_view; ";
         }
 
-        SearchableFunctionalRepositoryWithLongId<?>[] repositories = SearchableRepositories.getSearchableRepositories();
+        ScopedSecureRepository<?>[] repositories = SearchableRepositories.getSearchableRepositories();
         EntityManager em = null;
 
         List<String> queries = new ArrayList<>(repositories.length);
 
         StringBuilder sb = new StringBuilder();
-        for (SearchableFunctionalRepositoryWithLongId r : repositories) {
+        for (ScopedSecureRepository r : repositories) {
             SearchableRepositoryMetadata gsa = SearchableRepositories.getGlobalSearchableRepositoryAnnotation(r);
             Class c = gsa.entityClass();
             String tableName = SearchableRepositories.discoverTableName(c);

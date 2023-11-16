@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -143,7 +143,11 @@ public class FileService extends ComponentProvider {
         }
     }
 
-    public File saveAndPrepareFileEntity(Long orgId, String uuid, String fileName, long totalFileSize, String originalFilename, InputStream inputStream) throws IOException {
+    public File saveAndPrepareFileEntity(Long orgId, String uuid, String fileName, String originalFilename, byte[] input) throws IOException, SQLException {
+        return saveAndPrepareFileEntity(orgId, uuid, fileName, Long.valueOf(input.length), originalFilename, new ByteArrayInputStream(input));
+    }
+
+    public File saveAndPrepareFileEntity(Long orgId, String uuid, String fileName, long totalFileSize, String originalFilename, InputStream inputStream) throws IOException, SQLException {
         debug("[saveAndPrepareFileEntity]");
         File f = null;
         Path path = new java.io.File(originalFilename).toPath();

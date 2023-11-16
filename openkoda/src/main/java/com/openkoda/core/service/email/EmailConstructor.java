@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -27,6 +27,7 @@ import com.openkoda.core.helper.ModulesInterceptor;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.model.User;
+import com.openkoda.model.file.File;
 import com.openkoda.model.task.Email;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 
@@ -85,7 +87,7 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
      * @return a {@link com.openkoda.model.task.Email} object.
      */
     public Email prepareEmail(String emailTo, String nameTo, String subject, String templateName, int delayInSeconds,
-                              Map<String, Object> model) {
+                              Map<String, Object> model, File... attachments) {
         debug("[prepareEmail] {} {} {} {} {}", emailTo, nameTo, subject, templateName, delayInSeconds);
         model.put("applicationName", applicationName);
         String content = prepareContent( templateName, model );
@@ -96,6 +98,13 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
         email.setNameTo(nameTo);
         email.setNameFrom(applicationName);
         email.setStartAfter(LocalDateTime.now().plusSeconds(delayInSeconds));
+        if (attachments != null) {
+            ArrayList<Long> fileIds = new ArrayList<>();
+            for (File f: attachments) {
+                fileIds.add(f.getId());
+            }
+            email.setFilesId(fileIds);
+        }
         return email;
     }
 
@@ -103,26 +112,32 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
         debug("[prepareEmailTitleFromTemplate] {}", templateName);
         PageModelMap model = new PageModelMap();
         model.put(PageAttributes.canonicalObject, object);
-        return prepareEmailWithTitleFromTemplate(emailTo, emailTo, templateName, model);
+        return prepareEmailWithTitleFromTemplate(emailTo, null, emailTo, templateName, model);
     }
 
     public Email prepareEmailWithTitleFromTemplate(User recipient, String templateName) {
         debug("[prepareEmailTitleFromTemplate] {}", templateName);
         PageModelMap model = new PageModelMap();
         model.put(PageAttributes.userEntity, recipient);
-        return prepareEmailWithTitleFromTemplate(recipient.getEmail(), recipient.getName(), templateName, model);
+        return prepareEmailWithTitleFromTemplate(recipient.getEmail(), null, recipient.getName(), templateName, model);
     }
 
     public Email prepareEmailWithTitleFromTemplate(User recipient, String templateName, PageModelMap model) {
         debug("[prepareEmailTitleFromTemplate] {}", templateName);
         model.put(PageAttributes.userEntity, recipient);
-        return prepareEmailWithTitleFromTemplate(recipient.getEmail(), recipient.getName(), templateName, model);
+        return prepareEmailWithTitleFromTemplate(recipient.getEmail(), null, recipient.getName(), templateName, model);
     }
 
-    public Email prepareEmailWithTitleFromTemplate(String emailTo, String nameTo, String templateName, PageModelMap model) {
+    public Email prepareEmailWithTitleFromTemplate(User recipient, String subject, String templateName, PageModelMap model) {
         debug("[prepareEmailTitleFromTemplate] {}", templateName);
-        Email email = this.prepareEmail(emailTo, nameTo, "", templateName, 0, model);
-        String title = StringUtils.defaultIfBlank(getTitleFromHTML(email.getContent()), "System message");
+        model.put(PageAttributes.userEntity, recipient);
+        return prepareEmailWithTitleFromTemplate(recipient.getEmail(), subject, recipient.getName(), templateName, model);
+    }
+
+    public Email prepareEmailWithTitleFromTemplate(String emailTo, String subject, String nameTo, String templateName, PageModelMap model, File... attachments) {
+        debug("[prepareEmailTitleFromTemplate] {}", templateName);
+        Email email = this.prepareEmail(emailTo, nameTo, "", templateName, 0, model, attachments);
+        String title = StringUtils.defaultIfBlank(subject, StringUtils.defaultIfBlank(getTitleFromHTML(email.getContent()), "System message"));
         email.setSubject(title);
         return email;
     }

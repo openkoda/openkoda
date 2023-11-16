@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.controller.common;
 
+import com.openkoda.controller.PageBuilderController;
 import com.openkoda.core.audit.SystemHealthStatus;
 import com.openkoda.core.flow.BasePageAttributes;
 import com.openkoda.core.flow.PageAttr;
@@ -47,9 +48,6 @@ import com.openkoda.model.event.EventListenerEntry;
 import com.openkoda.model.event.Scheduler;
 import com.openkoda.model.notification.Notification;
 import com.openkoda.repository.notifications.NotificationKeeper;
-import com.openkoda.uicomponent.dto.UIComponentControllerEndpointList;
-import com.openkoda.uicomponent.editor.UIComponentControllerEndpointForm;
-import com.openkoda.uicomponent.editor.UIComponentFrontendResourceForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -121,12 +119,10 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<Page<FrontendResource>> frontendResourcePage = new PageAttr<>("frontendResourcePage");
     PageAttr<FrontendResource> frontendResourceEntity = new PageAttr<>("frontendResourceEntity");
     PageAttr<FrontendResourceForm> frontendResourceForm = new PageAttr<>("frontendResourceForm");
-    PageAttr<UIComponentFrontendResourceForm> uiComponentFrontendResourceForm = new PageAttr<>("uiComponentFrontendResourceForm");
+    PageAttr<PageBuilderForm> pageBuilderForm = new PageAttr<>("pageBuilderForm");
     PageAttr<FrontendResourcePageForm> frontendResourcePageForm = new PageAttr<>("frontendResourcePageForm");
     PageAttr<ControllerEndpoint> controllerEndpoint = new PageAttr<>("controllerEndpoint");
     PageAttr<List<ControllerEndpoint>> controllerEndpoints = new PageAttr<>("controllerEndpoints");
-    PageAttr<UIComponentControllerEndpointForm> uiComponentControllerEndpointForm = new PageAttr<>("uiComponentControllerEndpointFormList[0]");
-    PageAttr<UIComponentControllerEndpointList> uiComponentControllerEndpointFormList = new PageAttr<>("uiComponentControllerEndpointList");
     PageAttr<PageModelMap> uiComponentModel = new PageAttr<>("uiComponentModel");
     PageAttr<Object> controllerEndpointResult = new PageAttr<>("controllerEndpointResult");
     PageAttr<String> uiComponentPreviewUrl = new PageAttr<>("uiComponentPreviewUrl");
@@ -139,6 +135,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<EventListenerEntry> eventListenerEntity = new PageAttr<>("eventListenerEntity");
     PageAttr<EventListenerEntry> eventListenerEntityToUnregister = new PageAttr<>("eventListenerEntityToUnregister");
     PageAttr<Scheduler> schedulerEntity = new PageAttr<>("schedulerEntity");
+    PageAttr<Form> formEntity = new PageAttr<>("formEntity");
     PageAttr<String> clientToken = new PageAttr<>("clientToken");
     PageAttr<Token> tokenEntity = new PageAttr<>("tokenEntity");
     PageAttr<IntegrationModuleOrganizationConfiguration> organizationIntegrationModuleConfiguration = new PageAttr<>
@@ -188,6 +185,9 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<List<Tuple5<ProfileSettingsRepository, Function, PageAttr, String, String>>> additionalSettingsForms = new PageAttr<>("additionalSettingsForms");
     PageAttr<Boolean> isValid = new PageAttr<>("isValid");
     PageAttr<String> redirectUrl = new PageAttr<>("redirectUrl");
+    PageAttr<String> reload = new PageAttr<>("reload");
+    PageAttr<PageBuilderController.EmbeddableComponents> embeddableComponents = new PageAttr<>("embeddableComponents");
+
 
 
     default <S, T> Function<Page<S>, Page<T>> pageConverter(Function<? super S, ? extends T> elementConverter) {

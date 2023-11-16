@@ -1,15 +1,17 @@
 package timelog.repository;
 
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.repository.SecureRepository;
 import org.springframework.stereotype.Repository;
 import timelog.model.Ticket;
+
+import static timelog.TimelogApp.TICKET;
 
 @Repository
 @SearchableRepositoryMetadata(
     entityClass = Ticket.class,
-    entityKey = "ticket",
+    entityKey = TICKET,
     descriptionFormula = "(name)"
 )
-public interface TicketRepository extends SearchableFunctionalRepositoryWithLongId<Ticket> {
+public interface TicketRepository extends SecureRepository<Ticket> {
 }

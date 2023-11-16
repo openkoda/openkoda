@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.controller;
 
 import com.openkoda.core.form.*;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.model.Privilege;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.repository.SecureMapEntityRepository;
@@ -56,7 +56,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             PrivilegeBase defaultWritePrivilege,
             Function<FormFieldDefinitionBuilderStart,
             FormFieldDefinitionBuilder> builder,
-            SearchableFunctionalRepositoryWithLongId secureRepository,
+            ScopedSecureRepository secureRepository,
             Class formClass
             ) {
 
@@ -75,7 +75,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
      */
     public CRUDControllerConfiguration registerCRUDController(
             FrontendMappingDefinition frontendMappingDefinition,
-            SearchableFunctionalRepositoryWithLongId secureRepository,
+            ScopedSecureRepository secureRepository,
             Class formClass
             ) {
         String key = frontendMappingDefinition.name;
@@ -85,6 +85,13 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
         return controllerConfiguration;
     }
 
+    /**
+     * unregisteres the generic controller configuration for given key
+     * @param key
+     */
+    public void unregisterCRUDController(String key) {
+        this.remove(key);
+    }
 
     /** creates a generic controller configuration {@link CRUDControllerConfiguration} and registers it
      * with {@link ReflectionBasedEntityForm}
@@ -94,7 +101,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
      */
     public CRUDControllerConfiguration registerCRUDController(
             FrontendMappingDefinition frontendMappingDefinition,
-            SearchableFunctionalRepositoryWithLongId secureRepository) {
+            ScopedSecureRepository secureRepository) {
         return registerCRUDController(frontendMappingDefinition, secureRepository, ReflectionBasedEntityForm.class);
     }
 
@@ -111,7 +118,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             PrivilegeBase defaultReadPrivilege,
             PrivilegeBase defaultWritePrivilege,
             Function<FormFieldDefinitionBuilderStart, FormFieldDefinitionBuilder> builder,
-            SearchableFunctionalRepositoryWithLongId secureRepository) {
+            ScopedSecureRepository secureRepository) {
 
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
                 FrontendMappingDefinition.createFrontendMappingDefinition(key, defaultReadPrivilege, defaultWritePrivilege, builder),
@@ -123,12 +130,26 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
 
     public CRUDControllerConfiguration registerCRUDController(
             FrontendMappingDefinition frontendMappingDefinition,
-            SearchableFunctionalRepositoryWithLongId secureRepository,
+            ScopedSecureRepository secureRepository,
             Class formClass,
             Privilege defaultReadPrivilege,
             Privilege defaultWritePrivilege) {
 
         String key = frontendMappingDefinition.name;
+        CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
+                frontendMappingDefinition, secureRepository, formClass, defaultReadPrivilege, defaultWritePrivilege);
+        this.put(key, controllerConfiguration);
+        return controllerConfiguration;
+    }
+
+    public CRUDControllerConfiguration registerCRUDController(
+            String key,
+            FrontendMappingDefinition frontendMappingDefinition,
+            ScopedSecureRepository secureRepository,
+            Class formClass,
+            Privilege defaultReadPrivilege,
+            Privilege defaultWritePrivilege) {
+
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
                 frontendMappingDefinition, secureRepository, formClass, defaultReadPrivilege, defaultWritePrivilege);
         this.put(key, controllerConfiguration);

@@ -1,0 +1,8 @@
+---
+!!com.openkoda.service.export.dto.FrontendResourceConversionDto
+includeInSitemap: false
+name: "email-fragments"
+requiredPrivilege: null
+type: "HTML"
+resourceType : "RESOURCE"
+content: "templates/frontend-resource/public/email-fragments.html"

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
@@ -58,6 +58,8 @@ public interface TemplateFormFieldNames {
 
     String URL_PATH_ = "urlPath";
     String REQUIRED_PRIVILEGE_ = "requiredPrivilege";
+    String READ_PRIVILEGE = "readPrivilege";
+    String WRITE_PRIVILEGE = "writePrivilege";
     String FRONTEND_RESOURCE_TYPE_ = "frontendResourceType";
     String TITLE= "title";
     String CATEGORY= "category";
@@ -71,6 +73,7 @@ public interface TemplateFormFieldNames {
     String READING_TIME = "readingTime";
     String PUBLISHED = "published";
     String INCLUDE_IN_SITEMAP_ = "includeInSitemap";
+    String EMBEDDABLE_ = "embeddable";
     String CONTENT_ = "content";
     String DRAFT_CONTENT_ = "draftContent";
     String CONTENT_EDITABLE_ = "contentEditable";
@@ -89,7 +92,8 @@ public interface TemplateFormFieldNames {
     String NET_AMOUNT_ = "netAmount";
     String TAX_AMOUNT_ = "taxAmount";
     String IMAGES_ = "images";
-    String IS_PUBLIC = "isPublic";
+    String ACCESS_LEVEL = "accessLevel";
+    String ACCESS_LEVELS = "accessLevels";
 
     String PLAN_ID_ = "planId";
     String PLAN_NAME_ = "planName";
@@ -161,5 +165,8 @@ public interface TemplateFormFieldNames {
     String MODEL_ATTRIBUTES = "modelAttributes";
     String RESPONSE_TYPE = "responseType";
     String FRONTEND_RESOURCE_ID = "frontendResourceId";
+    String REGISTER_API_CRUD_CONTROLLER = "registerApiCrudController";
+    String REGISTER_HTML_CRUD_CONTROLLER = "registerHtmlCrudController";
+    String TABLE_COLUMNS = "tableColumns";
 
 }

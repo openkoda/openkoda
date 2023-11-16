@@ -261,6 +261,7 @@
                             </th:block>
                             <th:block th:if="${@auth.hasGlobalPrivilege('manageOrgData')}">
                                 <form th:replace="forms::single-button-post-form-with-confirm-prompt-callback(${@url.removeOrganization(a.id)}, #{template.remove}, #{organization.remove} + ' ' + ${a.name}, ${a.name}, '() => {app.showMessage(\'' + #{organization.remove.success} + '\');}', '() => app.showMessage(\'' + #{organization.remove.error} + '\') ', ' btn-sm btn-primary btn-simple')" />
+                                <a class="btn btn-sm btn-primary btn-simple" th:href="${@url.exportAllYamlResourcesForOrg(a.id)}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All</a>
                             </th:block>
                         </div>
                     </td>
@@ -315,11 +316,11 @@
             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                  aria-labelledby="frontendResourceMenuLink">
                 <a class="dropdown-item" th:href="${@url.newFrontendResourceEntry()}" th:text="#{template.new}">New Frontend Resource Entry</a>
-                <a class="dropdown-item" th:href="${@url.zipFrontendResource()}" download="backup.zip" th:text="#{frontendresource.zipAll}">Zip All</a>
+                <a class="dropdown-item" th:href="${@url.yamlAllFrontendResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
                 <a class="dropdown-item">
                     <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
                         ${@url.publishAllFrontendResource()},
-                        #{frontendresource.publishAll},
+                        #{frontendResource.publishAll},
                         #{template.confirmationPrompt},
                         'a => app.showMessage(\'Published All.\')',
                          'btn-link btn-simple p-0')}" />
@@ -327,7 +328,7 @@
                 <a class="dropdown-item">
                     <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
                     ${@url.clearAllFrontendResource()},
-                    #{frontendresource.clearAll},
+                    #{frontendResource.clearAll},
                     #{template.confirmationPrompt},
                     'a => app.showMessage(\'Cleared All.\')',
                      'btn-link btn-simple p-0')}" />
@@ -336,9 +337,9 @@
         </div>
         <div class="card-header-buttons">
             <a class="btn-primary btn btn-sm" th:href="${@url.newFrontendResourceEntry()}" th:text="#{template.new}">New Frontend Resource Entry</a>
-            <a class="btn-primary btn btn-sm" th:href="${@url.zipFrontendResource()}" download="backup.zip" th:text="#{frontendresource.zipAll}">Zip All</a>
-            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.publishAllFrontendResource()}, #{frontendresource.publishAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Published All.\')' )}" />
-            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.clearAllFrontendResource()}, #{frontendresource.clearAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Cleared All.\')' )}" />
+            <a class="btn-primary btn btn-sm" th:href="${@url.yamlAllFrontendResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
+            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.publishAllFrontendResource()}, #{frontendResource.publishAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Published All.\')' )}" />
+            <a th:replace="~{forms::single-button-post-form-with-confirm-callback(${@url.clearAllFrontendResource()}, #{frontendResource.clearAll}, #{template.confirmationPrompt}, 'a => app.showMessage(\'Cleared All.\')' )}" />
         </div>
     </div>
 
@@ -351,11 +352,14 @@
                     <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
                     <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
                     <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
-                    <th th:replace="~{tables::asort('urlPath', 'URL Path', 'obj', ${organizationRelatedEntityPage})}">URL Path</th>
+                    <th th:replace="~{tables::asort('resourceType', 'Resource Type', 'obj', ${organizationRelatedEntityPage})}">Resource Type</th>
+                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'obj', ${organizationRelatedEntityPage})}">Access Level</th>
+                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'obj', ${organizationRelatedEntityPage})}">Organization ID</th>
                     <th>Required Privilege</th>
                     <th>Resources</th>
                     <th>Draft</th>
                     <th>Live</th>
+                    <th>Export</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -366,7 +370,9 @@
                     <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.referenceString}"></a></td>
                     <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.name}"></a></td>
                     <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.type}"></a></td>
-                    <td><a target="_blank" th:href="${a.urlPath == '' ? '' : '/' + a.urlPath}" th:text="${a.urlPath}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.resourceType}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.accessLevel}"></a></td>
+                    <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.organizationId}"></a></td>
                     <td><a th:href="${@url.frontendResourceSettings(a.id)}" th:text="${a.requiredPrivilege}"></a></td>
                     <td class="align-left">
                         <div class="dropdown" th:with="resourceExists=${@frontendResource.resourceExists(a)}">
@@ -383,11 +389,11 @@
                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                  aria-labelledby="dropdownMenuLink">
                                 <a class="dropdown-item" th:classappend="${resourceExists} ? '' : 'href-disabled'" target="_blank"
-                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath + '?resource'}" th:text="#{template.view}">View</a>
+                                   th:href="${a.name == '' ? '' : '/' + a.name + '?resource'}" th:text="#{template.view}">View</a>
                                 <a class="dropdown-item"  th:classappend="${resourceExists} ? '' : 'href-disabled'">
                                     <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
                                         ${@url.reloadFrontendResourceToDraft(a.id)},
-                                        #{frontendresource.pushToDraft},
+                                        #{frontendResource.pushToDraft},
                                         #{template.confirmationPrompt},
                                         'a => app.showMessage(\'Content reloaded from resources and pushed to draft.\')',
                                         'btn-link btn-simple p-0' )}"/>
@@ -414,12 +420,12 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                  aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" th:classappend="${a.urlPath == '' || !a.draft} ? 'href-disabled' : ''" target="_blank"
-                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath + '?draft'}" th:text="#{template.view}">View</a>
+                                <a class="dropdown-item" th:classappend="${a.name == '' || !a.draft} ? 'href-disabled' : ''" target="_blank"
+                                   th:href="${a.name == '' ? '' : '/' + a.name + '?draft'}" th:text="#{template.view}">View</a>
                                 <a class="dropdown-item" th:classappend="${a.draft} ? '' : 'href-disabled'">
                                     <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(
                                         ${@url.publishFrontendResource(a.id)},
-                                        #{frontendresource.pushToLive},
+                                        #{frontendResource.pushToLive},
                                         #{template.confirmationPrompt},
                                         'a => app.showMessage(\'Draft content pushed to live.\')',
                                         'btn-link p-0' )}" />
@@ -442,8 +448,8 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                  aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" th:classappend="${a.urlPath == '' || !a.contentExists} ? href-disabled : ''" target="_blank"
-                                   th:href="${a.urlPath == '' ? '' : '/' + a.urlPath}" th:text="#{template.view}">View</a>
+                                <a class="dropdown-item" th:classappend="${a.name == '' || !a.contentExists} ? href-disabled : ''" target="_blank"
+                                   th:href="${a.name == '' ? '' : '/' + a.name}" th:text="#{template.view}">View</a>
                                 <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}"
                                    th:href="${@url.allAudit('frontendResource:' + a.id)}" th:text="#{template.audit}">Audit</a>
                                 <a class="dropdown-item">
@@ -456,6 +462,9 @@
                                 </a>
                             </div>
                         </div>
+                    </td>
+                    <td>
+                        <a class="btn-primary btn btn-sm" th:href="${@url.yamlFrontendResource(a.id)}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportToYaml}">Export to Zipped Yaml</a>
                     </td>
                 </tr>
                 </tbody>
@@ -470,6 +479,7 @@
         <h6 class="m-0 font-weight-bold" th:text="${title}">Frontend Element</h6>
         <div class="card-header-buttons">
             <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newUIComponent()}" th:text="#{template.new}">New</a>
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.yamlAllUiComponents()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
         </div>
     </div>
 
@@ -481,8 +491,9 @@
                 <tr>
                     <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
                     <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
+                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'obj', ${organizationRelatedEntityPage})}">Organization ID</th>
+                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'obj', ${organizationRelatedEntityPage})}">Access Level</th>
                     <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
-                    <th th:replace="~{tables::asort('urlPath', 'URL Path', 'obj', ${organizationRelatedEntityPage})}">URL Path</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -490,11 +501,17 @@
                 <tr th:each="a : ${organizationRelatedEntityPage.content}">
                     <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.referenceString}"></a></td>
                     <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.name}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.organizationId}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.accessLevel}"></a></td>
                     <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.type}"></a></td>
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.urlPath}"></a></td>
-                    <td th:if="${@auth.hasGlobalPrivilege('manageFrontendResource')}">
-                        <th:block th:replace="~{forms::single-button-post-form-with-confirm(${'./' + a.id + '/remove'},
-                         #{template.remove}, 'Are you sure you want to remove frontend element '+ ${a.id} + '?')}"/>
+                    <td>
+                        <div class="tbuttons d-flex">
+                            <th:block th:if="${@auth.hasGlobalPrivilege('manageFrontendResource')}">
+                                <th:block th:replace="~{forms::single-button-post-form-with-confirm(${'./' + a.id + '/remove'},
+                                 #{template.remove}, 'Are you sure you want to remove frontend element '+ ${a.id} + '?')}"/>
+                                <a class="btn-primary btn btn-sm" th:href="${@url.yamlFrontendResource(a.id)}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportToYaml}">Export to Zipped Yaml</a>
+                            </th:block>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -514,12 +531,15 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th th:replace="~{tables::asort('urlPath', #{frontendresource.urlPath.label}, 'obj', ${organizationRelatedEntityPage})}">
+                    <th th:replace="~{tables::asort('name', #{frontendResource.name.label}, 'obj', ${organizationRelatedEntityPage})}">
                         URL Path
                     </th>
+                    <th th:replace="~{tables::asort('organizationId', #{frontendResource.organizationId.label}, 'obj', ${organizationRelatedEntityPage})}">
+                        Organization ID
+                    </th>
                     <th th:text="#{template.preview}">Preview</th>
-                    <th th:replace="~{tables::asort('isPublic', #{frontendresource.isPublic}, 'obj', ${organizationRelatedEntityPage})}">
-                        Is public
+                    <th th:replace="~{tables::asort('accessLevel', #{frontendResource.accessLevel}, 'obj', ${organizationRelatedEntityPage})}">
+                        Access Level
                     </th>
                     <th th:text="#{template.endpoints}">Number of web endpoints</th>
                     <th th:replace="~{tables::asort('createdOn', #{template.updatedOn}, 'obj', ${organizationRelatedEntityPage})}">
@@ -530,12 +550,13 @@
                 </thead>
                 <tbody>
                 <tr th:each="a : ${organizationRelatedEntityPage.content}">
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.urlPath}"></a></td>
-                    <td><a th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.name}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.organizationId}"></a></td>
+                    <td><a th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"
                            th:target="_blank"
-                           th:text="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"></a>
+                           th:text="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"></a>
                     </td>
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.isPublic}"></a></td>
+                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.accessLevel}"></a></td>
                     <td th:text="${@AllRepositories.unsecure.controllerEndpoint.findByFrontendResourceId(a.id).size()}">
                         0
                     </td>
@@ -552,7 +573,7 @@
                             </th:block>
                             <a class="btn btn-sm btn-primary btn-simple text-nowrap"
                                th:target="_blank"
-                               th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.urlPath,a.isPublic)}"
+                               th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"
                                th:text="#{template.preview}"></a>
                         </div>
                     </td>
@@ -577,11 +598,13 @@
                  aria-labelledby="eventMenuLink">
                 <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.newEventListener()}" th:text="#{template.new}">New</a>
                 <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.sendEvent()}" th:text="#{template.sendEvent}">Send Event</a>
+                <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.yamlAllEventResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
             </div>
         </div>
         <div class="card-header-buttons">
             <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newEventListener()}" th:text="#{template.new}">New</a>
             <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.sendEvent()}" th:text="#{template.sendEvent}">Send Event</a>
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.yamlAllEventResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
         </div>
     </div>
 
@@ -601,6 +624,7 @@
                         name
                     </th>
                     <th>Consumer Method Parameters</th>
+                    <th></th>
                     <th></th>
                 </tr>
                 </thead>
@@ -622,6 +646,9 @@
                     <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
                         <form th:replace="~{forms::single-button-post-form-with-confirm(${a.id} + '/remove', #{template.remove}, 'Are you sure you want to delete event listener?')}" />
                     </td>
+                    <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
+                        <a class="btn-primary btn btn-sm" th:href="${@url.yamlEventListener(a.id)}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportToYaml}">Export to Zipped Yaml</a>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -635,6 +662,7 @@
         <h6 class="m-0 font-weight-bold" th:text="${title}">Schedulers</h6>
         <div class="card-header-buttons">
             <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newScheduler()}" th:text="#{template.new}">New</a>
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.yamlAllSchedulerResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export All to YAML</a>
         </div>
     </div>
 
@@ -648,6 +676,8 @@
                 <th th:replace="~{tables::asort('cronExpression', 'Cron Expression', 'scheduler', ${schedulerPage})}"></th>
                 <th th:replace="~{tables::asort('eventData', 'Event Data', 'scheduler', ${schedulerPage})}"></th>
                 <th th:replace="~{tables::asort('onMasterOnly', 'Master Only', 'scheduler', ${schedulerPage})}"></th>
+                <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'scheduler', ${schedulerPage})}"></th>
+                <th></th>
                 <th></th>
             </tr>
             </thead>
@@ -663,9 +693,15 @@
                     <td>
                         <th:block th:if="${a.onMasterOnly}">YES</th:block>
                     </td>
+                    <td>
+                        <th:block th:if="${a.organizationId}" th:text="${a.organizationId}"></th:block>
+                    </td>
                     <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
                         <th:block th:replace="~{forms::single-button-post-form-with-confirm(${a.id + '/remove'},
                          #{template.remove}, 'Are you sure you want to remove scheduler '+ ${a.id} + ' ' + ${a.cronExpression} + ' ' + ${a.eventData} +'?')}"/>
+                    </td>
+                    <td th:if="${@auth.hasGlobalPrivilege('canManageBackend')}">
+                        <a class="btn-primary btn btn-sm" th:href="${@url.yamlScheduler(a.id)}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportToYaml}">Export to Zipped Yaml</a>
                     </td>
                 </tr>
                 </tbody>

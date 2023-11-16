@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -28,6 +28,8 @@ package com.openkoda.model;
  * 
  */
 public enum Privilege implements PrivilegeBase, PrivilegeNames {
+
+    isUser("Global Settings - Is User", _isUser),
 
     //ORGANIZATION DATA
     readOrgData("Organization - Can Read", _readOrgData),
@@ -69,14 +71,6 @@ public enum Privilege implements PrivilegeBase, PrivilegeNames {
     //   FRONTEND RESOURCE
     readFrontendResource("Frontend Resource - Can Read", _readFrontendResource),
     manageFrontendResource("Frontend Resource - Can Manage", _manageFrontendResource),
-
-
-    //  ATTRIBUTES
-    canSeeAttributes("Attributes - Can Read", _canSeeAttributes),
-    canEditAttributes("Attributes - Can Edit", _canEditAttributes),
-    canEditUserAttributes("Attributes - Can Edit User Attributes", _canEditUserAttributes),
-    canEditOrgAttributes("Attributes - Can Edit Organization Attributes", _canEditOrgAttributes),
-    canDefineAttributes("Attributes - Can Create Attributes Definitions", _canDefineAttributes),
 
     // REFRESHER TOKEN
     canRefreshTokens("Token - Can Refresh", _canRefreshTokens),

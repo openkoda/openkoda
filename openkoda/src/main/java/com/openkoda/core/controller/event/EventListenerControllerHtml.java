@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -64,7 +64,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
             @RequestParam(required = false, defaultValue = "", name = "event_search") String search) {
         debug("[getAll]");
         return findListenersFlow(search, null, pageable)
-                .mav(EVENTLISTENER + "-" + ALL);
+                .mav("eventlistener-" + ALL);
     }
 
     /**
@@ -79,7 +79,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     public Object settings(@PathVariable(ID) Long eListenerId)
     {debug("[settings] ListenerId: {}", eListenerId);
         return find(null, eListenerId)
-                .mav(EVENTLISTENER + "-settings");
+                .mav("eventlistener-" + SETTINGS);
     }
 
     /**
@@ -93,7 +93,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     public Object newListener() {
         debug("[newListener]");
         return find(null, -1L)
-                .mav(EVENTLISTENER + "-settings");
+                .mav("eventlistener-" + SETTINGS);
     }
 
     /**
@@ -157,7 +157,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     public Object sendEventListener(){
         debug("[sendEventListener]");
         return chooseEvent()
-                .mav(EVENTLISTENER + "-" + SEND);
+                .mav("eventlistener-" + SEND);
     }
 
     /**
@@ -194,4 +194,5 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
                 .mav(ENTITY + '-' + FORMS + "::eventlistener-emit-event-success",
                         ENTITY + '-' + FORMS + "::eventlistener-emit-event-error");
     }
+
 }

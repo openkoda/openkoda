@@ -8,7 +8,7 @@
     <div class="row" layout:fragment="content" th:attr="data-menu-item='system-health'">
         <script src="/vendor/scripts/js.cookie.min.js"> </script>
 
-        <th:block th:replace="~{frontend-resource/main-page-fragments::system-health-custom}"/>
+        <th:block th:replace="~{frontend-resource/global/main-page-fragments::system-health-custom}"/>
 
         <div class="col-lg-8" th:if="${@environment.getProperty('spring.session.store-type') == 'hazelcast'}">
             <div class="card shadow mb-4">

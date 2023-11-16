@@ -12,16 +12,16 @@
     <parent>
         <groupId>com.openkoda</groupId>
         <artifactId>openkoda-aggregator</artifactId>
-        <version>1.4.1</version>
+        <version>1.4.3</version>
     </parent>
 
     <artifactId>openkoda-app</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.3</version>
     <packaging>pom</packaging>
 
     <properties>
         <cucumber.version>7.8.1</cucumber.version>
-        <selenium.version>4.8.3</selenium.version>
+        <selenium.version>4.13.0</selenium.version>
         <selenide.version>6.12.4</selenide.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -255,6 +255,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+
 
         <!-- webjars -->
         <dependency>
@@ -318,8 +324,8 @@
 
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-pdf</artifactId>
-            <version>9.1.18</version>
+            <artifactId>flying-saucer-pdf-itext5</artifactId>
+            <version>9.1.22</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -495,6 +501,12 @@
             <artifactId>hibernate-spatial</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.theokanning.openai-gpt3-java</groupId>
+            <artifactId>service</artifactId>
+            <version>0.11.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -632,7 +644,7 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                         <manifestEntries>
-                            <Built-By>OpenKoda</Built-By>
+                            <Built-By>Openkoda</Built-By>
                         </manifestEntries>
                     </archive>
                 </configuration>

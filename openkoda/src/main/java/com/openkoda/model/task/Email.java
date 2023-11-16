@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -24,9 +24,11 @@ package com.openkoda.model.task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.openkoda.model.Organization;
 import com.openkoda.model.common.AuditableEntityOrganizationRelated;
+import com.openkoda.model.file.File;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Formula;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -63,6 +65,22 @@ public class Email extends Task implements AuditableEntityOrganizationRelated {
 
     private String attachmentURL;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {})
+    @JoinTable(
+            name="file_reference",
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            inverseJoinColumns =  @JoinColumn(name = "file_id"),
+            joinColumns = @JoinColumn(name = "organization_related_entity_id", insertable = false, updatable = false)
+    )
+    @JsonIgnore
+    @OrderColumn(name="sequence")
+    protected List<File> files;
+
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = Long.class)
+    @CollectionTable(name = "file_reference", joinColumns = @JoinColumn(name = "organization_related_entity_id"), foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @Column(name="file_id")
+    @OrderColumn(name="sequence")
+    protected List<Long> filesId = new ArrayList<>();
 
     /**
      * <p>Constructor for Email.</p>
@@ -242,5 +260,21 @@ public class Email extends Task implements AuditableEntityOrganizationRelated {
     @Override
     public String toString() {
         return getId() + ", " + emailTo + ", attempts:" + getAttempts();
+    }
+
+    public List<File> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
+    }
+
+    public List<Long> getFilesId() {
+        return filesId;
+    }
+
+    public void setFilesId(List<Long> filesId) {
+        this.filesId = filesId;
     }
 }

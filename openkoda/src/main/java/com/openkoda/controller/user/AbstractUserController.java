@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -32,7 +32,6 @@ import com.openkoda.core.repository.common.ProfileSettingsRepository;
 import com.openkoda.core.security.UserProvider;
 import com.openkoda.core.service.event.ApplicationEvent;
 import com.openkoda.form.EditUserForm;
-import com.openkoda.model.Privilege;
 import com.openkoda.model.Role;
 import com.openkoda.model.User;
 import jakarta.inject.Inject;
@@ -74,8 +73,7 @@ public class AbstractUserController extends AbstractController {
             aPageable) {
         debug("[findUsers] search {}", aSearchTerm);
         return Flow.init()
-                .thenSet( userPage, a -> repositories.secure.user.search(aSearchTerm, aSpecification,
-                        Privilege.readUserData, aPageable))
+                .thenSet( userPage, a -> repositories.secure.user.search(aSearchTerm, null, aSpecification, aPageable))
                 .execute();
     }
 
@@ -153,7 +151,7 @@ public class AbstractUserController extends AbstractController {
     }
 
     protected PageModelMap doResetApiKey(){
-        return Flow.init(null, repositories.secure.user.findOne(UserProvider.getUserIdOrNotExistingId()))
+        return Flow.init(userEntity, repositories.secure.user.findOne(UserProvider.getUserIdOrNotExistingId()))
                 .thenSet(userEntity, apiKeyEntity, plainApiKeyString, a -> services.apiKey.resetApiKey(a.result))
                 .then(a -> Tuples.of(
                         repositories.unsecure.user.save(a.result.getT1()),

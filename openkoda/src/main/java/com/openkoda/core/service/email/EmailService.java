@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -27,6 +27,7 @@ import com.openkoda.core.security.UserProvider;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.dto.OrganizationRelatedObject;
 import com.openkoda.model.User;
+import com.openkoda.model.file.File;
 import com.openkoda.model.task.Email;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,17 @@ public class EmailService extends ComponentProvider {
     }
     public Email sendAndSaveEmail(User recipient, String emailTemplateName, PageModelMap model) {
         debug("[sendAndSaveEmail] Sends {} to {}", emailTemplateName, recipient);
-        return repositories.unsecure.email.save(services.emailConstructor.prepareEmailWithTitleFromTemplate(recipient, emailTemplateName, model));
+        return repositories.unsecure.email.save(services.emailConstructor.prepareEmailWithTitleFromTemplate(recipient, null, emailTemplateName, model));
+    }
+
+    public Email sendAndSaveEmail(User recipient, String subject, String emailTemplateName, PageModelMap model) {
+        debug("[sendAndSaveEmail] Sends {} to {}", emailTemplateName, recipient);
+        return repositories.unsecure.email.save(services.emailConstructor.prepareEmailWithTitleFromTemplate(recipient, subject, emailTemplateName, model));
+    }
+
+    public Email sendAndSaveEmail(String email, String subject, String emailTemplateName, PageModelMap model, File... attachments) {
+        debug("[sendAndSaveEmail] Sends {} to {}", emailTemplateName, email);
+        return repositories.unsecure.email.save(services.emailConstructor.prepareEmailWithTitleFromTemplate(email, subject, email, emailTemplateName, model, attachments));
     }
 
     public Email sendAndSaveOrganizationEmail(User recipient, String emailTemplateName, PageModelMap model, Long orgId) {

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -21,15 +21,17 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
+import com.openkoda.model.file.File;
 import jakarta.inject.Inject;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.ServletContext;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 /**
@@ -50,7 +53,6 @@ import java.util.concurrent.Executors;
  *
  */
 @Service
-@Primary
 public class SmtpEmailSender extends EmailSender {
 
     @Value("${application.logo:/vendor/swagger-ui/springfox-swagger-ui/favicon-32x32.png}")
@@ -70,7 +72,7 @@ public class SmtpEmailSender extends EmailSender {
      * {@inheritDoc}
      */
     @Override
-    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL) {
+    public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL, List<File> attachments) {
         debug("[sendEmail] {} -> {} Subject: {}", fullFrom, fullTo, subject);
         try {
             final MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -89,6 +91,18 @@ public class SmtpEmailSender extends EmailSender {
                     }
                 } catch (UnsupportedEncodingException e) {
                     warn("[sendEmail]", e);
+                }
+            }
+
+            if (attachments != null) {
+                for (File f: attachments) {
+                    try {
+                        byte[] bytes = IOUtils.toByteArray(f.getContentStream());
+                        ByteArrayResource r = new ByteArrayResource(bytes, f.getFilename());
+                        message.addAttachment(f.getFilename(), r, f.getContentType());
+                    } catch (Exception e) {
+                        error(e, "Couldn't attach {} to email", f.getFilename());
+                    }
                 }
             }
 

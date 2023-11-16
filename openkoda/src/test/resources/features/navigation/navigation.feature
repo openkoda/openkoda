@@ -12,12 +12,12 @@ Feature: Navigation
       | organizations          | /html/organization/all      |
       | audit                  | /html/audit/all             |
       | roles                  | /html/role/all              |
-      | frontendresource       | /html/frontendresource/all  |
-      | frontend-elements      | /html/webendpoints/all      |
+      | frontendresource       | /html/frontendResource/all  |
+      | frontend-elements      | /html/webEndpoint/all      |
       | files                  | /html/file/all              |
       | serverJs               | /html/serverJs/all          |
       | threads                | /html/thread                |
-      | event-listeners        | /html/eventlistener/all     |
+      | event-listeners        | /html/eventListener/all     |
       | schedulers             | /html/scheduler/all         |
       | logs                   | /html/logs/all              |
       | system-health          | /html/system-health         |

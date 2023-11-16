@@ -17,7 +17,7 @@
 
     <groupId>com.openkoda</groupId>
     <artifactId>openkoda-aggregator</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.3</version>
     <packaging>pom</packaging>
 
     <modules>

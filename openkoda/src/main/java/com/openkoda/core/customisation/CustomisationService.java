@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2016-2022, Codedose CDX Sp. z o.o. Sp. K. <stratoflow.com>
+Copyright (c) 2016-2023, Openkoda CDX Sp. z o.o. Sp. K. <openkoda.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -26,9 +26,10 @@ import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.repository.common.ProfileSettingsRepository;
-import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
+import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.service.event.AbstractApplicationEvent;
 import com.openkoda.core.service.event.EventConsumer;
+import com.openkoda.model.Privilege;
 import com.openkoda.model.common.AuditableEntity;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.module.Module;
@@ -69,8 +70,20 @@ public interface CustomisationService {
 
     void registerOnApplicationStartListener(Consumer<CustomisationService> c);
 
-    void registerFrontendMapping(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
-    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
-    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, SearchableFunctionalRepositoryWithLongId repository);
+    void registerFrontendMapping(FrontendMappingDefinition definition, ScopedSecureRepository repository);
+
+    void unregisterFrontendMapping(String key);
+    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository);
+    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege);
+    default CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, String readPrivilege, String writePrivilege) {
+        return registerHtmlCrudController(definition, repository, Privilege.valueOf(readPrivilege), Privilege.valueOf(writePrivilege));
+    }
+    void unregisterHtmlCrudController(String key);
+    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository);
+    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege);
+    default CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, String readPrivilege, String writePrivilege) {
+        return registerApiCrudController(definition, repository, Privilege.valueOf(readPrivilege), Privilege.valueOf(writePrivilege));
+    }
+    void unregisterApiCrudController(String key);
 
 }
