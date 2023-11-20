@@ -15,11 +15,46 @@
 </div>
 
 
-### Documentation Links
+## Openkoda Documentation
 * [Application Development](openkoda/doc/app-development.md)
 * [Admin Panel](openkoda/doc/admin.md)
 * [Installation](openkoda/doc/installation.md)
 * [Example Application](openkoda/doc/5-minute-guide.md)
+
+
+
+## Release Notes
+### What's new in Openkoda 1.4.3 
+
+#### Openkoda Core:  
+  
+- Page Builder for custom dashboards.  
+- Assisted creation of web forms based on data model definition.  
+- Import/export of YAML components: web forms, web endpoints, server-side code, event listeners, schedulers, frontend resources.  
+- Improvements to dashboard user interface.  
+- Minor tweaks and security fixes.  
+  
+Full source code: https://github.com/openkoda/openkoda
+  
+  
+#### Openkoda Enterprise:  
+  
+🎉 Extend your Openkoda application with natural language only (Generative AI).  
+🎉 Powerful autocomplete supporting new application components.  
+🎉 User-friendly UI for building web forms, endpoints, server-side code.  
+  
+Contact us for enterprise features: https://openkoda.com/contact/
+  
+  
+#### Openkoda Timelog Application (open-source):  
+  
+- New timelog reports.  
+- Added Account -> Project -> Ticket hierarchy.  
+- Creative Work Statements.  
+- New Application menu.  
+- Init SQL replaced with YAML defined Openkoda components.  
+  
+Full source code: https://github.com/openkoda/openkoda/tree/main/examples/timelog
 
 ###
 <div style="text-align: center;" align="center">
