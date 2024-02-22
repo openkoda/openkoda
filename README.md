@@ -3,8 +3,8 @@
 </p>
 
 <div style="text-align: center;" align="center">
-    <h2>Open-source low-code platform</h2>
-    <p><a href="https://openkoda.com/">Openkoda</a> is an open source, low-code platform that enables Java developers to build scalable, extensible, and secure enterprise and SaaS applications more efficiently. With Openkoda, you can get your applications to market faster, while retaining full ownership of your code.</p>
+    <h2>Open source business application platform for fast development</h2>
+    <p><a href="https://openkoda.com/">Openkoda</a> is an open source development platform that enables Java developers to build scalable, extensible, and secure enterprise and SaaS applications more efficiently. With Openkoda, you can get your applications to market faster, while retaining full ownership of your code.</p>
 </div>
 
 <div style="text-align: center;" align="center">
