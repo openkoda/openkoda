@@ -25,14 +25,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.service.form;
 
 import com.openkoda.controller.ComponentProvider;
+import com.openkoda.core.customisation.ServerJSRunner;
 import com.openkoda.core.form.AbstractForm;
+import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.helper.ClusterHelper;
+import com.openkoda.core.helper.NameHelper;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.service.event.ClusterEventSenderService;
-import com.openkoda.model.Form;
-import com.openkoda.model.ServerJs;
+import com.openkoda.model.component.Form;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.model.component.ServerJs;
+import com.openkoda.repository.SecureRepositoryWrapper;
+import com.openkoda.service.dynamicentity.DynamicEntityRegistrationService;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -40,6 +46,9 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.openkoda.core.helper.NameHelper.toEntityKey;
+import static com.openkoda.core.service.FrontendResourceService.frontendResourceTemplateNamePrefix;
 
 /**
  * Service provides any {@link Form} entity related actions
@@ -50,7 +59,6 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
 
     @Inject
     private ClusterEventSenderService clusterEventSenderService;
-
     /**
      * Unregister and register the updated form again
      * @param formId
@@ -97,9 +105,13 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
 
     /**
      * Load all form entities from database and register each of them
+     *  @param proceed indicates, whether the setup procedure should actually happen
      */
-    public void loadAllFormsFromDb() {
+    public void loadAllFormsFromDb(boolean proceed) {
         debug("[loadFormsFromDb]");
+        if (not(proceed)) {
+            return;
+        }
         List<Form> all = repositories.unsecure.form.findAll();
         all.forEach(this::registerForm);
     }
@@ -143,36 +155,55 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
         return reloadForm(formId);
     }
 
+    public static FrontendMappingDefinition getFrontendMappingDefinition(Form form) {
+        return getFrontendMappingDefinition(form.getName(), form.getReadPrivilegeAsString(), form.getWritePrivilegeAsString(), form.getCode());
+    }
+
+    public static FrontendMappingDefinition getFrontendMappingDefinition(String name, String readPrivilege, String writePrivilege, String code) {
+        String finalScript = "let form = new com.openkoda.core.service.FrontendMappingDefinitionService().createFrontendMappingDefinition(\""
+                + name + "\",\"" + readPrivilege + "\",\"" + writePrivilege + "\","
+                + code + ");\nform";
+        ServerJs serverJs = new ServerJs(finalScript, StringUtils.EMPTY, null);
+        Map<String, Object> model = new HashMap();
+        return new ServerJSRunner().evaluateServerJs(serverJs, model, null, FrontendMappingDefinition.class);
+    }
+
     private boolean registerForm(Form form) {
         debug("[registerForm]");
-        String finalScript = "let form = services.frontendMappingDefinition.createFrontendMappingDefinition(\""
-                +form.getName() + "\",\"" + form.getReadPrivilege().name() + "\",\"" + form.getWritePrivilege().name() + "\","
-                + form.getCode() + ");\nform";
 
-        ServerJs serverJs = new ServerJs(finalScript, StringUtils.EMPTY, null);
-        ScopedSecureRepository repository = services.data.getRepository(form.getName());
+        DynamicEntityRegistrationService.generateDynamicEntityDescriptor(form, System.currentTimeMillis());
 
-        Map<String, Object> model = new HashMap();
-        FrontendMappingDefinition formFieldDefinitionBuilder = services.serverJSRunner.evaluateServerJs(serverJs, model, null, FrontendMappingDefinition.class);
+        ScopedSecureRepository<?> repository = services.data.getRepository(toEntityKey(form.getTableName()), SecurityScope.USER);
 
-        services.customisation.registerFrontendMapping(formFieldDefinitionBuilder, repository);
-        AbstractForm.markDirty(form.getName());
+        if(((SecureRepositoryWrapper) repository).isSet()) {
+            FrontendMappingDefinition formFieldDefinitionBuilder = getFrontendMappingDefinition(
+                    form.getName(),
+                    form.getReadPrivilegeAsString(),
+                    form.getWritePrivilegeAsString(),
+                    form.getCode());
 
-        if(form.isRegisterHtmlCrudController()){
-            services.customisation.registerHtmlCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege()).setGenericTableFields(form.getTableColumnsList());
+            services.customisation.registerFrontendMapping(formFieldDefinitionBuilder, repository);
+            AbstractForm.markDirty(form.getName());
+
+            if (form.isRegisterHtmlCrudController()) {
+                CRUDControllerConfiguration crudControllerConfiguration = services.customisation.registerHtmlCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege()).setGenericTableFields(form.getTableColumnsList());
+                if(StringUtils.isNotEmpty(form.getTableView())) {
+                    crudControllerConfiguration.setTableViewWebEndpoint(frontendResourceTemplateNamePrefix + FrontendResource.AccessLevel.GLOBAL.getPath() + form.getTableView());
+                }
+            }
+            if (form.isRegisterApiCrudController()) {
+                services.customisation.registerApiCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege());
+            }
+            return true;
         }
-        if(form.isRegisterApiCrudController()){
-            services.customisation.registerApiCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege());
-        }
-        return true;
+        return false;
     }
 
     private boolean unregisterForm(Form form) {
         debug("[unregisterForm]");
         services.customisation.unregisterFrontendMapping(form.getName());
-        services.customisation.unregisterHtmlCrudController(form.getName());
-        services.customisation.unregisterApiCrudController(form.getName());
+        services.customisation.unregisterHtmlCrudController(form.getName().toLowerCase());
+        services.customisation.unregisterApiCrudController(form.getName().toLowerCase());
         return true;
     }
-
 }

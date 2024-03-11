@@ -33,6 +33,11 @@ public class AbstractSystemHealthController extends AbstractController {
                 .thenSet(systemHealthStatus, a -> services.systemStatus.statusNow())
                 .execute();
     }
+    protected PageModelMap validate(){
+        return Flow.init()
+                .thenSet(databaseUpdateScript, a -> services.databaseValidationService.getUpdateScript(true))
+                .execute();
+    }
 
     protected PageModelMap getThreads(){
         return Flow.init()

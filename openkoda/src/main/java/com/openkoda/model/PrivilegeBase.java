@@ -33,6 +33,8 @@ import static com.openkoda.core.security.HasSecurityRules.BB_OPEN;
 public interface PrivilegeBase {
 
     String getLabel();
+    PrivilegeGroup getGroup();
+    String getCategory();
     String name();
     default boolean isHidden() { return false; };
 

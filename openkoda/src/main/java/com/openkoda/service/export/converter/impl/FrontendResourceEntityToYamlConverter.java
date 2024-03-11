@@ -21,13 +21,12 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.converter.impl;
 
-import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.FrontendResource;
-import com.openkoda.service.export.converter.EntityToYamlConverter;
+import com.openkoda.model.component.ControllerEndpoint;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.repository.ControllerEndpointRepository;
 import com.openkoda.service.export.dto.ControllerEndpointConversionDto;
 import com.openkoda.service.export.dto.FrontendResourceConversionDto;
-import com.openkoda.service.export.util.ZipUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -37,54 +36,66 @@ import java.util.zip.ZipOutputStream;
 import static com.openkoda.service.export.FolderPathConstants.*;
 
 @Component
-public class FrontendResourceEntityToYamlConverter extends ComponentProvider implements EntityToYamlConverter<FrontendResource, FrontendResourceConversionDto> {
+public class FrontendResourceEntityToYamlConverter extends AbstractEntityToYamlConverter<FrontendResource, FrontendResourceConversionDto>{
 
-    private ZipUtils zipUtils;
 
+
+    @Inject
     private ControllerEndpointEntityToYamlConverter controllerEndpointEntityToYamlConverter;
+    @Inject
+    public ControllerEndpointRepository controllerEndpointRepository;
 
-    @Autowired
-    public FrontendResourceEntityToYamlConverter(ControllerEndpointEntityToYamlConverter controllerEndpointEntityToYamlConverter, ZipUtils zipUtils) {
-        this.controllerEndpointEntityToYamlConverter = controllerEndpointEntityToYamlConverter;
-        this.zipUtils = zipUtils;
+
+    @Override
+    public FrontendResourceConversionDto addToZip(FrontendResource entity, ZipOutputStream zipOut){
+         List<ControllerEndpoint> controllerEndpoints = controllerEndpointRepository.findByFrontendResourceId(entity.getId());
+         for(ControllerEndpoint ce : controllerEndpoints){
+             controllerEndpointEntityToYamlConverter.addToZip(ce, zipOut);
+         }
+         return super.addToZip(entity, zipOut);
+
+    }
+    @Override
+    public String getPathToContentFile(FrontendResource entity) {
+        return EXPORT_RESOURCES_PATH_ + getExportPath(entity) + entity.getName() + entity.getType().getExtension();
     }
 
     @Override
-    public FrontendResourceConversionDto exportToYamlAndAddToZip(FrontendResource entity, ZipOutputStream zipOut) {
-        debug("[exportToYamlAndAddToZip]");
+    public String getContent(FrontendResource entity) {
+        return entity.getContent();
+    }
 
-        String orgPath = entity.getOrganizationId() == null ? "" : SUBDIR_ORGANIZATION_PREFIX + entity.getOrganizationId() + "/";
-        String entityExportPath = (entity.getResourceType().equals(FrontendResource.ResourceType.UI_COMPONENT) ? UI_COMPONENT_ : FRONTEND_RESOURCE_) + entity.getAccessLevel().getPath() + orgPath;
-        String contentFilePath = EXPORT_RESOURCES_PATH_ + entityExportPath + entity.getName() + entity.getType().getExtension();
-        String resourceFilePath = EXPORT_CONFIG_PATH_ + entityExportPath + entity.getName() + ".yaml";
+    @Override
+    public String getPathToYamlComponentFile(FrontendResource entity) {
+        return EXPORT_CONFIG_PATH_ + getExportPath(entity) + entity.getName() + ".yaml";
+    }
 
-        zipUtils.addToZipFile(entity.getContent(), contentFilePath, zipOut);
-
-        FrontendResourceConversionDto dto = populateDto(entity, contentFilePath);
-
-        List<ControllerEndpointConversionDto> controllerEndpointDtos = repositories.unsecure.controllerEndpoint.findByFrontendResourceId(entity.getId()).stream()
-                .map(controllerEndpoint -> controllerEndpointEntityToYamlConverter.exportToYamlAndAddToZip(controllerEndpoint, zipOut))
+    @Override
+    public FrontendResourceConversionDto getConversionDto(FrontendResource entity) {
+        FrontendResourceConversionDto dto = populateDto(entity);
+        List<ControllerEndpointConversionDto> controllerEndpointDtos = controllerEndpointRepository.findByFrontendResourceId(entity.getId()).stream()
+                .map(controllerEndpoint -> controllerEndpointEntityToYamlConverter.getConversionDto(controllerEndpoint))
                 .collect(Collectors.toList());
-
         dto.setControllerEndpoints(controllerEndpointDtos);
-
-
-        zipUtils.addToZipFile(dtoToYamlString(dto), resourceFilePath, zipOut);
-
         return dto;
     }
 
-    private FrontendResourceConversionDto populateDto(FrontendResource entity, String contentFilePath) {
-        FrontendResourceConversionDto frontendResourceConversionDto = new FrontendResourceConversionDto();
-        frontendResourceConversionDto.setContent(contentFilePath);
-        frontendResourceConversionDto.setIncludeInSitemap(entity.getIncludeInSitemap());
-        frontendResourceConversionDto.setName(entity.getName());
-        frontendResourceConversionDto.setAccessLevel(entity.getAccessLevel());
-        frontendResourceConversionDto.setRequiredPrivilege(entity.getRequiredPrivilege());
-        frontendResourceConversionDto.setType(entity.getType().name());
-        frontendResourceConversionDto.setResourceType(entity.getResourceType().name());
-
-        return frontendResourceConversionDto;
+    private String getExportPath(FrontendResource entity){
+        String orgPath = entity.getOrganizationId() == null ? "" : SUBDIR_ORGANIZATION_PREFIX + entity.getOrganizationId() + "/";
+        return (entity.getResourceType().equals(FrontendResource.ResourceType.UI_COMPONENT) ? UI_COMPONENT_ : FRONTEND_RESOURCE_) + entity.getAccessLevel().getPath() + orgPath;
     }
 
+    private FrontendResourceConversionDto populateDto(FrontendResource entity) {
+        FrontendResourceConversionDto dto = new FrontendResourceConversionDto();
+        dto.setContent(getResourcePathToContentFile(entity));
+        dto.setIncludeInSitemap(entity.getIncludeInSitemap());
+        dto.setName(entity.getName());
+        dto.setAccessLevel(entity.getAccessLevel());
+        dto.setRequiredPrivilege(entity.getRequiredPrivilege());
+        dto.setType(entity.getType().name());
+        dto.setResourceType(entity.getResourceType().name());
+        dto.setModule(entity.getModuleName());
+        dto.setOrganizationId(entity.getOrganizationId());
+        return dto;
+    }
 }

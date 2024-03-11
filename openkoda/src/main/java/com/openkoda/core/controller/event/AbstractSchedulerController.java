@@ -26,7 +26,7 @@ import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.form.SchedulerForm;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.Scheduler;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.validation.BindingResult;
@@ -90,6 +90,7 @@ public class AbstractSchedulerController extends ComponentProvider implements Ha
         return Flow.init(schedulerForm, schedulerFormData)
                 .then(a -> services.validation.validateAndPopulateToEntity(schedulerFormData, br,new Scheduler()))
                 .thenSet(schedulerEntity, a -> repositories.unsecure.scheduler.saveAndFlush(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired(a.result))
                 .then(a -> services.scheduler.loadClusterAware(a.result.getId()))
                 .thenSet(schedulerForm, a -> new SchedulerForm())
                 .execute();
@@ -112,6 +113,7 @@ public class AbstractSchedulerController extends ComponentProvider implements Ha
                 .then(a -> repositories.unsecure.scheduler.findOne(schedulerId))
                 .then(a -> services.validation.validateAndPopulateToEntity(schedulerFormData, br,a.result))
                 .then(a -> repositories.unsecure.scheduler.saveAndFlush(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired(a.result))
                 .then(a -> services.scheduler.reloadClusterAware(a.result.getId()))
                 .execute();
     }
@@ -126,6 +128,8 @@ public class AbstractSchedulerController extends ComponentProvider implements Ha
     protected PageModelMap removeScheduler(long schedulerId) {
         debug("[removeScheduler] schedulerId: {}", schedulerId);
         return Flow.init(schedulerId)
+                .then(a -> repositories.secure.scheduler.findOne(schedulerId))
+                .then(a -> services.componentExport.removeExportedFilesIfRequired(a.result))
                 .then(a -> repositories.unsecure.scheduler.deleteOne(schedulerId))
                 .then(a -> services.scheduler.removeClusterAware(schedulerId))
                 .execute();

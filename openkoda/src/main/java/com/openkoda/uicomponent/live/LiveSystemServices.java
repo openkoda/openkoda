@@ -25,6 +25,8 @@ import com.openkoda.core.customisation.ServerJSProcessRunner;
 import com.openkoda.core.customisation.ServerJSRunner;
 import com.openkoda.uicomponent.SystemServices;
 import jakarta.inject.Inject;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -33,6 +35,7 @@ import java.util.Map;
 
 
 @Component
+@Profile("!cloud")
 public class LiveSystemServices implements SystemServices {
 
     @Inject ServerJSRunner serverJSRunner;

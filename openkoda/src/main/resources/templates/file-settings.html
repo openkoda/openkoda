@@ -5,7 +5,8 @@
 <div class="container-fluid">
 
 
-    <div layout:fragment="content">
+    <div layout:fragment="content" th:attr="data-menu-item='configuration'">
+        <nav th:replace="~{navigation-fragments::configuration-nav-tabs('files')}"></nav>
         <form th:replace="~{file-entity-form::file-settings-form-new}"/>
     </div>
 

@@ -27,7 +27,7 @@
             th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
 
 
-<form th:fragment="single-button-post-form(url, label, addedClass)" th:action="${url}"><button
+<form th:fragment="single-button-post-form(url, label, addedClass)" th:action="${url}" method="POST"><button
         th:class="${'btn btn-primary inline ' + addedClass}" type="submit"
         th:text="${label}">
     Submit</button></form>
@@ -37,9 +37,10 @@
     <button class="btn btn-sm btn-primary" th:text="${label}"
             th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"/></form>
 
-<form th:fragment="single-icon-post-form-with-confirm(url, iconClass, confirmationText)" method="POST"
+<form th:fragment="single-icon-post-form-with-confirm(url, iconClass, tooltipText, confirmationText)" method="POST"
       th:action="${url}">
-    <button class="bg-transparent p-0 border-0" th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button">
+    <button class="bg-transparent p-0 border-0" th:onclick="app.confirmAndSubmit([[${confirmationText}]], this.form)" type="button"
+            data-toggle="tooltip" data-placement="top" th:title="${tooltipText}">
         <i th:class="${iconClass} + ' form-icon'"></i>
     </button>
 </form>
@@ -86,9 +87,37 @@
     <button th:class="'btn btn-sm ' + ${addedClass}" th:text="${label}"
             th:onclick="app.confirmThenSubmitAsyncAndCallback(this.form, app.confirmPrompt( [[${confirmationPromptText}]] , [[${textToConfirm}]] ), [[${callback}]], [[${failureCallback}]])" type="button"/></form>
 
+<form th:fragment="single-icon-post-form-with-confirm-prompt-callback(url, iconClass, tooltipText, confirmationPromptText, textToConfirm, callback, failureCallbac)" method="POST"
+      th:action="${url}">
+    <button class="bg-transparent p-0 border-0" type="button"
+            th:onclick="app.confirmThenSubmitAsyncAndCallback(this.form, app.confirmPrompt( [[${confirmationPromptText}]] , [[${textToConfirm}]] ), [[${callback}]], [[${failureCallback}]])"
+            data-toggle="tooltip" data-placement="top" th:title="${tooltipText}">
+        <i th:class="${iconClass} + ' form-icon'"></i>
+    </button>
+</form>
+
+
 <form th:fragment="single-button-post-form-with-confirm-callback-class(url, label, confirmationText, callback, addedClass)" method="POST" th:action="${url}" th:class="'btn-form '">
     <button th:class="'btn ' + ${addedClass}" th:text="${label}"
             th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button"/></form>
+
+<form th:fragment="single-dropdown-item-post-with-confirm-callback(url, label, confirmationText, callback)" method="POST" th:action="${url}" th:class="'btn-form d-block'">
+    <button class="dropdown-item" th:text="${label}" type="button"
+            th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])"/></form>
+
+<form th:fragment="single-icon-post-form-with-confirm-callback(url, iconClass, tooltipText, confirmationText, callback)" method="POST" th:action="${url}" th:class="'btn-form '">
+    <button class="bg-transparent p-0 border-0" th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button"
+            data-toggle="tooltip" data-placement="top" th:title="${tooltipText}">
+        <i th:class="${iconClass} + ' form-icon'"></i>
+    </button>
+</form>
+
+<form th:fragment="single-icon-post-form-with-confirm-callback-with-disable(url, iconClass, tooltipText, confirmationText, callback, disabled)" method="POST" th:action="${url}" th:class="'btn-form '">
+    <button class="bg-transparent p-0 border-0" th:onclick="app.confirmAndSubmitAndCallback([[${confirmationText}]], this.form, [[${callback}]])" type="button" th:disabled="${disabled}"
+            data-toggle="tooltip" data-placement="top" th:title="${tooltipText}">
+        <i th:class="${iconClass} + ' form-icon'"></i>
+    </button>
+</form>
 
 
 <form th:fragment="single-button-post-form-with-replace(url, label)" method="POST"
@@ -138,8 +167,14 @@
     <button th:fragment="button-submit-and-callback(label, callback)" class="btn btn-primary btn-submit" th:onclick="app.submitAndCallback(this.form, [[${callback}]])" type="button" th:text="${label}">Submit</button>
     <button th:fragment="button-submit-and-callback-inline(label, callback)" class="btn btn-primary inline btn-sm btn-submit"
             th:onclick="app.submitAndCallback(this.form,[[${callback}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="icon-submit-and-callback-inline(iconClass, tooltipText, callback)"
+            class="bg-transparent p-0 border-0"
+            th:onclick="app.submitAndCallback(this.form,[[${callback}]])" type="button"
+            data-toggle="tooltip" data-placement="top" th:title="${tooltipText}">
+        <i th:class="${iconClass} + ' form-icon'"></i>
+    </button>
 
-    <button th:fragment="button-select-and-replace(label, selector, url)" class="btn btn-primary inline" th:onclick="app.selectAndReplace([[${selector}]],[[${url}]])" type="button" th:text="${label}">Submit</button>
+    <button th:fragment="button-select-and-replace(label, selector, url)" class="btn btn-primary inline" th:onclick="app.selectReplaceAndRefresh([[${selector}]],[[${url}]])" type="button" th:text="${label}">Submit</button>
 
     <th:block th:fragment="hidden-base(moduleName, name, value)" >
         <input th:if="${value == null}" th:fragment="hidden(name)" type="hidden" th:name="${name}" th:field="*{__${name}__}" />
@@ -215,10 +250,10 @@
         <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
     </div>
 
-    <div th:fragment="show-value(value, label)" class="row">
-        <div class="col-md-4 text-md-right"><strong th:text="${label + ':'}"></strong> </div>
-        <div class="col-md-8 text-md-left" th:text="${value}"/>
-    </div>
+    <tr th:fragment="show-tr-value(value, label)">
+        <td class="font-weight-bold"  th:text="${label}"></td>
+        <td th:text="${value}"></td>
+    </tr>
 
     <div th:fragment="select-simple-datalist(moduleName, fieldName, label, datalistId)" class="form-group ">
         <div th:replace="~{forms::select-base-datalist(${moduleName}, ${fieldName}, ${label}, ${datalistId}, true, #{template.dropdown.select}, '', false, '', false, false, false, '', null, '')}"> </div>
@@ -314,10 +349,9 @@
 				<i class="fa fa-question-circle"></i>
 			</span>
         </label>
-        <select th:id="${moduleName + '_' + fieldName}" th:disabled="${isDisabled}" th:name="${fieldName}" th:class="${'selectpicker type1 form-control ' + addedClass}"
-                th:with="changeCallback=${onChangeCallback ?: 'a => null'}"
-                th:onchange="'${onChangeSubmit ? 'app.submitAndCallback(this.form, [[${changeCallback}]])' : 'a => null'}'" >
-            <option th:if="${showDefault}" value="" th:text="${defaultText}">Select...</option>
+        <select th:id="${moduleName + '_' + fieldName}" th:disabled="${isDisabled}" th:name="${fieldName}"
+                th:class="${'selectpicker type1 form-control simple-control' + addedClass}" width="fit"
+                th:title="#{template.dropdown.select}" >
         </select>
         <th:block th:replace="~{forms::additional-inline-action()}"/>
         <script th:inline="javascript">
@@ -326,13 +360,42 @@
                 let fieldValue = /*[[ ${value} ?: *{__${ '' + fieldName + '' }__}]]*/ '';
                 fieldValue = fieldValue + "";
                 let fieldName = /*[[${ fieldName }]]*/ '';
+			    let moduleName = /*[[${ '' + moduleName + '' }]]*/ '';
                 let showDefault = /*[[${ showDefault }]]*/ false;
                 let disableOptions = /*[[${ disableOptions }]]*/ false;
                 let defaultText = /*[[${ defaultText }]]*/ 'Select';
                 app.populateSelect(selectId, fieldName, fieldValue, datalistId, showDefault, defaultText, disableOptions);
             })();
         </script>
-        <em th:if="${value == null}" class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+        <script type="text/javascript" th:inline="javascript">
+		    $( document ).ready(function() {
+			    let onChangeSubmit = /*[[${ '' + onChangeSubmit + '' }]]*/ '';
+			    let changeCallback = /*[[${ '' + changeCallback + '' }]]*/ 'a => null';
+			    let moduleName = /*[[${ '' + moduleName + '' }]]*/ '';
+			    let fieldName = /*[[${ '' + fieldName + '' }]]*/ '';
+                let selectpickerElem = $(`select[id="${moduleName}_${fieldName}"]`);
+                selectpickerElem.selectpicker();
+				if(onChangeSubmit === true) {
+                    selectpickerElem.on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+	                    app.submitAndCallback(this.form, changeCallback);
+                    });
+
+                }
+		    });
+        </script>
+        <th:block th:if="${value == null}">
+            <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
+            <script type="text/javascript" th:inline="javascript">
+	            (function(){
+	                let moduleName = /*[[${ '' + moduleName + '' }]]*/ '';
+	                let fieldName = /*[[${ '' + fieldName + '' }]]*/ '';
+                    let selectpickerElem = $(`select[id="${moduleName}_${fieldName}"]`);
+                    if(typeof selectpickerElem.selectpicker === "function"){
+                        selectpickerElem.selectpicker();
+                    }
+	            })();
+            </script>
+        </th:block>
     </div>
 
     <div th:fragment="radiobutton-table-base(moduleName, fieldName, label, description, datalistId, addedClass, isDisabled, help, hasLabel)" class="form-group ">
@@ -357,23 +420,22 @@
         <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
     </div>
 
-    <div th:fragment="checkbox-table(moduleName, fieldName, label, description, datalistId, addedClass, isDisabled, help)" th:class="${addedClass} + ' form-group'">
+    <div th:fragment="checkbox-table(moduleName, fieldName, label, description, datalistId, addedClass, isDisabled, help, grouped)" th:class="${addedClass} + ' form-group'">
         <label th:if="${label != null && label != ''}" th:for="${fieldName}">
             <th:block th:text="${label}" />&nbsp;
             <span th:if="${help != ''}" data-toggle="tooltip" th:attr="data-content=${help}" data-placement="top" class="help" >
 				<i class="fa fa-question-circle"></i>
 			</span>
         </label>
-        <table th:class="${'form-control table table-responsive table-checkbox ' + addedClass}">
-            <tbody th:id="${moduleName + '_' + fieldName}">
-            </tbody>
-        </table>
+        <div th:class="${'form-control auto ' + (grouped ? 'table-checkbox-grouped ' : '') + addedClass}" th:id="${moduleName + '_' + fieldName}">
+        </div>
         <script th:inline="javascript">
             (function(){let datalistId = /*[[${datalistId}]]*/ '_none_';
                 let selectId = /*[[${moduleName + '_' + fieldName}]]*/ '_none_';
                 let fieldValues = /*[[*{__${ '' + fieldName + '' }__}]]*/ [];
                 let fieldName = /*[[${ fieldName }]]*/ '';
-                app.populateCheckboxTable(selectId, fieldName, fieldValues, datalistId);
+                let grouped = /*[[${ grouped }]]*/ '';
+                app.populateCheckboxTable(selectId, fieldName, fieldValues, datalistId, grouped);
             })();
         </script>
         <em class="alert-danger" th:errors="*{__${fieldName}__}">Error</em>
@@ -675,7 +737,8 @@
     <div th:fragment="checkbox-with-collapse-with-warning-with-class(moduleName, name, label, disabled, addedClass, collapseTarget, elementSelector, warningClass, warningMsg, alertMsg)">
         <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}" th:field="*{__${name}__}" type="checkbox" th:class="${addedClass}"
                th:ischecked="*{__${ '' + name + '' }__}"
-               th:onclick="|app.showCheckboxAlert('${moduleName + '-' + name}', '${alertMsg}')|"
+               th:data-alertbox="|app.showCheckboxAlert('${moduleName + '-' + name}', '${alertMsg}')|"
+               onclick="this.getAttribute('data-alertbox')"
                data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"/>
         <div th:replace="~{forms::label-for-checkbox-with-warning('checkbox-label', ${label}, ${warningClass}, ${warningMsg})}"></div>
         <script th:inline="javascript">
@@ -738,26 +801,26 @@
     </div>
 
     <div th:fragment="switch-collapse-content(moduleName, name, firstValueLabel, secondValueLabel, disabled, addedClass, collapseTarget)" th:class="${addedClass}">
-        <div class="d-table-cell align-middle">
+        <div class="d-flex">
             <div th:replace="~{forms::label-simple('', ${firstValueLabel})}"></div>
+            <div class="custom-control custom-switch d-flex">
+                <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
+                       class="custom-control-input" data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"
+                       th:ischecked="*{__${ '' + name + '' }__}"/>
+                <div th:replace="~{forms::label-for-switch(${moduleName + '-' + name}, ${secondValueLabel})}"></div>
+            </div>
+            <script th:inline="javascript">
+                (function(){
+                    let elementSelector1 = /*[[${collapseTarget + '1'} ]]*/ '_none_';
+                    let elementSelector2 = /*[[${collapseTarget + '2'} ]]*/ '_none_';
+                    let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
+                    let addedClass = /*[[${addedClass}]]*/ '_none_';
+                    let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
+                    app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector1, collapseTarget, !isVisible);
+                    app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector2, collapseTarget, isVisible);
+                })();
+            </script>
         </div>
-        <div class="custom-control custom-switch pl-4 d-table-cell align-middle">
-            <input th:id="${moduleName + '-' + name}" th:disabled="${disabled}"  th:field="*{__${name}__}" type="checkbox"
-                   class="custom-control-input" data-toggle="collapse" th:data-target="'#' + ${collapseTarget}"
-                   th:ischecked="*{__${ '' + name + '' }__}"/>
-            <div th:replace="~{forms::label-for-switch(${moduleName + '-' + name}, ${secondValueLabel})}"></div>
-        </div>
-        <script th:inline="javascript">
-			(function(){
-				let elementSelector1 = /*[[${collapseTarget + '1'} ]]*/ '_none_';
-				let elementSelector2 = /*[[${collapseTarget + '2'} ]]*/ '_none_';
-				let collapseTarget = /*[[${collapseTarget}]]*/ '_none_';
-				let addedClass = /*[[${addedClass}]]*/ '_none_';
-				let isVisible = /*[[*{__${ '' + name + '' }__}]]*/ false;
-				app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector1, collapseTarget, !isVisible);
-				app.wrapCheckboxSectionAndShowIfAllGroupVisible(addedClass, elementSelector2, collapseTarget, isVisible);
-			})();
-        </script>
     </div>
 
     <ul th:fragment="select-with-filter(moduleName, values, name)" th:id="${moduleName + '-' + name}" role="menu" class="dropdown-menu">
@@ -775,10 +838,28 @@
         </select> <br />
         <em class="alert-danger" th:errors="*{__${name}__}">Error</em>
     </div>
+    <div th:fragment="multiselect-with-onclick-action(optionsList, getValue, label, onclick, identifier, addedCss)" th:class="'form-group ' + ${addedCss}">
+        <div th:replace="~{forms::label-simple('', ${label})}"></div>
+        <select th:id="'select-' + ${identifier}" class="selectpicker form-control" multiple data-live-search="true" th:title="#{template.dropdown.select}">
+            <option th:each="entry : ${optionsList}" th:value="${entry.__${getValue}__}" th:text="${entry.__${getValue}__}"
+                    th:data-content="${identifier == 'image' ? '<img class=option-img src=' + entry.__${getValue}__ + '></img>' : ''}"></option>
+        </select>
+        <script type="text/javascript" th:inline="javascript">
+            $( document ).ready(function() {
+                let onclick = /*[[${ '' + onclick + '' }]]*/ '';
+                let identifier = /*[[${ '' + identifier + '' }]]*/ '';
+                $('#select-' + identifier).selectpicker();
+                $('#select-' + identifier).on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+                    let sel = $(this).find('option').eq(clickedIndex).val();
+                    eval(onclick + '("' + sel + '", "' + identifier + '")');
+                });
+            });
+        </script>
+    </div>
 
     <div th:fragment="global-file-upload(allowedContentType, multipleSelection, addedClass)">
         <th:block th:replace="~{forms::file-upload-prerequisites}"/>
-        <div id="global-file-upload" ></div>
+        <div id="global-file-upload" th:class="${addedClass}" ></div>
         <script th:inline="javascript">
             (function(){
                 let csrfParamName = /*[[${ '' + _csrf.parameterName + '' }]]*/ '';
@@ -1096,6 +1177,15 @@
     <input type="hidden" name="id" th:value="${formId}">
 </form>
 
+<form th:fragment="single-post-toggle-like-checkbox-with-callback(url, name, isChecked, formId, callback, isMapDto)" th:id="${'form-' + formId}" method="post" th:action="${url}">
+    <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${isChecked}" th:checked="${isChecked}"
+               th:onchange="app.submitCheckboxAndCallback(this, [[${'form-' + formId}]],[[${callback}]])" th:id="customSwitch + ${formId}">
+        <label class="custom-control-label" th:for="customSwitch + ${formId}"></label>
+        <input type="hidden" name="singleFieldToUpdate" th:value="${name}">
+    </div>
+</form>
+
 <form th:fragment="single-post-checkbox-with-callback(url, name, isChecked, formId, callback, isMapDto)" th:id="${'form-' + formId}" method="post" th:action="${url}">
     <input type="checkbox" th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${isChecked}" th:checked="${isChecked}"
            th:onchange="app.submitCheckboxAndCallback(this, [[${'form-' + formId}]],[[${callback}]])" >
@@ -1211,8 +1301,8 @@
         app.setupInputFilter(/*[[${ '' + name + '.' + type + 'Statements[' + index + '][Value]' + '' }]]*/ '', app.allowDigitsLettersSpaceDash)
     </script>
     <div class="d-table-cell pl-2">
-        <i class="fas fa-fw fa-plus-circle text-primary" type="button" th:if="${index == 0}" th:onclick="|app.getNextRuleLine(${organizationEntity.id}, '${name}', '${type}', '${key}', '${datalistId}', '${disabled}', '${advanced}')|"></i>
-        <i class="fas fa-fw fa-minus-circle text-danger" type="button" th:if="${index > 0}" th:onclick="|document.getElementById('${name + '.' + type + '[' + index + ']'}').remove()|"></i>
+        <i class="fas fa-fw fa-plus-circle text-primary" type="button" th:if="${index == 0}" onclick="this.getAttribute('data-nextrule')"  th:data-nextrule="|app.getNextRuleLine(${organizationEntity.id}, '${name}', '${type}', '${key}', '${datalistId}', '${disabled}', '${advanced}')|"></i>
+        <i class="fas fa-fw fa-minus-circle text-danger" type="button" th:if="${index > 0}" onclick="this.getAttribute('data-elementById')" th:data-elementById="|document.getElementById('${name + '.' + type + '[' + index + ']'}').remove()|"></i>
     </div>
 </div>
 
@@ -1222,7 +1312,7 @@
     <div th:class="*{(__${valueFieldName}__ == null ? 'd-table' : 'd-none') + ' search-box'}">
         <input th:replace="~{forms::select-base-searchable('', ${fieldName}, null, ${url}, 'd-inline', ${disabled}, 'd-table-cell pr-2', ${indexForKey}, ${indexToDisplay}, ${indexForImgUrl}, ${indexForUrl})}"/>
         <button type="button" class="btn btn-sm btn-primary d-table-cell" th:text="#{__${key}__.search.add.label}"
-                th:onclick="app.appendSelectedFromSearch([[${organizationEntityId}]], [[${valueFieldName + '_selected'}]], [[${'_' + name + '.' + type + 'Statements[' + index + ']'}]], [[${name + '.' + type + 'Statements[' + index + '][Value]'}]])">Add</button>
+                onclick="this.getAttribute('data-formSearch')" th:data-formSearch="app.appendSelectedFromSearch([[${organizationEntityId}]], [[${valueFieldName + '_selected'}]], [[${'_' + name + '.' + type + 'Statements[' + index + ']'}]], [[${name + '.' + type + 'Statements[' + index + '][Value]'}]])">Add</button>
     </div>
     <input type="hidden" th:name="${valueFieldName}" th:id="${valueFieldName}" th:value="*{__${valueFieldName}__}">
     <div th:id="${valueFieldName + '_selected'}" class="p-3" th:with="selectedElements=*{__${valueFieldName}__}">
@@ -1270,7 +1360,7 @@
 <th:block th:fragment="selected-searchable(selectedId, fieldName, imgUrl, label, url)" th:with="id=${fieldName + '_' + selectedId + '_' + #dates.createNow().getTime()}">
     <div th:id="${id}" class="selected-box d-inline-block text-center bg-white border-400 rounded mb-3" th:data-value="${selectedId}">
         <i class="fas fa-fw fa-times w-100 text-right" type="button"
-           th:onclick="document.getElementById([[${id}]]).remove(); app.updateSelectedFromSearch([[${fieldName + '_selected'}]], [[${fieldName}]], null);"></i>
+           onclick="this.getAttribute('data-elementById')" th:data-elementById="document.getElementById([[${id}]]).remove(); app.updateSelectedFromSearch([[${fieldName + '_selected'}]], [[${fieldName}]], null);"></i>
         <div>
             <th:block th:if="${url == null}">
                 <img th:if="${imgUrl != null}" th:src="${imgUrl}"/>

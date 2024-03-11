@@ -31,60 +31,84 @@ package com.openkoda.core.form;
 public enum FieldType {
 
     //Direct single value:
-    text, password, hidden,
+    text(FieldDbType.VARCHAR_255),
+    password(FieldDbType.VARCHAR_255),
+    hidden(FieldDbType.BIGINT),
 
     //date and time
-    date, datetime, time,
+    date(FieldDbType.DATE),
+    datetime(FieldDbType.TIMESTAMP_W_TZ),
+    time(FieldDbType.TIME_W_TZ),
 
     //Direct single boolean value:
-    checkbox, checkbox_with_warning, switch_values, switch_values_with_warning,
+    checkbox(FieldDbType.BOOLEAN),
+    checkbox_with_warning(FieldDbType.BOOLEAN),
+    switch_values(FieldDbType.BOOLEAN),
+    switch_values_with_warning(FieldDbType.BOOLEAN),
 
     //Simple textarea
-    textarea,
+    textarea(FieldDbType.VARCHAR_1000),
 
     //Code edition:
-    code_html, code_css, code_js, code_with_webendpoint_autocomplete, code_with_form_autocomplete,
+    code_html(FieldDbType.VARCHAR_262144),
+    code_css(FieldDbType.VARCHAR_262144),
+    code_js(FieldDbType.VARCHAR_262144),
+    code_with_webendpoint_autocomplete(FieldDbType.VARCHAR_262144),
+    code_with_form_autocomplete(FieldDbType.VARCHAR_262144),
 
+    //foreign key reference
+    many_to_one(FieldDbType.BIGINT),
     //Special for organization selection:
-    organization_select,
+    organization_select(FieldDbType.BIGINT),
+    module_select(FieldDbType.VARCHAR_255),
 
     datalist(false),
     //One value from dictionary:
-    dropdown, dropdown_with_disable, radio_list, radio_list_no_label, dropdown_with_entities,
+    dropdown(FieldDbType.VARCHAR_255),
+    dropdown_with_disable,
+    radio_list,
+    radio_list_no_label,
+    dropdown_with_entities,
 
     //Many values from dictionary:
     checkbox_list,
+    checkbox_list_grouped,
 
     //Visual divider:
     divider,
-    section_with_checkbox, section_with_checkbox_with_warning, section_with_switch, section_with_switch_content(false),
+    section_with_checkbox,
+    section_with_checkbox_with_warning,
+    section_with_switch,
+    section_with_switch_content(false),
 
     //Buttons
     button,
     submit_to_new_tab(false),
     //
 
-    number, map,
+    number(FieldDbType.NUMERIC),
+    map,
 
     document,
     rule_then, rule_then_else,
 
-    image_url,
+    image_url(FieldDbType.VARCHAR_255),
 
     //Files
     files_library, file_library,
     images_library, image_library,
     image,
-    files,
+    files(FieldDbType.VARCHAR_255),
 
     //One to Many component
     one_to_many,
     //
-    color_picker,
+    color_picker(FieldDbType.VARCHAR_255),
 
     section_with_dropdown,
 
-    recaptcha
+    recaptcha,
+    div
     ;
 
     public boolean hasValue() {
@@ -94,14 +118,32 @@ public enum FieldType {
         return name();
     }
 
+    public FieldDbType getDbType() {
+        return dbType;
+    }
+
+
+    FieldType(boolean hasValue, FieldDbType dbType) {
+        this.hasValue = hasValue;
+        this.dbType = dbType;
+    }
+
+    FieldType(FieldDbType dbType) {
+        this.hasValue=true;
+        this.dbType = dbType;
+    }
+
     FieldType(boolean hasValue) {
         this.hasValue = hasValue;
+        this.dbType = null;
     }
 
     FieldType() {
-        hasValue = true;
+        this.hasValue = true;
+        this.dbType = null;
     }
 
     private boolean hasValue;
+    private FieldDbType dbType;
 
 }

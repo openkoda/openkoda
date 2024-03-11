@@ -22,9 +22,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.form;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.openkoda.model.OpenkodaModule;
 import com.openkoda.model.Organization;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.repository.SecureEntityDictionaryRepository;
+import com.openkoda.uicomponent.annotation.Autocomplete;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDate;
@@ -60,47 +62,47 @@ public class FormFieldDefinitionBuilderStart {
         this.defaultReadPrivilege = defaultReadPrivilege;
         this.defaultWritePrivilege = defaultWritePrivilege;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> datalist(String datalistId, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, DATALIST_PREFIX + datalistId, datalistId, datalist, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> datalist(String datalistId, Function<SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, DATALIST_PREFIX + datalistId, datalistId, datalist, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> text(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, text, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> textarea(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, textarea, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Boolean> checkbox(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, checkbox, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Boolean>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<LocalDateTime> datetime(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datetime, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<LocalDateTime>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<LocalDate> date(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, date, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<LocalDate>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Number> number(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, number, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Number>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdown(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
@@ -116,207 +118,234 @@ public class FormFieldDefinitionBuilderStart {
 //        fields.add(lastField = createFormFieldDefinition(formName, fieldName, one_to_many, defaultReadPrivilege, defaultWritePrivilege, urlToAddObjectToList, valueSupplier, "forms::default-entity-tile"));
 //        return (FormFieldDefinitionBuilder<Object>)this;
 //    }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdown(String fieldName, String datalistId, boolean allowNull) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, allowNull, dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdown(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, dropdown, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdown(String fieldName, String datalistId, Boolean allowNull) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, allowNull, dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdownWithDisable(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, dropdown_with_disable, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdownWithDisable(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, dropdown_with_disable, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> sectionWithDropdown(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, section_with_dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> sectionWithDropdown(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, section_with_dropdown, null, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> dropdownNonDto(String fieldName, String datalistId) {
         fields.add(lastField = createNonDtoFormFieldDefinition(formName, fieldName, datalistId, dropdown, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> checkboxList(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, fieldName, checkbox_list, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> checkboxList(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, checkbox_list, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
 
+    @Autocomplete
+    public FormFieldDefinitionBuilder<String> checkboxListGrouped(String fieldName, String datalistId) {
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, checkbox_list_grouped, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<String>)this;
+    }
+
+    @Autocomplete
+    public FormFieldDefinitionBuilder<Long> manyToOne(String fieldName, String referencedEntityKey) {
+        String datalistId = DATALIST_PREFIX + referencedEntityKey;
+        datalist(datalistId, d -> d.dictionary(referencedEntityKey));
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, null,true, many_to_one, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<Long>)this;
+    }
+
+    @Autocomplete
     public FormFieldDefinitionBuilder<Long> organizationSelect(String fieldName) {
         datalist("organizations", d -> d.dictionary(Organization.class));
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, "organizations", true, organization_select, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Long>)this;
     }
+    @Autocomplete
+    public FormFieldDefinitionBuilder<Long> moduleSelect(String fieldName) {
+        datalist("modules", d -> d.dictionary(OpenkodaModule.class));
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, "modules", true, module_select, defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<Long>)this;
+    }
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> radioList(String fieldName, String datalistId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, datalistId, radio_list, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> radioListNoLabel(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, null, radio_list_no_label, null, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> radioListNoLabel(String fieldName, String dataListId) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, dataListId, radio_list_no_label, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> customFieldType(String fieldName, Function<Object, FieldType> fieldTypeFunction) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, fieldTypeFunction, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> divider(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, divider, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> codeCss(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_css, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> codeHtml(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_html, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> codeJs(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_js, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> codeWithWebendpointAutocomplete(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_with_webendpoint_autocomplete, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> codeWithFormAutocomplete(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, code_with_form_autocomplete, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> hidden(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, hidden, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> switchValues(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, switch_values, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> switchValuesWithWarning(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, switch_values_with_warning, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> sectionWithCheckboxWithWarning(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, section_with_checkbox_with_warning, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> sectionWithCheckbox(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, section_with_checkbox, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> sectionWithSwitch(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, section_with_switch, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> sectionWithSwitchContent(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, section_with_switch_content, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> password(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, password, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> submitToNewTab(String fieldName, String url) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, submit_to_new_tab, defaultReadPrivilege, defaultWritePrivilege, url));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> map(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, map, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>) this;
     }
 
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> imagesLibrary(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, files_library, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, "image/png,image/jpeg", filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> imageLibrary(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, file_library, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, "image/png,image/jpeg", filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> files(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier, String mimeType) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, DATALIST_PREFIX + fieldName, files, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege, mimeType, filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> image(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, image, "", defaultReadPrivilege, defaultWritePrivilege, "image/png,image/jpeg", filesConverter));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> imageUrl(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, image_url, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<String> colorPicker(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, color_picker, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<String>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> timePicker(String fieldName) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName, time, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> ruleThen(String fieldName, BiFunction<DtoAndEntity, SecureEntityDictionaryRepository, Object> datalistSupplier, String url) {
         fields.add(lastField = createFormFieldDefinition(formName, fieldName,null, url, rule_then, datalistSupplier, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
     public FormFieldDefinitionBuilder<Object> recaptcha() {
         fields.add(lastField = createFormFieldDefinition(formName, RECAPTCHA, recaptcha, defaultReadPrivilege, defaultWritePrivilege));
         return (FormFieldDefinitionBuilder<Object>)this;
     }
-
+    @Autocomplete
+    public FormFieldDefinitionBuilder<Object> div(String fieldName) {
+        fields.add(lastField = createFormFieldDefinition(formName, fieldName, div,  defaultReadPrivilege, defaultWritePrivilege));
+        return (FormFieldDefinitionBuilder<Object>)this;
+    }
     //TODO: move to some better place
     Function filesConverter = new Function() {
         @Override

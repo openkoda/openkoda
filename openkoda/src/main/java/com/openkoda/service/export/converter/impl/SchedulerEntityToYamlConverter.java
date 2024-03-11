@@ -22,35 +22,39 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.core.flow.LoggingComponent;
-import com.openkoda.model.event.Scheduler;
-import com.openkoda.service.export.converter.EntityToYamlConverter;
+import com.openkoda.model.component.Scheduler;
 import com.openkoda.service.export.dto.SchedulerConversionDto;
-import com.openkoda.service.export.util.ZipUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.zip.ZipOutputStream;
-
-import static com.openkoda.service.export.FolderPathConstants.SCHEDULER_BASE_FILES_PATH;
+import static com.openkoda.service.export.FolderPathConstants.EXPORT_CONFIG_PATH_;
+import static com.openkoda.service.export.FolderPathConstants.SCHEDULER_;
 
 @Component
-public class SchedulerEntityToYamlConverter implements EntityToYamlConverter<Scheduler, SchedulerConversionDto>, LoggingComponent {
-
-    @Autowired
-    ZipUtils zipUtils;
+public class SchedulerEntityToYamlConverter extends AbstractEntityToYamlConverter<Scheduler, SchedulerConversionDto> implements LoggingComponent {
 
     @Override
-    public SchedulerConversionDto exportToYamlAndAddToZip(Scheduler entity, ZipOutputStream zipOut) {
-        debug("[exportToYamlAndAddToZip]");
+    public String getPathToContentFile(Scheduler entity) {
+        return null;
+    }
 
+    @Override
+    public String getContent(Scheduler entity) {
+        return null;
+    }
+
+    @Override
+    public String getPathToYamlComponentFile(Scheduler entity) {
+        return getYamlDefaultFilePath(EXPORT_CONFIG_PATH_ + SCHEDULER_, entity.getEventData(), entity.getOrganizationId());
+    }
+
+    @Override
+    public SchedulerConversionDto getConversionDto(Scheduler entity) {
         SchedulerConversionDto dto = new SchedulerConversionDto();
         dto.setCronExpression(entity.getCronExpression());
         dto.setEventData(entity.getEventData());
         dto.setOnMasterOnly(entity.isOnMasterOnly());
-
-        String resourceFilePath = zipUtils.setResourceFilePath(SCHEDULER_BASE_FILES_PATH, entity.getEventData(), entity.getOrganizationId());
-
-        zipUtils.addToZipFile(dtoToYamlString(dto), resourceFilePath, zipOut);
+        dto.setModule(entity.getModuleName());
+        dto.setOrganizationId(entity.getOrganizationId());
         return dto;
     }
 }

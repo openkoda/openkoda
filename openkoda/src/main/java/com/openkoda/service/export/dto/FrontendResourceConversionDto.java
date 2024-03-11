@@ -21,11 +21,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 
 import java.util.List;
 
-public class FrontendResourceConversionDto {
+public class FrontendResourceConversionDto extends ComponentDto{
 
     private boolean includeInSitemap;
     private FrontendResource.AccessLevel accessLevel;
@@ -34,8 +34,6 @@ public class FrontendResourceConversionDto {
     private String type;
     private String resourceType;
     private String content;
-
-    private Long organizationId;
     private List<ControllerEndpointConversionDto> controllerEndpoints;
 
     public boolean getIncludeInSitemap() {
@@ -96,14 +94,6 @@ public class FrontendResourceConversionDto {
 
     public List<ControllerEndpointConversionDto> getControllerEndpoints() {
         return controllerEndpoints;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
     }
 
     public void setControllerEndpoints(List<ControllerEndpointConversionDto> controllerEndpoints) {

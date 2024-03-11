@@ -24,8 +24,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.controller.frontendresource;
 
+import com.openkoda.controller.DefaultComponentProvider;
+import com.openkoda.core.flow.Flow;
+import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
+import com.openkoda.core.form.CRUDControllerConfiguration;
+import com.openkoda.core.form.ReflectionBasedEntityForm;
+import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.common.ComponentEntity;
+import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
+import com.openkoda.model.component.FrontendResource;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import static com.openkoda.controller.common.URLConstants._FRONTENDRESOURCE;
@@ -36,7 +50,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 
 /**
- * The controller for server-side generated html actions considering any {@link com.openkoda.model.FrontendResource} management or CRUD operations.
+ * The controller for server-side generated html actions considering any {@link FrontendResource} management or CRUD operations.
  * See also {@link AbstractFrontendResourceController}
  */
 @RestController
@@ -44,13 +58,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class FrontendResourceControllerHtml extends AbstractFrontendResourceController {
 
     /**
-     * The default resource name of a content for {@link com.openkoda.model.FrontendResource} with type {@link FrontendResource.Type}.HTML
+     * The default resource name of a content for {@link FrontendResource} with type {@link FrontendResource.Type}.HTML
      */
     @Value("${default.frontendResourcePage.template.name:frontend-resource-template}")
     String defaultFrontendResourcePageTemplate;
 
     /**
-     * Triggers update of the {@link com.openkoda.model.FrontendResource} and prepares the result response.
+     * Triggers update of the {@link FrontendResource} and prepares the result response.
      * See also {@link AbstractFrontendResourceController}
      *
      * @param content a {@link java.lang.String} object.
@@ -71,7 +85,7 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
 
 
     /**
-     * Triggers the publish action of the {@link com.openkoda.model.FrontendResource} and prepares the result response.
+     * Triggers the publish action of the {@link FrontendResource} and prepares the result response.
      * See also {@link AbstractFrontendResourceController}
      *
      * @param organizationId
@@ -89,7 +103,7 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
     }
 
     /**
-     * Triggers the publish action of all {@link com.openkoda.model.FrontendResource} in the database and prepares the result response.
+     * Triggers the publish action of all {@link FrontendResource} in the database and prepares the result response.
      * See also {@link AbstractFrontendResourceController}
      *
      * @return java.lang.Object
@@ -118,7 +132,7 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
     }
 
     /**
-     * Reloads draft content of all {@link com.openkoda.model.FrontendResource} .
+     * Reloads draft content of all {@link FrontendResource} .
      * See also {@link AbstractFrontendResourceController}
      *
      * @param frontendResourceId
@@ -133,7 +147,7 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
     }
 
     /**
-     * Downloads all {@link com.openkoda.model.FrontendResource} from the database packed in a .ZIP file.
+     * Downloads all {@link FrontendResource} from the database packed in a .ZIP file.
      * See also {@link com.openkoda.core.service.ZipService}, {@link com.openkoda.repository.FrontendResourceRepository}
      *
      * @return byte[]
@@ -146,4 +160,60 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
         return services.zipService.zipFrontendResources(repositories.unsecure.frontendResource.findAll()).toByteArray();
     }
 
+    @PostMapping(_NEW_SETTINGS)
+    public Object saveNew(@Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
+        debug("[saveNew]");
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(FRONTENDRESOURCE);
+        PrivilegeBase privilege = conf.getPostNewPrivilege();
+        Long organizationId = ((ReflectionBasedEntityForm) form).dto.getOrganizationId();
+        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ((Flow<Object, AbstractOrganizationRelatedEntityForm, DefaultComponentProvider>)
+                Flow.init(componentProvider, conf.getFormAttribute(), form))
+                .then(a -> services.validation.validateAndPopulateToEntity(form, br, conf.createNewEntity(organizationId)))
+                .then(a -> (SearchableOrganizationRelatedEntity)conf.getSecureRepository().saveOne(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired((ComponentEntity) a.result))
+                .thenSet(conf.getFormAttribute(), a -> conf.createNewForm(organizationId, a.result))
+                .execute()
+                .mav(conf.getFormSuccessFragment(), conf.getFormErrorFragment());
+    }
+    @PostMapping(_ID_SETTINGS)
+    public Object save(
+            @PathVariable(ID) Long objectId,
+            @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
+            @Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
+        debug("[saveNew]");
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(FRONTENDRESOURCE);
+        PrivilegeBase privilege = conf.getPostSavePrivilege();
+        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ((Flow<Object, AbstractOrganizationRelatedEntityForm, DefaultComponentProvider>)
+                Flow.init(componentProvider, conf.getFormAttribute(), form))
+                .then(a -> (SearchableOrganizationRelatedEntity)conf.getSecureRepository().findOne(objectId))
+                .then(a -> services.validation.validateAndPopulateToEntity(form, br,a.result))
+                .then(a -> (SearchableOrganizationRelatedEntity)conf.getSecureRepository().saveOne(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired((ComponentEntity) a.result))
+                .thenSet(conf.getFormAttribute(), a -> conf.createNewForm(organizationId, a.result))
+                .execute()
+                .mav(conf.getFormSuccessFragment(), conf.getFormErrorFragment());
+    }
+    @PostMapping(_ID_REMOVE)
+    @Transactional
+    public Object remove(
+            @PathVariable(name=ID) Long objectId,
+            @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId) {
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(FRONTENDRESOURCE);
+        PrivilegeBase privilege = conf.getPostRemovePrivilege();
+        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return Flow.init(componentProvider, objectId)
+                .then(a -> repositories.secure.scheduler.findOne(objectId))
+                .then(a -> services.componentExport.removeExportedFilesIfRequired(a.result))
+                .then(a -> conf.getSecureRepository().deleteOne(objectId))
+                .execute()
+                .mav(a -> true, a -> false);
+    }
 }

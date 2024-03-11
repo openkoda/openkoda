@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export;
 
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +30,7 @@ import java.util.List;
 public class FolderPathConstants {
 
     public static final String COMPONENTS_ = "components/";
+    public static final String COMPONENTS_ADDITIONAL_FILES_ = "components-additional-files/";
     public static final String SERVER_SIDE_ = "server-side/";
     public static final String FORM_ = "form/";
     public static final String SCHEDULER_ = "scheduler/";
@@ -37,9 +38,11 @@ public class FolderPathConstants {
     public static final String FRONTEND_RESOURCE_ = "frontend-resource/";
     public static final String UI_COMPONENT_ = "ui-component/";
 
-    public static final String EXPORT_CODE_PATH_ = "code/";
-    public static final String EXPORT_RESOURCES_PATH_ = "templates/";
-    public static final String EXPORT_CONFIG_PATH_ = "components/";
+    public static final String EXPORT_PATH="src/main/resources/";
+    public static final String EXPORT_CODE_PATH_ = EXPORT_PATH + "code/";
+    public static final String EXPORT_RESOURCES_PATH_ = EXPORT_PATH + "templates/";
+    public static final String EXPORT_CONFIG_PATH_ = EXPORT_PATH + "components/";
+    public static final String EXPORT_MIGRATION_PATH_ = EXPORT_PATH + "migration/";
 
     public static final String SUBDIR_ORGANIZATION_PREFIX = "org_";
 

@@ -6,7 +6,8 @@
 
 
 
-    <div layout:fragment="content">
+    <div layout:fragment="content" th:attr="data-menu-item='security'">
+        <nav th:replace="~{navigation-fragments::security-nav-tabs('users')}"></nav>
 
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row justify-content-between">
@@ -25,13 +26,16 @@
             </div>
 
             <div class="card-body">
-                <input th:if="${@auth.canSeeEmail(userForm.entity)}"
-                       th:replace="~{forms::show-value(${userEntity.email}, #{userForm.email.label})}"/>
-                <input th:replace="~{forms::show-value(${userEntity.firstName}, #{userForm.firstName.label})}"/>
-                <input th:replace="~{forms::show-value(${userEntity.lastName}, #{userForm.lastName.label})}"/>
-                <input th:replace="~{forms::show-value(${userEntity.enabled}, #{editUserForm.enabled.label})}"/>
-                <input th:replace="~{forms::show-value(${userEntity.getLoginMethods()}, #{userInfo.loginMethods.label})}"/>
-                <input th:replace="~{forms::show-value(${#messages.msg('label.globalRole.' + userEntity.getGlobalRoleName())}, #{editUserForm.globalRoleName.label})}"/>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tr th:if="${@auth.canSeeEmail(userForm.entity)}" th:replace="~{forms::show-tr-value(${userEntity.email}, #{userForm.email.label})}"/>
+                        <tr th:replace="~{forms::show-tr-value(${userEntity.firstName}, #{userForm.firstName.label})}"/>
+                        <tr th:replace="~{forms::show-tr-value(${userEntity.lastName}, #{userForm.lastName.label})}"/>
+                        <tr th:replace="~{forms::show-tr-value(${userEntity.enabled}, #{editUserForm.enabled.label})}"/>
+                        <tr th:replace="~{forms::show-tr-value(${userEntity.getLoginMethods()}, #{userInfo.loginMethods.label})}"/>
+                        <tr th:replace="~{forms::show-tr-value(${#messages.msg('label.globalRole.' + userEntity.getGlobalRoleName())}, #{editUserForm.globalRoleName.label})}"/>
+                    </table>
+                </div>
             </div>
 
 

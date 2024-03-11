@@ -24,6 +24,7 @@ package com.openkoda.core.form;
 import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
+import com.openkoda.model.component.FrontendResource;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -274,7 +275,7 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
     /**
      * Explicitly casts dto values to string with toString() method.
      * That's necessary for field validators {@link FormFieldDefinitionBuilder#validate} - in case a dto value can't be cast to String as ((String) value) it throws exception.
-     * See for instance "type" field in frontendResourceForm - this value is an enum {@link com.openkoda.model.FrontendResource}.Type
+     * See for instance "type" field in frontendResourceForm - this value is an enum {@link FrontendResource}.Type
      */
     private void castToString(){
         dto.forEach((fieldName, fieldValue) -> {

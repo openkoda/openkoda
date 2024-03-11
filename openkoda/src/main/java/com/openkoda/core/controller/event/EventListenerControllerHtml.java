@@ -23,6 +23,8 @@ package com.openkoda.core.controller.event;
 
 import com.openkoda.form.EventListenerForm;
 import com.openkoda.form.SendEventForm;
+import com.openkoda.model.component.event.Event;
+import com.openkoda.model.component.event.EventListenerEntry;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +52,7 @@ import static com.openkoda.core.controller.generic.AbstractController.*;
 public class EventListenerControllerHtml extends AbstractEventListenerController {
 
     /**
-     * Prepares model and view to display all {@link com.openkoda.model.event.EventListenerEntry} page
+     * Prepares model and view to display all {@link EventListenerEntry} page
      * See also {@link AbstractEventListenerController}
      *
      * @param pageable
@@ -68,7 +70,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Prepares model and view for {@link com.openkoda.model.event.EventListenerEntry} settings page
+     * Prepares model and view for {@link EventListenerEntry} settings page
      * See also {@link AbstractEventListenerController}
      *
      * @param eListenerId
@@ -83,7 +85,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Prepares model and view for the new {@link com.openkoda.model.event.EventListenerEntry} configuration page
+     * Prepares model and view for the new {@link EventListenerEntry} configuration page
      * See also {@link AbstractEventListenerController}
      *
      * @return java.lang.Object
@@ -97,7 +99,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Triggers update of the {@link com.openkoda.model.event.EventListenerEntry} and prepares model and view for the result page
+     * Triggers update of the {@link EventListenerEntry} and prepares model and view for the result page
      * See also {@link AbstractEventListenerController}
      *
      * @param listenerId
@@ -115,7 +117,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Saves new {@link com.openkoda.model.event.EventListenerEntry} in the database and prepares model and view for the resulting page
+     * Saves new {@link EventListenerEntry} in the database and prepares model and view for the resulting page
      * See also {@link AbstractEventListenerController}
      *
      * @param eventListenerForm
@@ -132,7 +134,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Removes {@link com.openkoda.model.event.EventListenerEntry} from the database and prepares the result response
+     * Removes {@link EventListenerEntry} from the database and prepares the result response
      * See also {@link AbstractEventListenerController}
      *
      * @param listenerId
@@ -161,7 +163,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Prepares model and view for the manual event sending of a particular {@link com.openkoda.model.event.Event} type available in the Admin panel
+     * Prepares model and view for the manual event sending of a particular {@link Event} type available in the Admin panel
      * See also {@link AbstractEventListenerController}
      *
      * @param eventType
@@ -178,7 +180,7 @@ public class EventListenerControllerHtml extends AbstractEventListenerController
     }
 
     /**
-     * Emits the manually triggered {@link com.openkoda.model.event.Event} with the DTO data provided with the request
+     * Emits the manually triggered {@link Event} with the DTO data provided with the request
      * This is a functionality available in the Admin panel
      * See also {@link AbstractEventListenerController}
      *

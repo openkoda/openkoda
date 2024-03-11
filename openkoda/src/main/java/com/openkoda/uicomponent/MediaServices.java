@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.uicomponent;
 
 import com.openkoda.model.file.File;
+import com.openkoda.uicomponent.annotation.Autocomplete;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -36,6 +37,7 @@ public interface MediaServices {
      * <p>Many pdf pages can be created, with separate pages for each model provided</p>
      * <p>When models is null or empty, the template will be fed with empty model and one pdf will be generated</p>
      */
+    @Autocomplete
     byte[] writePdfToByteArray(String templateName, Map<String, Object> ... models);
 
     /**
@@ -43,6 +45,7 @@ public interface MediaServices {
      * <p>Many pdf pages can be created, with separate pages for each model provided</p>
      * <p>When models is null or empty, the template will be fed with empty model and one pdf will be generated</p>
      */
+    @Autocomplete
     InputStream writePdfToStream(String templateName, Map<String, Object> ... models);
 
     /**
@@ -50,12 +53,14 @@ public interface MediaServices {
      * <p>It ties to determine the content type of the file automatically</p>
      * <p>The method requires to provide content size which may be difficult in some scenarios.</p>
      */
+    @Autocomplete
     File createFileFromStream(InputStream inputStream, long totalFileSize, String fileName);
 
     /**
      * <p>Creates a file based from byte array</p>
      * <p>It ties to determine the content type of the file automatically</p>
      */
+    @Autocomplete
     File createFileFromByteArray(byte[] input, String fileName);
 
 }

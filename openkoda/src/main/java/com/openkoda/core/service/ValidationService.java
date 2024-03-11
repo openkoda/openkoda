@@ -30,7 +30,10 @@ import com.openkoda.core.form.AbstractForm;
 import com.openkoda.core.form.Form;
 import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
+import com.openkoda.model.common.ComponentEntity;
 import com.openkoda.model.common.LongIdEntity;
+import com.openkoda.service.export.ComponentExportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -54,6 +57,8 @@ import static com.openkoda.controller.common.URLConstants.CAPTCHA_VERIFIED;
 @Service
 public class ValidationService implements LoggingComponentWithRequestId {
 
+    @Autowired
+    ComponentExportService componentExportService;
     final public <F extends AbstractEntityForm<D, E>, E extends LongIdEntity, D> E validateAndPopulateToEntity(F form, BindingResult br, E entity) {
         try {
             validate(form, br);
@@ -70,7 +75,10 @@ public class ValidationService implements LoggingComponentWithRequestId {
             }
             throw ve;
         }
-        return form.populateToEntity(entity);
+       if(entity instanceof ComponentEntity && entity.getId() != null){
+           componentExportService.removeExportedFilesIfRequired((ComponentEntity) entity);
+       }
+       return form.populateToEntity(entity);
     }
 
     /**

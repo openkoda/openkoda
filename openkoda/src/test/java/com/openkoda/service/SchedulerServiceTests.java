@@ -23,7 +23,7 @@ package com.openkoda.service;
 
 import com.openkoda.AbstractTest;
 import com.openkoda.core.service.event.SchedulerService;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.Scheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

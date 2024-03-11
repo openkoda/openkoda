@@ -33,7 +33,7 @@ import com.openkoda.core.helper.UrlHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.model.MutableUserInOrganization;
-import com.openkoda.service.export.YamlImportService;
+import com.openkoda.service.export.ComponentImportService;
 import jakarta.inject.Inject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +93,7 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
     private SlashEndingUrlInterceptor slashEndingUrlInterceptor;
 
     @Inject
-    public YamlImportService yamlImportService;
+    public ComponentImportService componentImportService;
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -137,14 +137,15 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
 
     @Bean
     @Description("Thymeleaf template resolver serving HTML 5")
-    public ClassLoaderTemplateResolver templateResolver(QueryExecutor queryExecutor, FrontendResourceService frontendResourceService) {
+    public ClassLoaderTemplateResolver templateResolver(QueryExecutor queryExecutor, FrontendResourceService frontendResourceService, TemplatePathFilteringProcessor filteringProcessor) {
 
         FrontendResourceOrClassLoaderTemplateResolver templateResolver = new FrontendResourceOrClassLoaderTemplateResolver(
                 queryExecutor,
                 frontendResourceService,
-                yamlImportService,
+                componentImportService,
                 frontendResourceLoadAlwaysFromResources,
-                frontendResourceCreateIfNotExist);
+                frontendResourceCreateIfNotExist,
+                filteringProcessor);
         templateResolver.setPrefix("templates/");
         templateResolver.setCacheable(false);
         templateResolver.setSuffix(".html");

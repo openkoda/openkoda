@@ -21,12 +21,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-public class SchedulerConversionDto {
+public class SchedulerConversionDto extends ComponentDto {
 
     private String cronExpression;
     private String eventData;
     private boolean onMasterOnly;
-
     public String getCronExpression() {
         return cronExpression;
     }

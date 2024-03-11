@@ -60,13 +60,18 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private PageAttr<?> entityAttribute = PageAttributes.organizationRelatedEntity;
         private PageAttr<?> formAttribute = PageAttributes.organizationRelatedForm;
         private String tableView = "generic-all";
+        private String tableViewWebEndpoint = null;
         private String settingsView = "generic-settings";
+        private String readView = "generic-view";
         private String formNewFragment = "generic-settings-entity-form::generic-settings-form-new";
         private String formSuccessFragment = "generic-settings-entity-form::generic-settings-form-success";
         private String formErrorFragment = "generic-settings-entity-form::generic-settings-form-error";
+        private String navigationFragment;
+        private String menuItem;
         private Specification<E> additionalPredicate;
 
         private String[] genericTableFields;
+        private Long organizationId;
 
         private CRUDControllerConfiguration(String key, FrontendMappingDefinition frontendMappingDefinition,
                                             ScopedSecureRepository<E> secureRepository,
@@ -181,6 +186,11 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
                 return this;
         }
 
+        public CRUDControllerConfiguration<D, E, F> setTableViewWebEndpoint(String tableViewWebEndpoint) {
+                this.tableViewWebEndpoint = tableViewWebEndpoint;
+                return this;
+        }
+
         public String[] getTableFormFieldNames() {
                 return genericTableFields;
         }
@@ -192,6 +202,11 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
 
         public CRUDControllerConfiguration<D, E, F> setSettingsView(String settingsView) {
                 this.settingsView = settingsView;
+                return this;
+        }
+
+        public CRUDControllerConfiguration<D, E, F> setReadView(String readView) {
+                this.readView = readView;
                 return this;
         }
 
@@ -219,6 +234,24 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
 
         public CRUDControllerConfiguration<D, E, F> setFormErrorFragment(String formErrorFragment) {
                 this.formErrorFragment = formErrorFragment;
+                return this;
+        }
+
+        public String getNavigationFragment() {
+                return navigationFragment;
+        }
+
+        public CRUDControllerConfiguration<D, E, F> setNavigationFragment(String navigationFragment) {
+                this.navigationFragment = navigationFragment;
+                return this;
+        }
+
+        public String getMenuItem() {
+                return menuItem;
+        }
+
+        public CRUDControllerConfiguration<D, E, F> setMenuItem(String menuItem) {
+                this.menuItem = menuItem;
                 return this;
         }
 
@@ -282,10 +315,17 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
                 return tableView;
         }
 
+        public String getTableViewWebEndpoint() {
+                return tableViewWebEndpoint;
+        }
+
         public String getSettingsView() {
                 return settingsView;
         }
 
+        public String getReadView() {
+                return readView;
+        }
 
         public ScopedSecureRepository<E> getSecureRepository() {
                 return secureRepository;
@@ -383,6 +423,14 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         public CRUDControllerConfiguration<D, E, F> setAdditionalPredicate(Specification<E> additionalPredicate) {
                 this.additionalPredicate = additionalPredicate;
                 return this;
+        }
+
+        public Long getOrganizationId() {
+                return organizationId;
+        }
+
+        public void setOrganizationId(Long organizationId) {
+                this.organizationId = organizationId;
         }
 }
 

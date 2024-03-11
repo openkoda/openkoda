@@ -31,4 +31,10 @@ public class JsFlowExecutionException extends RuntimeException {
         this.code = code;
         this.position = position;
     }
+
+    public JsFlowExecutionException(String message, Throwable cause) {
+        super(String.format("Error executing flow: %s\nat: %s\ncode:\n%s\n", message, "N/A", "N/A"), cause);
+        this.code = "N/A";
+        this.position = "N/A";
+    }
 }

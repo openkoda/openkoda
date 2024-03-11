@@ -54,7 +54,7 @@ public class Flow<I, O, CP> implements Function <ResultAndModel<I, CP>, O>, Base
 
     public static boolean FULL_STACKTRACE_IN_ERROR = true;
 
-    protected static Map<String, Object> initParamsMap(Map<String, Object> params) {
+    public static Map<String, Object> initParamsMap(Map<String, Object> params) {
         if( params == null ) {
             return Collections.emptyMap();
         }
@@ -279,17 +279,23 @@ public class Flow<I, O, CP> implements Function <ResultAndModel<I, CP>, O>, Base
 
     public PageModelMap execute() {
         PageModelMap model = new PageModelMap();
-        ResultAndModel<O,CP> result = execute(model);
+        ResultAndModel<O,CP> result = executeFlow(model);
         return model;
     }
 
+    public PageModelMap execute(PageModelMap model) {
+        ResultAndModel<O,CP> result = executeFlow(model);
+        return model;
+    }
+
+    @Deprecated(forRemoval = true)
     public ResultAndModel<O,CP> executeWithResult() {
         PageModelMap model = new PageModelMap();
-        ResultAndModel<O,CP> result = execute(model);
+        ResultAndModel<O,CP> result = executeFlow(model);
         return result;
     }
 
-    private ResultAndModel<O,CP> execute(PageModelMap model) {
+    private ResultAndModel<O,CP> executeFlow(PageModelMap model) {
         try {
             O result = null;
             if(transactionalExecutor == null && transactionalExecutorProvider != null) {
@@ -318,7 +324,7 @@ public class Flow<I, O, CP> implements Function <ResultAndModel<I, CP>, O>, Base
                 String location = e.getSourceLocation().toString();
                 jsException = new JsFlowExecutionException(simpleMessage, code, location);
             } else {
-                jsException = new JsFlowExecutionException(simpleMessage, "N/A", "N/A");
+                jsException = new JsFlowExecutionException(simpleMessage, e);
             }
             model.put(isError, message, error, exception, true, getSimpleErrorMessage(jsException), getMessageString(jsException), jsException);
             throw jsException;

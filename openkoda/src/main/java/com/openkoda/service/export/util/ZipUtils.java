@@ -25,7 +25,11 @@ import com.openkoda.core.flow.LoggingComponent;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -44,6 +48,42 @@ public class ZipUtils implements LoggingComponent {
             zipOut.closeEntry();
         } catch (IOException e) {
             throw new RuntimeException("Zip export of " + entryName + " failed");
+        }
+    }
+
+    public void addFileToZip(File file, String entryName, ZipOutputStream zipOut){
+        debug("[addFileToZip]");
+
+        try {
+            ZipEntry zipEntry = new ZipEntry(entryName);
+            zipOut.putNextEntry(zipEntry);
+            FileInputStream fis = new FileInputStream(file);
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        } catch (IOException e) {
+            error("[addFileToZip]", e);
+        }
+    }
+
+    public void addURLFileToZip(URL url, String entryName, ZipOutputStream zipOut){
+        debug("[addURLFileToZip]");
+
+        try {
+            ZipEntry zipEntry = new ZipEntry(entryName);
+            zipOut.putNextEntry(zipEntry);
+            InputStream is = url.openStream();
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = is.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            is.close();
+        } catch (IOException e) {
+            error("[addURLFileToZip]", e);
         }
     }
 

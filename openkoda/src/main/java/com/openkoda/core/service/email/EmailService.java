@@ -29,6 +29,9 @@ import com.openkoda.dto.OrganizationRelatedObject;
 import com.openkoda.model.User;
 import com.openkoda.model.file.File;
 import com.openkoda.model.task.Email;
+
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 /**
@@ -59,6 +62,16 @@ public class EmailService extends ComponentProvider {
         return repositories.unsecure.email.save(services.emailConstructor.prepareEmailWithTitleFromTemplate(email, subject, email, emailTemplateName, model, attachments));
     }
 
+    public Email sendAndSaveEmail(String email, String subject, String emailTemplateName, PageModelMap model, LocalDateTime sendOn, File... attachments) {
+        debug("[sendAndSaveEmail] Sends {} to {}", emailTemplateName, email);
+        Email emailToSend = services.emailConstructor.prepareEmailWithTitleFromTemplate(email, subject, email, emailTemplateName, model, attachments);
+        if(sendOn != null) {
+            emailToSend.setStartAfter(sendOn);
+        }
+        
+        return repositories.unsecure.email.save(emailToSend);
+    }
+    
     public Email sendAndSaveOrganizationEmail(User recipient, String emailTemplateName, PageModelMap model, Long orgId) {
         debug("[sendAndSaveEmail] Sends {} to {}", emailTemplateName, recipient);
         Email orgEmail = services.emailConstructor.prepareEmailWithTitleFromTemplate(recipient, emailTemplateName, model);

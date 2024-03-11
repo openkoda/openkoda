@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.service.export.converter.YamlToEntityConverter;
 import com.openkoda.service.export.converter.YamlToEntityParentConverter;
 import com.openkoda.service.export.dto.ControllerEndpointConversionDto;
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.openkoda.service.export.FolderPathConstants.*;
 
@@ -45,8 +46,30 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
     @Override
     public FrontendResource convertAndSave(FrontendResourceConversionDto dto, String filePath) {
         debug("[convertAndSave]");
+        setAccessLevelAndOrgIdFromPath(dto, filePath);
+        FrontendResource frontendResource = getFrontendResource(dto);
+        frontendResource.setContent(loadResourceAsString(dto.getContent()));
+        repositories.secure.frontendResource.saveOne(frontendResource);
+        if(dto.getControllerEndpoints() != null){
+            convertControllerEndpoints(dto.getControllerEndpoints(), frontendResource.getId());
+        }
+        return frontendResource;
+    }
+    @Override
+    public FrontendResource convertAndSave(FrontendResourceConversionDto dto, String filePath, Map<String, String> resources) {
+        debug("[convertAndSave]");
+        setAccessLevelAndOrgIdFromPath(dto, filePath);
+        FrontendResource frontendResource = getFrontendResource(dto);
+        frontendResource.setContent(resources.get(dto.getContent()));
+        repositories.secure.frontendResource.saveOne(frontendResource);
+        if(dto.getControllerEndpoints() != null){
+            convertControllerEndpoints(dto.getControllerEndpoints(), frontendResource.getId(), resources);
+        }
+        return frontendResource;
+    }
 
-//        get access level and orgId from file path
+    private void setAccessLevelAndOrgIdFromPath(FrontendResourceConversionDto dto, String filePath) {
+        //        get access level and orgId from file path
         String accessLevel = filePath.contains(UI_COMPONENT_) ? StringUtils.substringBetween(filePath, UI_COMPONENT_, "/")
                 : StringUtils.substringBetween(filePath, FRONTEND_RESOURCE_, "/");
         if(StringUtils.isNotEmpty(accessLevel)) {
@@ -57,15 +80,8 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
         if(StringUtils.isNotEmpty(orgIdString)) {
             dto.setOrganizationId(Long.parseLong(orgIdString));
         }
-
-        FrontendResource frontendResource = convertToFrontendResource(dto);
-        repositories.secure.frontendResource.saveOne(frontendResource);
-        if(dto.getControllerEndpoints() != null){
-            convertControllerEndpoints(dto.getControllerEndpoints(), frontendResource.getId());
-        }
-
-        return frontendResource;
     }
+
 
     private void convertControllerEndpoints(List<ControllerEndpointConversionDto> controllerEndpointConversionDtos, Long frontendResourceId) {
         for (ControllerEndpointConversionDto controllerEndpointConversionDto : controllerEndpointConversionDtos) {
@@ -74,7 +90,14 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
         }
     }
 
-    private FrontendResource convertToFrontendResource(FrontendResourceConversionDto dto){
+    private void convertControllerEndpoints(List<ControllerEndpointConversionDto> controllerEndpointConversionDtos, Long frontendResourceId, Map<String, String> resources) {
+        for (ControllerEndpointConversionDto controllerEndpointConversionDto : controllerEndpointConversionDtos) {
+            controllerEndpointConversionDto.setFrontendResourceId(frontendResourceId);
+            controllerEndpointYamlToEntityConverter.convertAndSave(controllerEndpointConversionDto, null, resources);
+        }
+    }
+
+    private FrontendResource getFrontendResource(FrontendResourceConversionDto dto){
         FrontendResource frontendResource = new FrontendResource();
         frontendResource.setName(dto.getName());
         frontendResource.setIncludeInSitemap(dto.getIncludeInSitemap());
@@ -82,8 +105,8 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
         frontendResource.setRequiredPrivilege(dto.getRequiredPrivilege());
         frontendResource.setType(dto.getType());
         frontendResource.setResourceType(dto.getResourceType());
-        frontendResource.setContent(loadResourceAsString(dto.getContent()));
         frontendResource.setOrganizationId(dto.getOrganizationId());
+        frontendResource.setModuleName(dto.getModule());
         return frontendResource;
     }
 }

@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
 <body>
 <div class="container-fluid">
-    <div layout:fragment="content" th:attr="data-menu-item='page-builder'">
+    <div layout:fragment="content" th:attr="data-menu-item='configuration'">
         <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
         <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
         <style>
@@ -37,11 +37,12 @@
                 overflow-y: hidden;
             }
         </style>
+        <nav th:replace="~{navigation-fragments::configuration-nav-tabs('builder')}"></nav>
+
         <div class="row">
             <div class="col-12">
-                <div class="card shadow ml-2 mr-2">
+                <div class="card shadow first-card">
                     <div class="card-header py-3 d-flex flex-row">
-                        <h6 class="m-0 font-weight-bold">Page builder</h6>
                         <div class="card-header-buttons">
                             <a class="btn btn-sm btn-primary" href="view" target="_blank">View</a>
                         </div>
@@ -55,65 +56,90 @@
                                     <input th:replace="forms::text-simple-with-value('dto.name', *{dto.name}, #{frontendResource.name.label}, 'my-dashboard')"/>
                                 </div>
                             </div>
-                            <h6 class="card-subtitle mb-2 text-muted">Click on the buttons below in order to add it to the dashboard</h6>
 
-                            <div class="row mb-2">
-                                <div class="col-2">Tables:</div>
-                                <div class="col-10"><button th:each="fr: ${embeddableComponents.tables}" th:attr="onclick=|addNewWidget('${fr.getKey()}', 'table')|" th:utext="${'<i class=''fa fa-circle-plus'' aria-hidden=''true''></i> ' + fr.getKey()}" type="button" class="btn btn-outline-primary btn-sm mr-1"></button></div>
+                            <h6 class="card-subtitle mt-2 mb-2 text-muted"><th:block th:text="#{template.components.instruction}"></th:block></h6>
+
+                            <div class="row">
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.tables}, 'getKey()', #{template.tables}, 'addNewWidget', 'table', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.frontendResources}, 'getValue()', #{template.frontendResources}, 'addNewWidget', 'frontendResource', 'col-6')"/>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-2">Frontend Resources:</div>
-                                <div class="col-10"><button th:each="fr: ${embeddableComponents.frontendResources}" th:attr="onclick=|addNewWidget('${fr.getValue()}', 'frontendResource')|" th:utext="${'<i class=''fa fa-circle-plus'' aria-hidden=''true''></i> ' + fr.getValue()}"  type="button" class="btn btn-outline-primary btn-sm mr-1"></button></div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2">Web endpoints:</div>
-                                <div class="col-10"><button th:each="fr: ${embeddableComponents.uiComponents}" th:attr="onclick=|addNewWidget('${fr.getValue()}', 'webEndpoint')|" th:utext="${'<i class=''fa fa-circle-plus'' aria-hidden=''true''></i> ' + fr.getValue()}" type="button" class="btn btn-outline-primary btn-sm mr-1"></button></div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-2">Images:</div>
-                                <div class="col-10"><button th:each="fr: ${embeddableComponents.images}" th:attr="onclick=|addNewWidget('${fr.url}', 'image')|" th:utext="${'<i class=''fa fa-circle-plus'' aria-hidden=''true''></i> ' + fr.filename}" type="button" class="btn btn-outline-primary btn-sm mr-1"></button></div>
+                            <div class="row">
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.uiComponents}, 'getValue()', #{template.frontendElements}, 'addNewWidget', 'webEndpoint', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.images}, 'url', #{template.images}, 'addNewWidget', 'image', 'col-6')"/>
                             </div>
                             <div class="col text-center">
                                 <button class="btn btn-primary btn-submit" onclick="savePage(this.form)" type="button">Save</button>
-                            </div>
-                            <div class="trash text-center p-4">
-                                <i class="fa fa-trash-can" aria-hidden="true"></i>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="grid-stack"></div>
+        <div class="grid-stack preview"></div>
         <script type="text/javascript" th:inline="javascript">
             addNewWidget = function(url, type) {
-                let content = "";
-                let src = "";
-                if (type === "frontendResource") {
-                    src = "/" + url;
-                    content = '<iframe class="embedded-iframe" src="' + src +'"></iframe>';
-                } else if (type == "webEndpoint") {
-                    src = "../../webEndpoint/" + url + "?__view=plain";
-                    content = '<iframe class="embedded-iframe" src="' + src +'"></iframe>';
-                } else if (type == "table") {
-                    src = "../../" + url + "/all?__view=plain";
-                    content = '<iframe class="embedded-iframe" src="' + src +'"></iframe>';
-                } else if (type == "image") {
-                    src = url;
-                    content = '<img class="embedded-image" src="' + src +'"/>';
+                if($('[gs-id="' + url + '"]').length === 0) {
+                    let content = "";
+                    let src = "";
+                    if (type === "frontendResource") {
+                        src = "/" + url;
+                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                    } else if (type == "webEndpoint") {
+                        src = "../../cn/" + url + "?__view=plain";
+                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                    } else if (type == "table") {
+                        src = "../../" + url + "/all?__view=plain";
+                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                    } else if (type == "image") {
+                        src = url;
+                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><img class="embedded-image dashboard-widget" src="' + src +'"/>';
+                    }
+                    let w = grid.addWidget({w:6, h:3, content: content, id: url, type: type});
+                    registerClick();
+                } else {
+                    removeWidget(url);
                 }
-                let w = grid.addWidget({x:0, y:0, w:6, h:3, content: content});
             };
             let items = /*[[${ frontendResourceEntity?.content == null ? '[]' : frontendResourceEntity.content }]]*/ '[]';
             items = JSON.parse(items);
             let grid = GridStack.init({styleInHead: true, removable: '.trash', resizable: {handles: 'se,nw'}});
             grid.load(items);
 
+            $( document ).ready(function() {
+                let itemsGrouped = Object.groupBy(items, ({ type }) => type);
+                Object.keys(itemsGrouped).forEach(key => {
+                    let items = itemsGrouped[key];
+                    let selectpickerForType = $('#select-' + key);
+                    $(selectpickerForType).val(items.map(i => i.id));
+                    $(selectpickerForType).selectpicker('refresh');
+                });
+	            registerClick();
+            });
+
+            grid.on('removed', function(event, items) {
+                items.forEach(function(item) {
+                    $('#select-' + item.type + ' option[value="' + item.id + '"]').prop("selected", false);
+                    $('#select-' + item.type).selectpicker('refresh');
+                });
+            });
+
             savePage = function(form) {
                 form["dto.content"].value = JSON.stringify(grid.save(true, false));
                 form.submit();
             }
+
+            registerClick = function () {
+                $('i.dashboard-widget-x').on("click", function (e) {
+                    removeWidget($(this).attr('data-id'));
+                })
+            }
+
+            removeWidget = function (id) {
+                grid.removeWidget($('[gs-id="' + id + '"]').get(0));
+            }
+
         </script>
+
     </div>
 </div>
 </body>

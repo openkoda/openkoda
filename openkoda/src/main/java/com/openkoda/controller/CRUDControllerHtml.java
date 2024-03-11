@@ -39,10 +39,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -80,8 +83,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             ) {
         debug("[getAll]");
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getGetAllPrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getGetAllPrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -89,11 +91,12 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
                 .thenSet((PageAttr<Page<SearchableOrganizationRelatedEntity>>)conf.getEntityPageAttribute(), a -> (Page<SearchableOrganizationRelatedEntity>) conf.getSecureRepository().search(search, organizationId, conf.getAdditionalSpecification(), aPageable))
                 .thenSet(genericTableViewList, a -> ReflectionBasedEntityForm.calculateFieldsValuesWithReadPrivileges(conf.getFrontendMappingDefinition(), a.result, conf.getTableFormFieldNames()))
                 .thenSet(genericTableViewHeaders, a -> ReflectionBasedEntityForm.getFieldsHeaders(conf.getFrontendMappingDefinition(), conf.getTableFormFieldNames()))
+                .thenSet(genericViewNavigationFragment, a -> conf.getNavigationFragment())
                 .thenSet(isMapEntity, a -> conf.isMapEntity())
                 .thenSet(frontendMappingDefinition, a -> conf.getFrontendMappingDefinition())
-                .thenSet(menuItem,a->objKey)
+                .thenSet(menuItem, a -> conf.getMenuItem() != null ? conf.getMenuItem() : objKey)
                 .execute()
-                .mav(conf.getTableView());
+                .mav(conf.getTableViewWebEndpoint() != null ? conf.getTableViewWebEndpoint() : conf.getTableView());
     }
 
     /** Similar to {@link CRUDControllerHtml#getAll(Long, String, Pageable, String)} but returns json.
@@ -120,12 +123,9 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             ) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         debug("[getAll]");
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getGetAllPrivilege();
-
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getGetAllPrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         //check read privileges for particular fields
         String[] propertyNames = StringUtils.isBlank(properties) ? new String[0] : properties.split(",");
         for (String p : propertyNames) {
@@ -165,15 +165,14 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
     public Object create(
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey) {
-
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getGetNewPrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getGetNewPrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return Flow.init(transactional)
                 .thenSet(conf.getFormAttribute(), a -> conf.createNewForm(organizationId, null))
-                .thenSet(menuItem,a->objKey)
+                .thenSet(genericViewNavigationFragment, a -> conf.getNavigationFragment())
+                .thenSet(menuItem, a -> conf.getMenuItem() != null ? conf.getMenuItem() : objKey)
                 .execute()
                 .mav(conf.getSettingsView());
     }
@@ -194,14 +193,14 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name="obj", required=true) String objKey) {
 
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getGetSettingsPrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getGetSettingsPrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return Flow.init(componentProvider, objectId)
                 .then(a -> conf.getSecureRepository().findOne(objectId))
                 .thenSet(conf.getFormAttribute(), ac -> conf.createNewForm(organizationId, (SearchableOrganizationRelatedEntity) ac.result))
-                .thenSet(menuItem,a->objKey)
+                .thenSet(genericViewNavigationFragment, a -> conf.getNavigationFragment())
+                .thenSet(menuItem, a -> conf.getMenuItem() != null ? conf.getMenuItem() : objKey)
                 .execute()
                 .mav(conf.getSettingsView());
     }
@@ -215,6 +214,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
      * @return
      */
     @PostMapping(_NEW_SETTINGS)
+    @Transactional
     //TODO Rule 1.2: All business logic delegation should be in Abstract Controller
     //TODO Rule 1.4 All methods in non-public controllers must have @PreAuthorize
     public Object saveNew(
@@ -223,8 +223,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
         debug("[saveNew]");
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getPostNewPrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getPostNewPrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ((Flow<Object, AbstractOrganizationRelatedEntityForm, DefaultComponentProvider>)
@@ -247,6 +246,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
      * @return
      */
     @PostMapping(_ID_SETTINGS)
+    @Transactional
     //TODO Rule 1.2: All business logic delegation should be in Abstract Controller
     //TODO Rule 1.4 All methods in non-public controllers must have @PreAuthorize
     public Object save(
@@ -256,8 +256,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @Valid AbstractOrganizationRelatedEntityForm form, BindingResult br) {
         debug("[saveNew]");
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getPostSavePrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getPostSavePrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ((Flow<Object, AbstractOrganizationRelatedEntityForm, DefaultComponentProvider>)
@@ -279,6 +278,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
      * @return
      */
     @PostMapping(_ID_REMOVE)
+    @Transactional
     //TODO Rule 1.2: All business logic delegation should be in Abstract Controller
     //TODO Rule 1.4 All methods in non-public controllers must have @PreAuthorize
     public Object remove(
@@ -286,8 +286,7 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
             @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(name="obj", required=true) String objKey) {
         CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
-        PrivilegeBase privilege = conf.getPostRemovePrivilege();
-        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+        if (notValidAccess(conf.getPostRemovePrivilege(), conf.getOrganizationId(), organizationId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return Flow.init(componentProvider, objectId)
@@ -296,4 +295,45 @@ public class CRUDControllerHtml extends AbstractController implements HasSecurit
                 .mav(a -> true, a -> false);
     }
 
+    @GetMapping(_ID + _VIEW)
+    //TODO Rule 1.2: All business logic delegation should be in Abstract Controller
+    //TODO Rule 1.4 All methods in non-public controllers must have @PreAuthorize
+    public Object view(
+            @PathVariable(name = ID) Long objectId,
+            @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId,
+            @PathVariable(name="obj", required=true) String objKey) {
+
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(objKey);
+        if (notValidAccess(conf.getGetSettingsPrivilege(), conf.getOrganizationId(), organizationId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return Flow.init(componentProvider, objectId)
+                .thenSet(organizationRelatedObjectKey, a -> objKey)
+                .thenSet(organizationRelatedEntity, a -> (SearchableOrganizationRelatedEntity) conf.getSecureRepository().findOne(objectId))
+                .thenSet(organizationRelatedObjectMap, a -> convertUsingReflection(a.result))
+                .thenSet(genericViewNavigationFragment, a -> conf.getNavigationFragment())
+                .thenSet(menuItem, a -> conf.getMenuItem() != null ? conf.getMenuItem() : objKey)
+                .execute()
+                .mav(conf.getReadView());
+    }
+
+    private boolean notValidAccess(PrivilegeBase privilege, Long confOrganizationId, Long organizationId){
+        return !hasGlobalOrOrgPrivilege(privilege, organizationId);
+    }
+
+    private Map<String, Object> convertUsingReflection(Object object) {
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = object.getClass().getDeclaredFields();
+
+        try {
+            for (Field field: fields) {
+                field.setAccessible(true);
+                map.put(field.getName(), field.get(object));
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return map;
+    }
 }

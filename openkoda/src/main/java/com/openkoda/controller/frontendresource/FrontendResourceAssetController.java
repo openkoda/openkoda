@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.controller.frontendresource;
 
 import com.openkoda.controller.file.AbstractFileController;
+import com.openkoda.core.security.HasSecurityRules;
+import com.openkoda.model.Privilege;
 import com.openkoda.model.file.File;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,14 +40,19 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 @Controller
-public class FrontendResourceAssetController extends AbstractFileController {
+public class FrontendResourceAssetController extends AbstractFileController implements HasSecurityRules {
 
     @Transactional(readOnly = true)
-    @GetMapping(value = "/frontend-resource-asset-{frontendResourceFileId:" + NUMBERREGEX + "$}/*")
-    public void getFrontendResourceAsset(@PathVariable("frontendResourceFileId") Long frontendResourceFileId, @RequestParam(name = "dl", required = false, defaultValue = "false") boolean download, HttpServletRequest request,
-                            HttpServletResponse response) throws IOException, SQLException {
+    @GetMapping(value = {FILE_ASSET + "{frontendResourceFileId:" + NUMBERREGEX + "$}/*",
+            _HTML + FILE_ASSET + "{frontendResourceFileId:" + NUMBERREGEX + "$}/*"})
+    public void getFrontendResourceAsset(@PathVariable("frontendResourceFileId") Long frontendResourceFileId,
+                                         @RequestParam(name = "dl", required = false, defaultValue = "false") boolean download,
+                                         HttpServletRequest request,
+                                         HttpServletResponse response) throws IOException, SQLException {
         debug("[getFrontendResourceAsset] frontendResourceFileId {}", frontendResourceFileId);
-        File f = repositories.unsecure.file.findByIdAndPublicFileTrue(frontendResourceFileId);
+        File f = request.getRequestURI().contains(_HTML) && hasGlobalPrivilege(Privilege.isUser) ?
+                repositories.unsecure.file.findOne(frontendResourceFileId)
+                : repositories.unsecure.file.findByIdAndPublicFileTrue(frontendResourceFileId);
         if (f == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;

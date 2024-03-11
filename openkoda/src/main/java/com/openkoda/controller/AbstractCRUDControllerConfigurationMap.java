@@ -78,7 +78,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             ScopedSecureRepository secureRepository,
             Class formClass
             ) {
-        String key = frontendMappingDefinition.name;
+        String key = frontendMappingDefinition.getMappingKey();
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
                 frontendMappingDefinition, secureRepository, formClass);
         this.put(key, controllerConfiguration);
@@ -135,7 +135,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             Privilege defaultReadPrivilege,
             Privilege defaultWritePrivilege) {
 
-        String key = frontendMappingDefinition.name;
+        String key = frontendMappingDefinition.getMappingKey();
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
                 frontendMappingDefinition, secureRepository, formClass, defaultReadPrivilege, defaultWritePrivilege);
         this.put(key, controllerConfiguration);

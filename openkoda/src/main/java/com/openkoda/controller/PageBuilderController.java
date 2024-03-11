@@ -27,7 +27,7 @@ import com.openkoda.core.flow.Tuple;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.form.PageBuilderForm;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.file.File;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;

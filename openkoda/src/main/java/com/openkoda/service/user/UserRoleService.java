@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.user;
 
 import com.openkoda.controller.ComponentProvider;
+import com.openkoda.model.Privilege;
 import com.openkoda.model.UserRole;
 import com.openkoda.repository.specifications.UserRoleSpecification;
 import org.springframework.stereotype.Service;

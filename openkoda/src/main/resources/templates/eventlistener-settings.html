@@ -5,8 +5,55 @@
 <div class="container-fluid">
 
 
-    <div layout:fragment="content" th:attr="data-menu-item='event-listeners'">
+    <div layout:fragment="content" th:attr="data-menu-item='automation'">
+        <nav th:replace="~{navigation-fragments::automation-nav-tabs('event-listeners')}"></nav>
         <form th:replace="~{entity-forms::eventlistener-settings-form-new}"/>
+
+        <script type="text/javascript" th:inline="javascript">
+            filterConsumerByCategory = function (consumerSelect, filterValue, setValue) {
+	            let row = $('select[id="_dto.consumer"] option');
+	            row.hide()
+	            row.each(function(i, el) {
+		            if($(el).attr('data-c') === filterValue) {
+			            $(el).show();
+		            }
+	            });
+	            $(consumerSelect).selectpicker('refresh');
+				if(setValue) {
+	                $(consumerSelect).val("").trigger('change');
+                }
+            }
+            showParamsInputs = function (paramsNumber) {
+	            for (let i = 1; i <= 4; i++) {
+		            if(i <= paramsNumber) {
+			            $(`input[id="dto.staticData${i}"]`).parent().show();
+
+		            } else {
+			            $(`input[id="dto.staticData${i}"]`).parent().hide();
+		            }
+	            }
+            }
+            $( document ).ready(function() {
+                let consumerSelect = $('select[id="_dto.consumer"]');
+                let consumerCategorySelect = $('select[id="_dto.consumerCategory"]');
+	            let selectedConsumerVal = $(consumerSelect).val();
+	            let selectedConsumer = $(`select[id="_dto.consumer"] option[value="${selectedConsumerVal}"]`);
+				if(selectedConsumer !== '' && $('select[id="_dto.event"]').val() !== '') {
+                    $(consumerCategorySelect).val($(selectedConsumer).attr("data-c"));
+					$(consumerCategorySelect).selectpicker('refresh');
+                }
+                filterConsumerByCategory(consumerSelect, consumerCategorySelect.val(), false);
+				showParamsInputs(Number($(selectedConsumer).attr('data-p')))
+                $(consumerCategorySelect).on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+                    let filterValue = $(this).val();
+	                filterConsumerByCategory(consumerSelect, filterValue, true);
+                });
+	            $(consumerSelect).on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+		            let paramsNumber = $($(this).find('option')[clickedIndex]).attr('data-p')
+		            showParamsInputs(Number(paramsNumber));
+	            });
+            });
+        </script>
 
     </div>
 

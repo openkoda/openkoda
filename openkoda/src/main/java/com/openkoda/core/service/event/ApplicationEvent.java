@@ -28,7 +28,8 @@ import com.openkoda.dto.payment.PlanDto;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
 import com.openkoda.dto.user.BasicUser;
 import com.openkoda.dto.user.UserRoleDto;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.Scheduler;
+import com.openkoda.model.component.event.EventListenerEntry;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -78,7 +79,7 @@ public class ApplicationEvent<T> extends AbstractApplicationEvent<T> {
     public static final ApplicationEvent<String> BACKUP_FILE_COPIED = new ApplicationEvent<>(String.class, "BACKUP_FILE_COPIED");
 
     /**
-     * This event is used when running {@link com.openkoda.model.event.Scheduler}.
+     * This event is used when running {@link Scheduler}.
      * The scheduled task emits SCHEDULER_EXECUTED event along with String parameter which invokes proper consumers
      * on the basis of the String value.
      */

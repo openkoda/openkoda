@@ -107,7 +107,7 @@ public class AbstractUserController extends AbstractController {
         // on spoofing exit this spoofingUserId will be used to log back into one's account
         long spoofingUserId = userHelper.getUserId();
         return Flow.init()
-                .then(a -> repositories.unsecure.user.findOne(userId))
+                .thenSet(userEntity, a -> repositories.unsecure.user.findOne(userId))
                 .then(a -> services.runAs.startRunAsUser(a.result, request, response))
                 .then(a -> {
                     if(a.result) {
@@ -115,6 +115,7 @@ public class AbstractUserController extends AbstractController {
                     }
                     return a.result;
                 })
+                .thenSet(organizationEntityId, a -> a.model.get(userEntity).getOrganizationIds().length > 0 ? a.model.get(userEntity).getOrganizationIds()[0] : null)
                 .execute();
     }
     protected PageModelMap stopSpoofingUser(HttpSession session, HttpServletRequest request, HttpServletResponse response){

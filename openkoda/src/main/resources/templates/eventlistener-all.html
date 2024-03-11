@@ -4,7 +4,8 @@
 <body>
 <div class="container-fluid">
 
-    <div layout:fragment="content" th:attr="data-menu-item='event-listeners'">
+    <div layout:fragment="content" th:attr="data-menu-item='automation'">
+        <nav th:replace="~{navigation-fragments::automation-nav-tabs('event-listeners')}"></nav>
         <div th:replace="~{tables::event(${eventListenerPage}, #{template.eventListeners})}"/>
     </div>
 </div>

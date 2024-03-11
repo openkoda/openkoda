@@ -34,7 +34,9 @@ import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.model.naming.Identifier;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.openkoda.model.common.ModelConstants.INDEX_STRING_COLUMN;
@@ -49,6 +51,7 @@ import static com.openkoda.model.common.ModelConstants.UPDATED_ON;
 public class SearchableRepositories {
 
 
+    public static final String UPDATE_INDEX_QUERY = "UPDATE %s SET %s = (%s) where (CURRENT_TIMESTAMP - %s < interval '00:01:01')";
     private static SecureRepository<?>[] searchableRepositories = {};
     private static SecureRepository<?>[] globalSearchableRepositories = {};
 
@@ -59,6 +62,7 @@ public class SearchableRepositories {
      * By means of the queries the indexString is updated continuously as configured in {@link JobsScheduler#searchIndexUpdaterJob()}
      */
     private static String[] searchIndexUpdates = {};
+    private static List<String> searchIndexUpdatesForDynamicEntities = new ArrayList<>();
     private static final CamelCaseToUnderscoresNamingStrategy camelCaseToUnderscoredNamingStrategy = new CamelCaseToUnderscoresNamingStrategy();
 
     /** Run on the application startup.
@@ -105,8 +109,7 @@ public class SearchableRepositories {
             SearchableRepositoryMetadata gsa = getGlobalSearchableRepositoryAnnotation(e.getValue());
             String tableName = discoverTableName(gsa.entityClass());
 
-            searchIndexUpdates[sk] = String.format("UPDATE %s SET %s = (%s) where (CURRENT_TIMESTAMP - %s < interval '00:01:01')",
-                tableName, INDEX_STRING_COLUMN, gsa.searchIndexFormula(), UPDATED_ON);
+            searchIndexUpdates[sk] = String.format(UPDATE_INDEX_QUERY, tableName, INDEX_STRING_COLUMN, gsa.searchIndexFormula(), UPDATED_ON);
             searchableRepositories[sk++] = e.getValue();
             if (gsa.includeInGlobalSearch()) {
                 globalSearchableRepositories[gsk++] = e.getValue();
@@ -128,6 +131,10 @@ public class SearchableRepositories {
         return searchableRepositories;
     }
 
+    public static Map<String, SecureRepository> getSearchableRepositoriesWithEntityKeys() {
+        return searchableRepositoryByEntityKey;
+    }
+
     public static SearchableRepositoryMetadata getGlobalSearchableRepositoryAnnotation(ScopedSecureRepository r) {
         return r.getSearchableRepositoryMetadata();
     }
@@ -140,6 +147,15 @@ public class SearchableRepositories {
     public static ScopedSecureRepository getSearchableRepository(String entityKey, HasSecurityRules.SecurityScope scope) {
         return new SecureRepositoryWrapper(searchableRepositoryByEntityKey.get(entityKey), scope);
     }
+
+    public static void registerSearchableRepository(String tableName, SecureRepository repository) {
+        SearchableRepositoryMetadata gsa = getGlobalSearchableRepositoryAnnotation(repository);
+        searchableRepositoryByEntityKey.put(gsa.entityKey(), repository);
+        searchableRepositoryMetadataByEntityKey.put(gsa.entityKey(), gsa);
+        searchableRepositoryMetadataByEntityClass.put(gsa.entityClass(), gsa);
+        searchIndexUpdatesForDynamicEntities.add(String.format(UPDATE_INDEX_QUERY, tableName, INDEX_STRING_COLUMN, gsa.searchIndexFormula(), UPDATED_ON));
+    }
+
     public static Class<SearchableEntity> getSearchableRepositoryEntityClass(String entityKey) {
         SearchableRepositoryMetadata gsa = searchableRepositoryMetadataByEntityKey.get(entityKey);
         if (gsa == null) { return null; }
@@ -154,6 +170,10 @@ public class SearchableRepositories {
 
     public static String[] getSearchIndexUpdates() {
         return searchIndexUpdates;
+    }
+
+    public static List<String> getSearchIndexUpdatesForDynamicEntities() {
+        return searchIndexUpdatesForDynamicEntities;
     }
     public static String discoverTableName(Class c) {
         Table table = (Table) c.getAnnotation(Table.class);

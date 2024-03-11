@@ -170,4 +170,8 @@ public class SecureRepositoryWrapper<T extends SearchableEntity> implements Scop
         SearchableRepositoryMetadata gsa = interfaces[0].getAnnotation(SearchableRepositoryMetadata.class);
         return gsa;
     }
+
+    public boolean isSet() {
+        return this.wrapped != null;
+    }
 }

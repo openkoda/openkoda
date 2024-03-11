@@ -40,8 +40,8 @@ import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.form.FrontendResourceForm;
 import com.openkoda.form.FrontendResourcePageForm;
 import com.openkoda.form.RegisterUserForm;
-import com.openkoda.model.ControllerEndpoint;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.ControllerEndpoint;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.file.File;
 import com.openkoda.repository.FrontendResourceRepository;
 import com.openkoda.uicomponent.JsFlowRunner;
@@ -223,7 +223,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
     /**
      * Finds the requested {@link FrontendResource} and prepares model for its display.
      * For {@link FrontendResource} with {@link FrontendResource.ResourceType} equal to {@link FrontendResource.ResourceType.UI_COMPONENT} it processes
-     * any {@link ControllerEndpoint} assigned to this entity which match the subPath and the {@link com.openkoda.model.ControllerEndpoint.HttpMethod} requested.
+     * any {@link ControllerEndpoint} assigned to this entity which match the subPath and the {@link ControllerEndpoint.HttpMethod} requested.
      * See also {@link com.openkoda.repository.FrontendResourceRepository}, {@link com.openkoda.repository.ControllerEndpointRepository}
      *
      * @param organizationId

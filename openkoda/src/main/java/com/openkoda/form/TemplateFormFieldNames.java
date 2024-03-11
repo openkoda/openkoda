@@ -169,4 +169,15 @@ public interface TemplateFormFieldNames {
     String REGISTER_HTML_CRUD_CONTROLLER = "registerHtmlCrudController";
     String TABLE_COLUMNS = "tableColumns";
 
+    String EMAIL_HOST = "host";
+    String EMAIL_PORT = "port";
+    String EMAIL_USERNAME = "username";
+    String EMAIL_PROTOCOL = "protocol";
+    String EMAIL_PASSWORD = "password";
+    String EMAIL_FROM = "from";
+    String EMAIL_SSL = "ssl";
+    String EMAIL_SMTP_AUTH = "smtpAuth";
+    String EMAIL_STARTTLS = "starttls";
+    String EMAIL_REPLY_TO = "replyTo";
+    String EMAIL_MAILGUN_API_KEY = "mailgunApiKey";
 }

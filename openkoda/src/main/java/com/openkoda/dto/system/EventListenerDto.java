@@ -23,13 +23,14 @@ package com.openkoda.dto.system;
 
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.dto.OrganizationRelatedObject;
-import com.openkoda.model.event.Consumer;
-import com.openkoda.model.event.Event;
+import com.openkoda.model.component.event.Consumer;
+import com.openkoda.model.component.event.Event;
 
 public class EventListenerDto implements CanonicalObject, OrganizationRelatedObject {
 
     public String event;
     public String consumer;
+    public String consumerCategory;
     public String staticData1;
     public String staticData2;
     public String staticData3;
@@ -54,6 +55,14 @@ public class EventListenerDto implements CanonicalObject, OrganizationRelatedObj
 
     public void setConsumer(String consumer) {
         this.consumer = consumer;
+    }
+
+    public String getConsumerCategory() {
+        return consumerCategory;
+    }
+
+    public void setConsumerCategory(String consumerCategory) {
+        this.consumerCategory = consumerCategory;
     }
 
     public String getStaticData1() {

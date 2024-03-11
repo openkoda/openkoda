@@ -17,16 +17,13 @@
         </a>
         <!-- Dropdown - Alerts -->
 
-        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in text-center"
+        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
              aria-labelledby="alertsDropdown">
-            <h6 class="dropdown-header">
-                Alerts Center
-            </h6>
             <form th:each="n : ${unreadNotificationsList}">
                 <div th:replace="~{notification-dropdown :: generateUnreadNotification(${n})}"></div>
             </form>
 
-            <a class="dropdown-item text-center bg-primary text-white" th:href="${@url.notificationsAll(userEntityId, organizationEntityId)}">
+            <a class="dropdown-item" th:href="${@url.notificationsAll(userEntityId, organizationEntityId)}">
                 Show All Alerts
             </a>
         </div>

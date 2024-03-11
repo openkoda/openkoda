@@ -1,7 +1,0 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-<body>
-<form th:fragment="form(organizationRelatedForm, action)"
-      th:replace="~{generic-forms::generic-form(${organizationRelatedForm}, ${organizationRelatedForm.frontendMappingDefinition.name}, ${action}, '', '', ${@messages.getFieldLabel(organizationRelatedForm.frontendMappingDefinition.formLabel, organizationRelatedForm.frontendMappingDefinition.name)}, #{template.save}, true)}">
-</form>
-</body>

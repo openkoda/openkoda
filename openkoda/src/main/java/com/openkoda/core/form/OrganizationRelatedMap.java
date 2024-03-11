@@ -25,11 +25,18 @@ import com.openkoda.dto.OrganizationRelatedObject;
 
 import java.util.HashMap;
 
+import static java.lang.Long.parseLong;
+import static java.lang.String.valueOf;
+
 public class OrganizationRelatedMap extends HashMap<String, Object> implements OrganizationRelatedObject {
 
     @Override
     public Long getOrganizationId() {
-        return (Long) get("organizationId");
+        try{
+            return parseLong(valueOf(get("organizationId")));
+        } catch(RuntimeException e){
+            return null;
+        }
     }
 
     @Override

@@ -21,7 +21,22 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext;
+
 import com.openkoda.controller.common.PageAttributes;
+import com.openkoda.controller.common.URLConstants;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.helper.ModulesInterceptor;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
@@ -29,18 +44,8 @@ import com.openkoda.dto.CanonicalObject;
 import com.openkoda.model.User;
 import com.openkoda.model.file.File;
 import com.openkoda.model.task.Email;
-import jakarta.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Map;
+import jakarta.inject.Inject;
 
 /**
  * <p>Preparing an email from template.</p>
@@ -70,6 +75,8 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
     @Inject
     ModulesInterceptor modulesInterceptor;
 
+    @Inject ApplicationContext context;
+    
     private Context getContext() {
         debug("[getContext]");
         return new Context(LocaleContextHolder.getLocale());
@@ -136,7 +143,7 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
 
     public Email prepareEmailWithTitleFromTemplate(String emailTo, String subject, String nameTo, String templateName, PageModelMap model, File... attachments) {
         debug("[prepareEmailTitleFromTemplate] {}", templateName);
-        Email email = this.prepareEmail(emailTo, nameTo, "", templateName, 0, model, attachments);
+        Email email = this.prepareEmail(emailTo, nameTo, "", templateName, 0, model, attachments);        
         String title = StringUtils.defaultIfBlank(subject, StringUtils.defaultIfBlank(getTitleFromHTML(email.getContent()), "System message"));
         email.setSubject(title);
         return email;
@@ -163,12 +170,14 @@ public class EmailConstructor implements LoggingComponentWithRequestId {
         ctx.setVariable("mailReplyTo", mailReplyTo);
 
         modulesInterceptor.emailModelPreHandle(model);
+        ctx.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+                new ThymeleafEvaluationContext(context, null));
 
         for (Map.Entry<String, Object> entry : model.entrySet()) {
             ctx.setVariable(entry.getKey(), entry.getValue());
         }
 
-        return templateEngine.process(templateName, ctx);
+        return templateEngine.process(templateName + URLConstants.EMAILRESOURCE_DISCRIMINATOR, ctx);
     }
 
 }

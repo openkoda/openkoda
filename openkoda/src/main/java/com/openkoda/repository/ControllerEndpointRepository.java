@@ -23,15 +23,23 @@ package com.openkoda.repository;
 
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.ControllerEndpoint;
+import com.openkoda.model.OpenkodaModule;
+import com.openkoda.model.component.ControllerEndpoint;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface ControllerEndpointRepository extends UnsecuredFunctionalRepositoryWithLongId<ControllerEndpoint>, HasSecurityRules {
+public interface ControllerEndpointRepository extends UnsecuredFunctionalRepositoryWithLongId<ControllerEndpoint>, HasSecurityRules, ComponentEntityRepository<ControllerEndpoint> {
 
     List<ControllerEndpoint> findByFrontendResourceId(long frontendResourceId);
 
     ControllerEndpoint findByFrontendResourceIdAndSubPathAndHttpMethod(long frontendResourceId, String subPath, ControllerEndpoint.HttpMethod httpMethod);
+//    ControllerEndpoint findByFrontendResourceIdAndSubPathAndHttpMethodAndOrganizationId(long frontendResourceId, String subPath, ControllerEndpoint.HttpMethod httpMethod, long organizationId);
+
+    @Modifying
+    @Query("delete from ControllerEndpoint where module = :module")
+    void deleteByModule(OpenkodaModule module);
 }

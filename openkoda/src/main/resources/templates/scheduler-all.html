@@ -4,7 +4,8 @@
 <body>
 <div class="container-fluid">
 
-    <div layout:fragment="content" th:attr="data-menu-item='schedulers'">
+    <div layout:fragment="content" th:attr="data-menu-item='automation'">
+        <nav th:replace="~{navigation-fragments::automation-nav-tabs('schedulers')}"></nav>
         <div th:replace="~{tables::scheduler(${schedulerPage}, #{template.schedulers})}"/>
     </div>
 </div>

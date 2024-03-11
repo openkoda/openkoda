@@ -36,6 +36,7 @@ public abstract class AbstractGlobalSearchController extends AbstractController 
     protected PageModelMap findSearchResult(@Qualifier("search") Pageable searchPageable, @RequestParam(required = false, defaultValue = "", name = "search_search") String search) {
         debug("[findSearchResult] Search: {}", search);
         return Flow.init()
+                .thenSet(searchTerm, a -> search)
                 .thenSet(searchPage, a -> repositories.unsecure.search.findAll(createSpecification(search), searchPageable))
                 .execute();
     }

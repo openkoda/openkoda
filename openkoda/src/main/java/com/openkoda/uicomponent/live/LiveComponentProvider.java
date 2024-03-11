@@ -22,7 +22,6 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.uicomponent.live;
 
 
-import com.google.gson.annotations.Expose;
 import com.openkoda.uicomponent.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,19 +29,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class LiveComponentProvider {
 
-    @Expose
-    public final DataServices data;
-    @Expose
-    public final IntegrationServices integrations;
-    @Expose
-    public final MessagesServices messages;
-    @Expose
-    public final UtilServices util;
 
+    public final DataServices data;
+    public final IntegrationServices integrations;
+    public final MessagesServices messages;
+    public final UtilServices util;
     @Autowired(required = false)
     public final OpenAIServices openAI;
     public final SystemServices system;
-    @Expose
     public final MediaServices media;
 
     public LiveComponentProvider(

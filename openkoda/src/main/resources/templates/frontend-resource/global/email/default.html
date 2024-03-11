@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>System Message</title>
+</head>
+<body>
+<div th:text="${message}">
+</div>
+<br/>
+<div>
+    <th:block th:replace="~{frontend-resource/public/email-fragments::goodbye-text}"/>
+</div>
+<br/>
+<footer>
+    <div>
+        P.S. This message has been generated automatically. Please contact your administrator for further information.
+    </div>
+</footer>
+</body>
+</html>

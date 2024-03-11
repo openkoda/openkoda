@@ -24,18 +24,24 @@ package com.openkoda.repository;
 import com.openkoda.core.flow.Tuple;
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.ServerJs;
+import com.openkoda.model.OpenkodaModule;
+import com.openkoda.model.component.ServerJs;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface ServerJsRepository extends UnsecuredFunctionalRepositoryWithLongId<ServerJs>, HasSecurityRules {
+public interface ServerJsRepository extends UnsecuredFunctionalRepositoryWithLongId<ServerJs>, HasSecurityRules, ComponentEntityRepository<ServerJs> {
 
     ServerJs findByName(String name);
 
     @Query("select new com.openkoda.core.flow.Tuple(s.id, s.name) FROM ServerJs s order by name")
     List<Tuple> findAllAsTuple();
+
+    @Modifying
+    @Query("delete from ServerJs where module = :module")
+    void deleteByModule(OpenkodaModule module);
 
 }

@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
     <!-- App css -->
-    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+    <link th:href="@{~/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -34,8 +34,8 @@
     <![endif]-->
 
     <script src="/vendor/jquery/jquery.min.js"></script>
-    <script th:src="@{/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
-    <script th:src="@{/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{~/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{~/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
 
     <!-- Custom head scripts -->
     <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>

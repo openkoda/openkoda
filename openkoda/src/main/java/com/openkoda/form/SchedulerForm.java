@@ -24,7 +24,7 @@ package com.openkoda.form;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.dto.system.SchedulerDto;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.Scheduler;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.validation.BindingResult;
 

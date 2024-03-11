@@ -42,9 +42,6 @@ public class ReflectionHelper {
     public String getNameWithParamNamesAndTypes(Method method){
         return  method.getName() + "(" + getParameterNamesAndTypes(method) + ")";
     }
-    public String getNameWithParamTypes(Method method){
-        return method.getName() + "(" + getParameterTypes(method) + ")";
-    }
     public String getNameWithParamNamesAndTypesAndReturnType(Method method, String methodPrefix){
         return getShortName(method.getGenericReturnType()) + " " + methodPrefix + method.getName() + "(" + getParameterNamesAndTypes(method) + ")";
     }

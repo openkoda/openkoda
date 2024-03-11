@@ -31,6 +31,7 @@ import com.openkoda.form.GlobalOrgRoleForm;
 import com.openkoda.form.InviteUserForm;
 import com.openkoda.form.OrganizationForm;
 import com.openkoda.model.Organization;
+import com.openkoda.model.Privilege;
 import com.openkoda.repository.specifications.UserSpecifications;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.validation.BindingResult;
 import reactor.util.function.Tuples;
+
+import static com.openkoda.model.Privilege.readUserData;
 
 /**
  * <p>AbstractOrganizationController class.</p>

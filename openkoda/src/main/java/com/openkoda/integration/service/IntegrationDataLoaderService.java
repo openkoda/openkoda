@@ -41,7 +41,7 @@ import static com.openkoda.core.lifecycle.BaseDatabaseInitializer.ROLE_ADMIN;
 public class IntegrationDataLoaderService extends IntegrationComponentProvider {
 
     @EventListener(CoreSettledEvent.class)
-    private void updateOrgAdminAndUserRole() {
+    public void updateOrgAdminAndUserRole() {
         if (SpringProfilesHelper.isInitializationProfile()) {
             services.module.addModulePrivilegesToRole(ROLE_ADMIN, new HashSet<>(Arrays.asList(IntegrationPrivilege.values())));
         }

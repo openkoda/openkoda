@@ -23,7 +23,7 @@ package com.openkoda.controller;
 
 import com.openkoda.core.controller.generic.AbstractController;
 import com.openkoda.core.service.SitemapIndex;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

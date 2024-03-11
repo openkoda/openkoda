@@ -24,6 +24,7 @@ package com.openkoda.uicomponent;
 import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.model.file.File;
 import com.openkoda.service.csv.CsvService;
+import com.openkoda.uicomponent.annotation.Autocomplete;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -47,38 +48,39 @@ public class UtilServices implements LoggingComponent {
     @Inject
     CsvService csvService;
 
+    @Autocomplete(doc="Get the current date")
     public LocalDate dateNow() {
         return LocalDate.now();
     }
-
+    @Autocomplete(doc="Get the current date and time")
     public LocalDateTime dateTimeNow() {
         return LocalDateTime.now();
     }
-
+    @Autocomplete(doc="Parse string to integer")
     public int parseInt(String s) {
         return Integer.parseInt(s);
     }
-
+    @Autocomplete(doc="Parse string to long")
     public long parseLong(String s) {
         return Long.parseLong(s);
     }
-
+    @Autocomplete(doc="Parse date string to date object")
     public LocalDate parseDate(String s) {
         return LocalDate.parse(s);
     }
-
+    @Autocomplete(doc="Get string value of the object")
     public String toString(Object o) {
         return o.toString();
     }
-
+    @Autocomplete(doc="Check for NaN (Not a Number)")
     public boolean isNaN(double d) {
         return Double.isNaN(d);
     }
-
+    @Autocomplete(doc="Parse string to floating-point number")
     public float parseFloat(String s) {
         return Float.parseFloat(s);
     }
-
+    @Autocomplete(doc="Parse JSON string to object")
     public JSONObject parseJSON(String s) {
         try {
             return new JSONObject(s);
@@ -87,7 +89,7 @@ public class UtilServices implements LoggingComponent {
             return null;
         }
     }
-
+    @Autocomplete(doc="Convert objects to JSON string")
     public String toJSON(Object o) {
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(o);
@@ -96,7 +98,7 @@ public class UtilServices implements LoggingComponent {
             return null;
         }
     }
-
+    @Autocomplete(doc="Decode Uniform Resource Identifier (URI) string")
     public String decodeURI(String uri) {
         try {
             return URLDecoder.decode(uri, StandardCharsets.UTF_8.name());
@@ -104,7 +106,7 @@ public class UtilServices implements LoggingComponent {
             return "Decoding failed because of: " + e.getMessage();
         }
     }
-
+    @Autocomplete(doc="Encode Uniform Resource Identifier (URI) string")
     public String encodeURI(String s) {
         try {
             return URLEncoder.encode(s, StandardCharsets.UTF_8.name());
@@ -112,11 +114,11 @@ public class UtilServices implements LoggingComponent {
             return "Encoding failed because of: " + e.getMessage();
         }
     }
-
+    @Autocomplete(doc="Export data to CSV file")
     public File toCSV(String filename, List<Object[]> data, String... headers) throws IOException, SQLException {
         return csvService.createCSV(filename, data, headers);
     }
-
+    @Autocomplete(doc="Compute MD5 hash of string")
     public String md5(String value) {
         return DigestUtils.md5Hex(value);
     }

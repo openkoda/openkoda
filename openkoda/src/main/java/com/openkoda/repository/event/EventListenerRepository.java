@@ -22,8 +22,12 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository.event;
 
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
+import com.openkoda.model.OpenkodaModule;
 import com.openkoda.model.common.ModelConstants;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.EventListenerEntry;
+import com.openkoda.repository.ComponentEntityRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -31,8 +35,12 @@ import org.springframework.stereotype.Repository;
  * @since 2019-03-11
  */
 @Repository
-public interface EventListenerRepository extends UnsecuredFunctionalRepositoryWithLongId<EventListenerEntry>, ModelConstants {
+public interface EventListenerRepository extends UnsecuredFunctionalRepositoryWithLongId<EventListenerEntry>, ModelConstants, ComponentEntityRepository<EventListenerEntry> {
 
     EventListenerEntry findByEventNameAndConsumerMethodName(String eventName, String consumerMethodName);
+
+    @Modifying
+    @Query("delete from EventListenerEntry where module = :module")
+    void deleteByModule(OpenkodaModule module);
 
 }

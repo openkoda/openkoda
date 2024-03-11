@@ -1,0 +1,88 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd ">
+ 
+    <!-- We don't need to this; This is required only in annotation based AOP support -->
+    <!-- <aop:aspectj-autoproxy /> -->
+
+    <aop:config>             
+        <aop:pointcut id="allCore" expression="execution(public * stratoflow.template.core.service..*.*(..)) 
+        || execution(public * stratoflow.template.core.controller..*.*(..))
+        || execution(public * stratoflow.template.core.customization..*.*(..))
+        || execution(public * stratoflow.template.core.job..*.*(..))
+        || execution(public * stratoflow.template.core.audit..*.*(..))
+        || execution(public * stratoflow.template.core.helper.CachedDictionariesHelperImpl.*.*(..))
+        || execution(public * stratoflow.template.core.helper.JsonHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.ModelEnricherInterceptor.*.*(..))
+        || execution(public * stratoflow.template.core.helper.NameHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.PrivilegeHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.RuleSpelHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.SystemStatHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.UrlHelper.*.*(..))
+        || execution(public * stratoflow.template.core.helper.UserHelper.*.*(..))
+        || execution(public * stratoflow.template.core.lifecycle..*.*(..))
+        || execution(public * stratoflow.template.core.repository..*.*(..))
+        || execution(public * stratoflow.template.core.security..*.*(..))
+        || execution(public * stratoflow.template.core.tracker..*.*(..))
+        "/>
+
+    <aop:pointcut id="allOpenkodaCore" expression="execution(public * com.openkoda.core.service..*.*(..)) 
+        || execution(public * com.openkoda.core.controller..*.*(..))
+        || execution(public * com.openkoda.core.customization..*.*(..))
+        || execution(public * com.openkoda.core.job..*.*(..))
+        || execution(public * com.openkoda.core.audit..*.*(..))
+        || execution(public * com.openkoda.core.helper.CachedDictionariesHelperImpl.*.*(..))
+        || execution(public * com.openkoda.core.helper.JsonHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.ModelEnricherInterceptor.*.*(..))
+        || execution(public * com.openkoda.core.helper.NameHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.PrivilegeHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.RuleSpelHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.SystemStatHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.UrlHelper.*.*(..))
+        || execution(public * com.openkoda.core.helper.UserHelper.*.*(..))
+        || execution(public * com.openkoda.core.lifecycle..*.*(..))
+        || execution(public * com.openkoda.core.repository..*.*(..))
+        || execution(public * com.openkoda.core.flow..*.*(..))
+        "/>
+        
+        <aop:pointcut id="allNonCore" expression="execution(public * stratoflow.template.repository..*.*(..)) 
+        || execution(public * stratoflow.template.service..*.*(..)) 
+        || execution(public * stratoflow.template.controller..*.*(..)) 
+        || execution(public * stratoflow.template.form..*.*(..))
+        || execution(public * stratoflow.template.integration..*.*(..)) "/>
+
+        <aop:pointcut id="allOpenkodaNonCore" expression="execution(public * com.openkoda.repository..*.*(..)) 
+        || execution(public * com.openkoda.service..*.*(..)) 
+        || execution(public * com.openkoda.controller..*.*(..)) 
+        || execution(public * com.openkoda.form..*.*(..))
+        || execution(public * com.openkoda.integration..*.*(..))
+        || execution(public * com.openkoda.uicomponent..*.*(..))
+        "/>
+        
+        <!--<aop:pointcut id="allNonCore" expression="execution(public  * stratoflow.template.repository..*.*(..)) 
+        "/>-->
+        
+        <aop:pointcut id="allScan" expression="execution(public  * com.scanrepeat.controller..*.*(..)) 
+                || execution(public  * com.scanrepeat.service..*.*(..))
+                || execution(public  * com.scanrepeat.repository..*.*(..))
+                
+        "/>
+        <aop:pointcut id="allThyme" expression="execution(public  * org.thymeleaf.standard..*.*(..)) "/>
+        
+        <aop:advisor pointcut-ref="allCore" advice-ref="performanceCount" order="2"/>
+        <aop:advisor pointcut-ref="allNonCore" advice-ref="performanceCount" order="2"/>
+        <aop:advisor pointcut-ref="allOpenkodaCore" advice-ref="performanceCount" order="2"/>
+        <aop:advisor pointcut-ref="allOpenkodaNonCore" advice-ref="performanceCount" order="2"/>
+        <!--<aop:advisor pointcut-ref="allThyme" advice-ref="performanceCount" order="2"/>-->
+        <aop:advisor pointcut-ref="allScan" advice-ref="performanceCount" order="2"/>
+        
+    </aop:config>
+ 
+    <!-- Spring AOP aspect instances -->
+    <bean id="performanceCount" class="com.borocomp.common.performance.spring.PerformanceMonitorInterceptor" />
+ 
+</beans>

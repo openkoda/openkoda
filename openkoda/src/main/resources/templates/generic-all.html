@@ -4,9 +4,12 @@
 <body>
 <div class="container-fluid">
   <div layout:fragment="content" th:attr="data-menu-item=${menuItem}">
+    <th:block th:if="${genericViewNavigationFragment != null}">
+      <nav th:replace="~{__${genericViewNavigationFragment}__}"></nav>
+    </th:block>
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center ">
-        <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(frontendMappingDefinition.formLabel, frontendMappingDefinition.name)}"></h6>
+        <h6 class="m-0 font-weight-bold" th:if="${navigationFragment == null}" th:text="${@messages.getFieldLabel(frontendMappingDefinition.formLabel, frontendMappingDefinition.name)}"></h6>
         <div class="card-header-buttons">
           <a class="btn-primary btn btn-sm ml-4" href="new/settings" th:text="#{template.new}">New</a>
         </div>
@@ -18,7 +21,7 @@
           <table class="table table-hover">
             <thead>
             <tr>
-              <th th:replace="~{tables::asort('id', '#', 'obj', ${organizationRelatedEntityPage})}"></th>
+              <th th:replace="~{tables::asort('id', #{template.id}, 'obj', ${organizationRelatedEntityPage})}"></th>
                 <th:block th:each="field,iter: ${genericTableViewHeaders}">
                   <th th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName())}"></th>
                 </th:block>
@@ -27,11 +30,19 @@
             </thead>
             <tbody>
             <tr th:each="a,it : ${organizationRelatedEntityPage.content}">
-              <td><a th:href="${'./' + a.id + '/settings'}" th:text="${a.referenceString}">1</a></td>
-              <td th:each="tableValue: ${genericTableViewList.get(it.index)}" th:text="${tableValue}"> </td>
+              <td><span th:text="${a.id}">1</span></td>
+              <td th:each="tableValue: ${genericTableViewList.get(it.index)}" th:text="${tableValue}"></td>
               <td>
-                <th:block th:replace="~{forms::single-button-post-form-with-confirm(${'./' + a.id + '/remove'},
-                         #{template.remove}, #{template.confirmationPrompt})}"/>
+                <div class="table-row-btns">
+                  <th:block th:replace="~{forms::single-icon-post-form-with-confirm(
+                    ${'./' + a.id + '/remove'},'fas fa-trash text-danger',#{template.remove}, #{template.confirmationPrompt})}"/>
+                  <a class="" th:href="${'./' + a.id + '/settings'}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
+                    <i class="fas fa-pen-to-square text-primary"></i>
+                  </a>
+                  <a class="" th:href="${'./' + a.id + '/view'}" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
+                    <i class="fas fa-eye text-primary"></i>
+                  </a>
+                </div>
               </td>
             </tr>
             </tbody>

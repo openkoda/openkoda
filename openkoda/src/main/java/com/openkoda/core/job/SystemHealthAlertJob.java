@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.job;
 
 import com.openkoda.core.audit.SystemHealthStatus;
-import com.openkoda.core.helper.SystemStatHelper;
+import com.openkoda.core.service.system.SystemHealthStatusService;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import jakarta.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,13 +33,13 @@ import java.util.Arrays;
 /**
  * Job checking system status.
  * Gets information such as ram usage, cpu usage and free disk space.
- * See also {@link SystemStatHelper}
+ * See also {@link SystemHealthStatusService}
  */
 @Component
 public class SystemHealthAlertJob implements LoggingComponentWithRequestId {
 
     @Inject
-    SystemStatHelper statHelper;
+    SystemHealthStatusService statHelper;
 
     @Value("${max.disk.percentage:75}")
     double maxUsedDiskSpacePercentageAllowed;

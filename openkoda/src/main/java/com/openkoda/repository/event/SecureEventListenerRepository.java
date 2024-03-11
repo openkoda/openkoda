@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository.event;
 
 import com.openkoda.model.common.SearchableRepositoryMetadata;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.EventListenerEntry;
 import com.openkoda.repository.SecureRepository;
 import org.springframework.stereotype.Repository;
 

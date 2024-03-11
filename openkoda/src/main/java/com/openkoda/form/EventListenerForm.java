@@ -24,9 +24,9 @@ package com.openkoda.form;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.dto.system.EventListenerDto;
-import com.openkoda.model.event.Consumer;
-import com.openkoda.model.event.Event;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.Consumer;
+import com.openkoda.model.component.event.Event;
+import com.openkoda.model.component.event.EventListenerEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 

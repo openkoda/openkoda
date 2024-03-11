@@ -25,24 +25,28 @@ import com.openkoda.core.helper.ApplicationContextProvider;
 import com.openkoda.core.helper.NameHelper;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import org.apache.commons.lang3.StringUtils;
-import reactor.util.function.Tuple3;
+import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class EventConsumer<T> implements LoggingComponentWithRequestId {
 
+    public static final String DESCRIPTION_REGEX = ",String";
+    public static final String DESCRIPTION_REGEX_WITH_SPACE = ", String";
     private final Consumer<T> consumer;
     private final BiConsumer<T, String []> consumerWithStaticData;
     private final Method consumerMethod;
     private final String description;
-    private final String numberOfConsumerMethodParameters;
+    private final int numberOfConsumerMethodParameters;
     private final String methodDescription;
     private final Class<T> eventClass;
 
+    private final EventConsumerCategory category;
 
     /**
      * EventConsumer class constructor
@@ -54,8 +58,9 @@ public class EventConsumer<T> implements LoggingComponentWithRequestId {
         this.description = "";
         this.eventClass = null;
         String dryMethodDescription = NameHelper.createMethodDescription(consumerMethod);
-        this.methodDescription = dryMethodDescription.replaceAll(",String", "").replaceAll(", String", "");
-        this.numberOfConsumerMethodParameters = String.valueOf(StringUtils.countMatches(dryMethodDescription, ", String"));
+        this.methodDescription = dryMethodDescription.replaceAll(DESCRIPTION_REGEX, "").replaceAll(DESCRIPTION_REGEX_WITH_SPACE, "");
+        this.numberOfConsumerMethodParameters = StringUtils.countMatches(dryMethodDescription, DESCRIPTION_REGEX_WITH_SPACE);
+        this.category = null;
     }
     /**
      * EventConsumer class constructor
@@ -69,8 +74,9 @@ public class EventConsumer<T> implements LoggingComponentWithRequestId {
         this.eventClass = eventClass;
         this.description = "";
         String dryMethodDescription = NameHelper.createMethodDescription(consumerMethod);
-        this.methodDescription = dryMethodDescription.replaceAll(",String", "").replaceAll(", String", "");
-        this.numberOfConsumerMethodParameters = String.valueOf(numberOfConsumerMethodParameters);
+        this.methodDescription = dryMethodDescription.replaceAll(DESCRIPTION_REGEX, "").replaceAll(DESCRIPTION_REGEX_WITH_SPACE, "");
+        this.numberOfConsumerMethodParameters = numberOfConsumerMethodParameters;
+        this.category = null;
     }
 
     /**
@@ -78,15 +84,18 @@ public class EventConsumer<T> implements LoggingComponentWithRequestId {
      */
     public EventConsumer(Method method,
                          Class<T> eventClass,
-                         int numberOfConsumerMethodParameters, String description) {
+                         int numberOfConsumerMethodParameters,
+                         String description,
+                         EventConsumerCategory category) {
         this.consumer = null;
         this.consumerWithStaticData = null;
         this.consumerMethod = method;
         this.eventClass = eventClass;
         this.description = description;
         String dryMethodDescription = NameHelper.createMethodDescription(consumerMethod);
-        this.methodDescription = dryMethodDescription.replaceAll(",String", "").replaceAll(", String", "");
-        this.numberOfConsumerMethodParameters = String.valueOf(numberOfConsumerMethodParameters);
+        this.methodDescription = dryMethodDescription.replaceAll(DESCRIPTION_REGEX, "").replaceAll(DESCRIPTION_REGEX_WITH_SPACE, "");
+        this.numberOfConsumerMethodParameters = numberOfConsumerMethodParameters;
+        this.category = category;
     }
 
     /**
@@ -99,8 +108,9 @@ public class EventConsumer<T> implements LoggingComponentWithRequestId {
         this.description = "";
         this.eventClass = null;
         String dryMethodDescription = NameHelper.createMethodDescription(consumerMethod);
-        this.methodDescription = dryMethodDescription.replaceAll(", String", "");
-        this.numberOfConsumerMethodParameters = String.valueOf(StringUtils.countMatches(dryMethodDescription, ", String"));
+        this.methodDescription = dryMethodDescription.replaceAll(DESCRIPTION_REGEX_WITH_SPACE, "");
+        this.numberOfConsumerMethodParameters = StringUtils.countMatches(dryMethodDescription, DESCRIPTION_REGEX_WITH_SPACE);
+        this.category = null;
     }
 
     /**
@@ -191,13 +201,26 @@ public class EventConsumer<T> implements LoggingComponentWithRequestId {
                 && this.consumerMethod.getDeclaringClass().getName().equals(className)
                 && this.consumerMethod.getName().equals(methodName)
                 && this.eventClass.isAssignableFrom(eventObjectClass)
-                && this.numberOfConsumerMethodParameters.equals(String.valueOf(numberOfStaticMethodParameters));
+                && this.numberOfConsumerMethodParameters == numberOfStaticMethodParameters;
     }
 
     /**
      * @return a Tuple3 object with three values: methodDescription, numberOfConsumerMethodParameters, and description.
      */
-    public Tuple3<String, String, String> propertiesToTuple() {
-        return Tuples.of(this.methodDescription, this.numberOfConsumerMethodParameters, this.description != null ? this.description : "");
+    public Tuple4<String, String, Integer, String> propertiesToTuple() {
+        return Tuples.of(this.category != null ? this.category.name() : "", this.methodDescription, this.numberOfConsumerMethodParameters, this.description != null ? this.description : "");
+    }
+
+    public Map<String, String> propertiesToMap() {
+        return Map.of(
+                "c", this.category != null ? this.category.name() : "",
+                "m", this.methodDescription,
+                "p", String.valueOf(this.numberOfConsumerMethodParameters),
+                "d", this.description != null ? this.description : "",
+                "v", this.methodDescription + "(" + this.description + ")");
+    }
+
+    public EventConsumerCategory getCategory() {
+        return category;
     }
 }

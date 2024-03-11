@@ -55,6 +55,4 @@ public class SecureRepositories {
     @Inject public SecureServerJsRepository serverJs;
     @Inject public SecureFormRepository form;
 
-
-
 }

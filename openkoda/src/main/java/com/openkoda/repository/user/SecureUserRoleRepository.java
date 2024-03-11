@@ -35,7 +35,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @SearchableRepositoryMetadata(
         entityClass = UserRole.class,
-        entityKey = "userrole",
+        entityKey = "userRole",
         searchIndexFormula = """
             (select u.first_name || ' ' || u.last_name || ' userid:' || COALESCE(CAST (user_id as text), '')
              || ' orgid:' || COALESCE(CAST (organization_id as text), '')

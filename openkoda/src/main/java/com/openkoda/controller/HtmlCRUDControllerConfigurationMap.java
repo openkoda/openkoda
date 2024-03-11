@@ -25,14 +25,23 @@ import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.model.Privilege;
+import com.openkoda.model.component.Form;
+import com.openkoda.repository.FormRepository;
+import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toCollection;
 
 @Component
 public class HtmlCRUDControllerConfigurationMap extends AbstractCRUDControllerConfigurationMap{
 
+    @Inject
+    FormRepository formRepository;
     private final HashMap<String, CRUDControllerConfiguration> exposed = new HashMap<>();
 
     //TODO: this is dirty solution, to be trashed
@@ -42,13 +51,32 @@ public class HtmlCRUDControllerConfigurationMap extends AbstractCRUDControllerCo
             Class formClass
     ) {
         CRUDControllerConfiguration c = super.registerCRUDController(frontendMappingDefinition, secureRepository, formClass);
-        exposed.put(frontendMappingDefinition.name, c);
+        setOrgIdAndExpose(frontendMappingDefinition.name, c);
         return c;
     }
 
     public Set<Entry<String, CRUDControllerConfiguration>> getExposed() {
         return exposed.entrySet();
     }
+    public Set<Entry<String, CRUDControllerConfiguration>> getExposed(Long organizationId){
+        return getExposed(organizationId, getExposed());
+    }
+    public LinkedHashSet<Entry<String, CRUDControllerConfiguration>> getExposedSorted() {
+        return getExposed().stream()
+                .sorted(Map.Entry.comparingByKey()).collect(toCollection(LinkedHashSet::new));
+    }
+    public LinkedHashSet<Entry<String, CRUDControllerConfiguration>> getExposedSorted(Long organizationId) {
+        return getExposed(organizationId, getExposedSorted());
+    }
+    private LinkedHashSet<Entry<String, CRUDControllerConfiguration>> getExposed(Long organizationId, Set<Entry<String, CRUDControllerConfiguration>> initialExposedSet) {
+        if(organizationId == null){
+            return new LinkedHashSet<>(initialExposedSet);
+        }
+        return initialExposedSet.stream()
+                .filter(e -> e.getValue().getOrganizationId() == null || organizationId.equals(e.getValue().getOrganizationId()))
+                .collect(toCollection(LinkedHashSet::new));
+    }
+
 
     public CRUDControllerConfiguration registerAndExposeCRUDController(
             FrontendMappingDefinition frontendMappingDefinition,
@@ -56,7 +84,19 @@ public class HtmlCRUDControllerConfigurationMap extends AbstractCRUDControllerCo
             Class formClass,
             Privilege readPrivilege, Privilege writePrivilege) {
         CRUDControllerConfiguration c = super.registerCRUDController(frontendMappingDefinition, secureRepository, formClass, readPrivilege, writePrivilege);
-        exposed.put(frontendMappingDefinition.name, c);
+        setOrgIdAndExpose(frontendMappingDefinition.name, c);
         return c;
+    }
+
+    @Override
+    public void unregisterCRUDController(String key) {
+        exposed.remove(key);
+        super.unregisterCRUDController(key);
+    }
+
+    private void setOrgIdAndExpose(String formName, CRUDControllerConfiguration conf){
+        Form form = formRepository.findByName(formName);
+        conf.setOrganizationId(form != null ? form.getOrganizationId() : null);
+        exposed.put(conf.getKey(), conf);
     }
 }

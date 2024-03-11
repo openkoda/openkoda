@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-public class ControllerEndpointConversionDto {
+public class ControllerEndpointConversionDto extends ComponentDto {
 
     private String subpath;
     private String httpHeaders;
@@ -86,4 +86,5 @@ public class ControllerEndpointConversionDto {
     public void setFrontendResourceId(Long frontendResourceId) {
         this.frontendResourceId = frontendResourceId;
     }
+
 }

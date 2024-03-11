@@ -86,7 +86,8 @@ public class UnsecureRepositories {
     @Inject public FileRepository file;
     @Inject public IntegrationRepository integration;
     @Inject public FormRepository form;
+    @Inject public EntityUnrelatedQueries entityUnrelatedQueries;
 
-
-
+    @Inject public OpenkodaModuleRepository openkodaModule;
+    @Inject public EmailConfigRepository emailConfig;
 }

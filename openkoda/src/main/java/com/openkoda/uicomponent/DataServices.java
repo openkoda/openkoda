@@ -25,14 +25,21 @@ import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.model.User;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
+import com.openkoda.uicomponent.annotation.Autocomplete;
 
 public interface DataServices {
+    @Autocomplete(doc="Get data repository for an entity using its key value")
     ScopedSecureRepository<?> getRepository(String entityName);
+    @Autocomplete(doc="Get data repository for an entity using its key value")
     ScopedSecureRepository<?> getRepository(String entityKey, String securityScope);
+    @Autocomplete(doc="Save form data as a new entity record")
     SearchableOrganizationRelatedEntity saveForm(AbstractOrganizationRelatedEntityForm form);
+    @Autocomplete(doc="Update an entity with form data")
     SearchableOrganizationRelatedEntity saveForm(AbstractOrganizationRelatedEntityForm form, SearchableOrganizationRelatedEntity entity);
+    @Autocomplete(doc="Retrieve a form by its identifier (key)")
     AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName);
+    @Autocomplete(doc="Retrieve a form associated with a provided entity object")
     AbstractOrganizationRelatedEntityForm getForm(String frontendMappingName, SearchableOrganizationRelatedEntity entity);
+    @Autocomplete(doc="Register a new user or return an existing user's data")
     User registerUserOrReturnExisting(String email, String firstName, String lastName);
-
 }

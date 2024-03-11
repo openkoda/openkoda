@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service;
 
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

@@ -22,10 +22,16 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.ControllerEndpoint;
+import com.openkoda.model.component.ControllerEndpoint;
 import com.openkoda.service.export.converter.YamlToEntityConverter;
 import com.openkoda.service.export.dto.ControllerEndpointConversionDto;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static com.openkoda.service.export.FolderPathConstants.SUBDIR_ORGANIZATION_PREFIX;
 
 @Component
 public class ControllerEndpointYamlToEntityConverter extends ComponentProvider implements YamlToEntityConverter<ControllerEndpoint, ControllerEndpointConversionDto> {
@@ -33,6 +39,27 @@ public class ControllerEndpointYamlToEntityConverter extends ComponentProvider i
     public ControllerEndpoint convertAndSave(ControllerEndpointConversionDto dto, String filePath) {
         debug("[convertAndSave]");
 
+        ControllerEndpoint controllerEndpoint = getControllerEndpoint(dto);
+        controllerEndpoint.setCode(loadResourceAsString(dto.getCode()));
+        return repositories.unsecure.controllerEndpoint.save(controllerEndpoint);
+
+    }
+    @Override
+    public ControllerEndpoint convertAndSave(ControllerEndpointConversionDto dto, String filePath, Map<String, String> resources) {
+        debug("[convertAndSave]");
+
+        ControllerEndpoint controllerEndpoint = getControllerEndpoint(dto);
+        controllerEndpoint.setCode(resources.get(dto.getCode()));
+        return repositories.unsecure.controllerEndpoint.save(controllerEndpoint);
+    }
+
+    private Long getOrgIdFromPath(String filePath) {
+        String orgIdString = StringUtils.substringBetween(filePath, SUBDIR_ORGANIZATION_PREFIX, "/");
+        return StringUtils.isNotEmpty(orgIdString) ? Long.parseLong(orgIdString) : null;
+    }
+
+    @NotNull
+    private ControllerEndpoint getControllerEndpoint(ControllerEndpointConversionDto dto) {
         ControllerEndpoint controllerEndpoint = new ControllerEndpoint();
         controllerEndpoint.setFrontendResourceId(dto.getFrontendResourceId());
         controllerEndpoint.setSubPath(dto.getSubpath() != null ? dto.getSubpath() : "");
@@ -40,10 +67,9 @@ public class ControllerEndpointYamlToEntityConverter extends ComponentProvider i
         controllerEndpoint.setHttpMethod(dto.getHttpMethod());
         controllerEndpoint.setModelAttributes(dto.getModelAttributes());
         controllerEndpoint.setResponseType(dto.getResponseType());
-        controllerEndpoint.setCode(loadResourceAsString(dto.getCode()));
-
-        return repositories.unsecure.controllerEndpoint.save(controllerEndpoint);
-
+        controllerEndpoint.setModuleName(dto.getModule());
+        controllerEndpoint.setOrganizationId(dto.getOrganizationId());
+        return controllerEndpoint;
     }
 
 }

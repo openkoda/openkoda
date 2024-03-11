@@ -21,20 +21,13 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.converter;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-
 import java.util.zip.ZipOutputStream;
 
-public interface EntityToYamlConverter <T, D> {
-    D exportToYamlAndAddToZip(T entity, ZipOutputStream zipOut);
+public interface EntityToYamlConverter<T, D> {
 
-    default String dtoToYamlString(Object object) {
-        DumperOptions options = new DumperOptions();
-        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-        options.setPrettyFlow(true);
-        Yaml yaml = new Yaml(options);
 
-        return yaml.dump(object);
-    }
+    D addToZip(T entity, ZipOutputStream zipOut);
+    T saveToFile(T entity);
+    T removeExportedFiles(T entity);
+
 }

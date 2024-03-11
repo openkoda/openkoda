@@ -23,6 +23,13 @@
 <form th:fragment="organization-settings-form-success"
       th:replace="~{generic-forms::generic-form(${organizationForm}, 'organizationForm', '', #{template.forms.organizationSaved}, 'alert-success', #{template.organization}, #{template.save}, false)}"/>/>
 
+<form th:fragment="email-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${emailConfigForm}, 'emailConfigForm', 'integrations/emailConfig', '', '', #{template.emailConfig}, #{template.save}, true)}" />
+<form th:fragment="email-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${emailConfigForm}, 'emailConfigForm', 'integrations/emailConfig', #{template.forms.containsErrors}, 'alert-danger', #{template.emailConfig}, #{template.save}, false)}" />
+<form th:fragment="email-settings-form-success"
+      th:replace="~{generic-forms::generic-form(${emailConfigForm}, 'emailConfigForm', 'integrations/emailConfig', 'Email settings saved', 'alert-success', #{template.emailConfig}, #{template.save}, false)}" />
+      
 <form th:fragment="global-org-role-form"
       th:replace="~{generic-forms::generic-form(${globalOrgRoleForm}, 'globalOrgRoleForm', 'addGlobalOrgRole', '', '', #{template.organizationRoles}, #{template.save}, true)}" />
 <form th:fragment="global-org-role-form-error"
@@ -37,15 +44,15 @@
 <form th:fragment="role-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allRoles()} )}"/>
 
 <form th:fragment="frontend-resource-settings-form-new"
-      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', '', '', 'Frontend Resource Data', #{template.save}, true)}" />
+      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', '', '', '', #{template.save}, true)}" />
 <form th:fragment="frontend-resource-settings-form-error"
-      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Frontend Resource Data', #{template.save}, false)}" />
+      th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', #{template.forms.containsErrors}, 'alert-danger', ', #{template.save}, false)}" />
 <form th:fragment="frontend-resource-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allFrontendResource()} )}"/>
 
 <form th:fragment="eventlistener-settings-form-new"
-      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', '', '', 'Event Listener Data', #{template.save}, true)}" />
+      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', '', '', '', #{template.save}, true)}" />
 <form th:fragment="eventlistener-settings-form-error"
-      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Event Listener Data', #{template.save}, false)}" />
+      th:replace="~{generic-forms::generic-form(${eventListenerForm}, 'eventListenerForm', '', #{template.forms.containsErrors}, 'alert-danger', '', #{template.save}, false)}" />
 <form th:fragment="eventlistener-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allEventListeners()} )}" />
 
 <form th:fragment="eventlistener-choose-event"
@@ -61,9 +68,9 @@
       th:replace="~{generic-forms::generic-form(${sendEventForm}, 'sendEventForm', 'send', 'Error while processing event or consumers.', 'alert-danger', 'Event List', 'Choose', false)}" />
 
 <form th:fragment="scheduler-settings-form-new"
-      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', '', '', 'Scheduler Data', #{template.save}, true)}" />
+      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', '', '', '', #{template.save}, true)}" />
 <form th:fragment="scheduler-settings-form-error"
-      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Scheduler Data', #{template.save}, false)}" />
+      th:replace="~{generic-forms::generic-form(${schedulerForm}, 'schedulerForm', '', #{template.forms.containsErrors}, 'alert-danger', '', #{template.save}, false)}" />
 <form th:fragment="scheduler-settings-form-success" th:replace="generic-forms::go-back( ${@url.allSchedulers()} )"/>
 
 <form th:fragment="logger-settings-form-new"

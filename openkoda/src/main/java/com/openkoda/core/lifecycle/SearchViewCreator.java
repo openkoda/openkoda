@@ -23,11 +23,11 @@ package com.openkoda.core.lifecycle;
 
 import com.openkoda.core.helper.SpringProfilesHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
-import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.model.Organization;
 import com.openkoda.model.common.*;
 import com.openkoda.repository.SearchableRepositories;
+import com.openkoda.repository.SecureRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.openkoda.model.common.ModelConstants.*;
 
@@ -53,14 +54,14 @@ public class SearchViewCreator implements LoggingComponentWithRequestId {
             queryString = "DROP VIEW IF EXISTS global_search_view; ";
         }
 
-        ScopedSecureRepository<?>[] repositories = SearchableRepositories.getSearchableRepositories();
+        Map<String, SecureRepository> repositories = SearchableRepositories.getSearchableRepositoriesWithEntityKeys();
         EntityManager em = null;
 
-        List<String> queries = new ArrayList<>(repositories.length);
+        List<String> queries = new ArrayList<>(repositories.size());
 
         StringBuilder sb = new StringBuilder();
-        for (ScopedSecureRepository r : repositories) {
-            SearchableRepositoryMetadata gsa = SearchableRepositories.getGlobalSearchableRepositoryAnnotation(r);
+        for (Map.Entry<String, SecureRepository> r : repositories.entrySet()) {
+            SearchableRepositoryMetadata gsa = SearchableRepositories.getGlobalSearchableRepositoryAnnotation(r.getValue());
             Class c = gsa.entityClass();
             String tableName = SearchableRepositories.discoverTableName(c);
             queries.add(prepareSubquery(c, tableName, gsa));
@@ -79,9 +80,9 @@ public class SearchViewCreator implements LoggingComponentWithRequestId {
         String organizationColumnName = (Organization.class.isAssignableFrom(c) ? "id" : ModelConstants.ORGANIZATION_ID);
         String urlFormula = isOrganizationRelated ?
                 StringUtils.defaultIfBlank(gsa.organizationRelatedPathFormula(),
-                ORG_RELATED_PATH_FORMULA_BASE + gsa.entityKey() + ID_PATH_FORMULA) :
+                ORG_RELATED_PATH_FORMULA_BASE + gsa.entityKey() + ID_VIEW_PATH_FORMULA) :
                 StringUtils.defaultIfBlank(gsa.globalPathFormula(),
-                GLOBAL_PATH_FORMULA_BASE + gsa.entityKey() + ID_PATH_FORMULA);
+                GLOBAL_PATH_FORMULA_BASE + gsa.entityKey() + ID_VIEW_PATH_FORMULA);
 
         return String.format(
             "(select id, '%s' as name, %s as " + ModelConstants.ORGANIZATION_ID
@@ -91,11 +92,11 @@ public class SearchViewCreator implements LoggingComponentWithRequestId {
                     + ", %s as " + REQUIRED_READ_PRIVILEGE_COLUMN
                     + ", (%s) as urlPath"
                     + ", %s from %s)",
-                c.getSimpleName(),
+                gsa.entityKey(),
                 (isOrganizationRelated ? organizationColumnName : "null \\:\\: bigint"),
                 (isTimestamped ? ModelConstants.CREATED_ON : "null \\:\\: timestamp"),
                 (isTimestamped ? ModelConstants.UPDATED_ON : "null \\:\\: timestamp"),
-                gsa.descriptionFormula(),
+                gsa.searchIndexFormula(),
                 getRequiredReadPrivilege(c),
                 urlFormula,
                 ModelConstants.INDEX_STRING_COLUMN,

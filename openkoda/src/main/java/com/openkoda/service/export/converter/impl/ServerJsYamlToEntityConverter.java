@@ -22,11 +22,13 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.ServerJs;
+import com.openkoda.model.component.ServerJs;
 import com.openkoda.service.export.converter.YamlToEntityConverter;
 import com.openkoda.service.export.converter.YamlToEntityParentConverter;
 import com.openkoda.service.export.dto.ServerJsConversionDto;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @YamlToEntityParentConverter(dtoClass = ServerJsConversionDto.class)
@@ -35,17 +37,26 @@ public class ServerJsYamlToEntityConverter extends ComponentProvider implements 
     @Override
     public ServerJs convertAndSave(ServerJsConversionDto dto, String filePath) {
         debug("[convertAndSave]");
-
-        ServerJs serverJs = convertToServerJs(dto);
+        ServerJs serverJs = getServerJs(dto);
+        serverJs.setCode(loadResourceAsString(dto.getCode()));
         return repositories.secure.serverJs.saveOne(serverJs);
     }
-    private ServerJs convertToServerJs(ServerJsConversionDto dto){
+
+    @Override
+    public ServerJs convertAndSave(ServerJsConversionDto dto, String filePath, Map<String, String> resources) {
+        debug("[convertAndSave]");
+        ServerJs serverJs = getServerJs(dto);
+        serverJs.setCode(resources.get(dto.getCode()));
+        return repositories.secure.serverJs.saveOne(serverJs);
+    }
+
+    private ServerJs getServerJs(ServerJsConversionDto dto){
         ServerJs serverJs = new ServerJs();
         serverJs.setName(dto.getName());
         serverJs.setArguments(dto.getArguments());
         serverJs.setModel(dto.getModel());
-        serverJs.setCode(loadResourceAsString(dto.getCode()));
-
+        serverJs.setModuleName(dto.getModule());
+        serverJs.setOrganizationId(dto.getOrganizationId());
         return serverJs;
     }
 }

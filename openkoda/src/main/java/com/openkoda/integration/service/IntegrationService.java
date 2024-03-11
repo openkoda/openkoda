@@ -24,6 +24,7 @@ package com.openkoda.integration.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.helper.PrivilegeHelper;
+import com.openkoda.core.service.event.EventConsumerCategory;
 import com.openkoda.dto.NotificationDto;
 import com.openkoda.integration.consumer.BasecampIntegrationConsumers;
 import com.openkoda.integration.consumer.GitHubIntegrationConsumers;
@@ -340,7 +341,7 @@ public class IntegrationService extends IntegrationComponentProvider {
     }
 
     public Flow<Long, ?, ?> initFlowForOrganizationConfiguration(Long organizationId, HttpServletRequest request) {
-        return Flow.init(null, organizationId)
+        return Flow.init(organizationEntityId, organizationId)
                 .thenSet(IntegrationPageAttributes.integrationTrelloForm, a -> integrationService.prepareTrelloFormForOrg(organizationId))
                 .thenSet(IntegrationPageAttributes.integrationGitHubForm, a -> integrationService.prepareGitHubFormForOrg(organizationId))
                 .thenSet(IntegrationPageAttributes.integrationSlackForm, a -> integrationService.prepareSlackFormForOrg(organizationId))
@@ -350,13 +351,33 @@ public class IntegrationService extends IntegrationComponentProvider {
     }
 
     private void registerConsumers() {
-        services.applicationEvent.registerEventConsumerWithMethod(NotificationDto.class, TrelloIntegrationConsumers.class, "createTrelloCardFromOrgNotification",
-                "This creates Cards on the specified List and Board on Trello based on the Notification.");
-        services.applicationEvent.registerEventConsumerWithMethod(NotificationDto.class, GitHubIntegrationConsumers.class, "createGitHubIssueFromOrgNotification",
-                "This creates Issue on the specified repository on GitHub, based on the Notification.");
-        services.applicationEvent.registerEventConsumerWithMethod(NotificationDto.class, JiraIntegrationConsumers.class, "createJiraIssueFromOrgNotification",
-                "This creates Issue on the specified project on JIRA, based on the Notification.");
-        services.applicationEvent.registerEventConsumerWithMethod(NotificationDto.class, BasecampIntegrationConsumers.class, "postBasecampToDo",
-                "This posts a To-Do to Basecamp To-Do List based on the Notification.");
+        services.applicationEvent.registerEventConsumerWithMethod(
+                NotificationDto.class,
+                TrelloIntegrationConsumers.class,
+                "createTrelloCardFromOrgNotification",
+                "This creates Cards on the specified List and Board on Trello based on the Notification.",
+                EventConsumerCategory.INTEGRATION
+        );
+        services.applicationEvent.registerEventConsumerWithMethod(
+                NotificationDto.class,
+                GitHubIntegrationConsumers.class,
+                "createGitHubIssueFromOrgNotification",
+                "This creates Issue on the specified repository on GitHub, based on the Notification.",
+                EventConsumerCategory.INTEGRATION
+        );
+        services.applicationEvent.registerEventConsumerWithMethod(
+                NotificationDto.class,
+                JiraIntegrationConsumers.class,
+                "createJiraIssueFromOrgNotification",
+                "This creates Issue on the specified project on JIRA, based on the Notification.",
+                EventConsumerCategory.INTEGRATION
+        );
+        services.applicationEvent.registerEventConsumerWithMethod(
+                NotificationDto.class,
+                BasecampIntegrationConsumers.class,
+                "postBasecampToDo",
+                "This posts a To-Do to Basecamp To-Do List based on the Notification.",
+                EventConsumerCategory.INTEGRATION
+        );
     }
 }

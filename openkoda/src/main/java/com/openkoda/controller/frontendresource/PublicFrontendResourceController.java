@@ -28,6 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,6 +60,7 @@ public class PublicFrontendResourceController extends AbstractFrontendResourceCo
                     "/{frontendResourcePath:" + EXCLUDE_SWAGGER_UI_REGEX + URL_WITH_DASH_REGEX + "$}/{subPath:" + FRONTENDRESOURCEREGEX + "$}"
             },
             method = {GET, POST})
+    @Transactional
     public Object openFrontendResourcePage(
             @PathVariable(value = "frontendResourcePath", required = false) String frontendResourcePath,
             @PathVariable(value = "subPath", required = false) String subPath,

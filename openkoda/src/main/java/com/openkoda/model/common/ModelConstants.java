@@ -66,8 +66,11 @@ public interface ModelConstants {
    String USER_ID_PLACEHOLDER = "##userId##";
    String REQUIRED_PRIVILEGE_COLUMN = "required_privilege";
    String REQUIRED_PRIVILEGE = "requiredPrivilege";
+   String REQUIRED_READ_PRIVILEGE = "requiredReadPrivilege";
+   String REQUIRED_WRITE_PRIVILEGE = "requiredWritePrivilege";
    String REQUIRED_READ_PRIVILEGE_COLUMN = "required_read_privilege";
    String GLOBAL_PATH_FORMULA_BASE = "'" + _HTML + "/";
-   String ORG_RELATED_PATH_FORMULA_BASE = "'" + _HTML + _ORGANIZATION + "/' || " + ORGANIZATION_ID + " || '/";
+   String ORG_RELATED_PATH_FORMULA_BASE = "'" + _HTML + "' || case when " + ORGANIZATION_ID + " is null then '' else '" + _ORGANIZATION + "/'||" + ORGANIZATION_ID + " end || '/";
    String ID_PATH_FORMULA = "/' || id || '" + _SETTINGS + "'";
+   String ID_VIEW_PATH_FORMULA = "/' || id || '" + _VIEW + "'";
 }

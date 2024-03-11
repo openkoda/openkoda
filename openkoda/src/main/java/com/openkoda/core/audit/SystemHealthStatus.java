@@ -21,6 +21,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.audit;
 
+import com.openkoda.core.service.system.SystemHealthStatusService;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ import java.util.Set;
 
 /**
  * Data object for keeping system health information.
- * See {@link com.openkoda.core.helper.SystemStatHelper}
+ * See {@link SystemHealthStatusService}
  */
 public class SystemHealthStatus {
 
@@ -49,14 +51,14 @@ public class SystemHealthStatus {
 
     /**
      * log_statement information from pg_settings
-     * See {@link com.openkoda.core.helper.SystemStatHelper#getLogStatement}
+     * See {@link SystemHealthStatusService#getLogStatement}
      */
     private String dbLogStatement;
 
 
     /**
      * log_min_duration_statement information from pg_settings
-     * See {@link com.openkoda.core.helper.SystemStatHelper#getLogMinDurationStatement}
+     * See {@link SystemHealthStatusService#getLogMinDurationStatement}
      */
     private String logMinDurationStatement;
 

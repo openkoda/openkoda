@@ -14,16 +14,15 @@
 
     <!-- Custom CSS -->
     <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
+    <link href="/vendor/bootstrap-select/bootstrap-select.min.css" rel="stylesheet">
 
     <!-- Custom fonts -->
     <link href="/vendor/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
     <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-          rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
     <!-- App css -->
-    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+    <link th:href="@{~/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -34,8 +33,8 @@
     <![endif]-->
 
     <script src="/vendor/jquery/jquery.min.js"></script>
-    <script th:src="@{/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
-    <script th:src="@{/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{~/vendor/openkoda/app.js(v=${resourcesVersion})}"></script>
+    <script th:src="@{~/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
 
     <!-- Custom head scripts -->
     <th:block th:replace="~{frontend-resource/global/head-customization::scripts}"></th:block>
@@ -45,7 +44,10 @@
 
     <!--Form scripts-->
     <script src="/vendor/jquery-dirty/jquery.dirty.js"></script>
-
+    
+    <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'tutorial')}">
+        <th:block th:replace="~{tutorial::tutorial}"></th:block>
+    </th:block>
 </head>
 
 <body id="page-top">
@@ -72,8 +74,8 @@
             </div>
         </a>
 
-        <th:block th:if="${@user.hasOrganizations()}" th:replace="frontend-resource/global/menu::users-menu"/>
-        <th:block th:replace="submenus::admin-menu"/>
+        <th:block th:if="${@user.hasOrganizations()}" th:replace="~{frontend-resource/global/menu::users-menu}"/>
+        <th:block th:replace="~{submenus::admin-menu}"/>
 
         <!-- Sidebar Toggler (Sidebar) -->
         <div class="mt-1 text-center d-none d-md-inline">
@@ -89,6 +91,12 @@
         <!-- Main Content -->
         <div id="content">
 
+            <th:block th:if="${@environment.getProperty('request.feature.visible')}">
+                <div class="navbar feature-request d-flex justify-content-end d-lg-none d-block">
+                    <a th:href="${@environment.getProperty('request.feature.url')}" class="btn btn-primary btn-sm" th:text="#{template.request.feature}">Request a Feature</a>
+                </div>
+            </th:block>
+
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top">
 
@@ -98,15 +106,15 @@
                 </button>
 
                 <!-- Topbar Search -->
-                <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
+                <form class="d-none d-sm-inline-block form-inline mr-auto my-2 my-md-0 mw-100 navbar-search"
                       id="top-search" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
                     <div class="input-group">
-                        <input type="text" class="form-control simple-control border-0 small  bg-white"
+                        <input type="text" class="form-control simple-control small bg-white"
                                placeholder="Search..."
-                               th:placeholder="#{search.placeholder}"
+                               th:placeholder="#{search.placeholder}" th:value="${searchTerm}"
                                aria-label="Search" aria-describedby="basic-addon2" name="search_search">
                         <div class="input-group-append">
-                            <button class="input-group-text border-0" type="submit" form="top-search" formmethod="get"
+                            <button class="input-group-text" type="submit" form="top-search" formmethod="get"
                                     formaction="/html/search">
                                 <i class="fas fa-search fa-sm"></i>
                             </button>
@@ -141,11 +149,31 @@
                         </div>
                     </li>
 
+
+                    <th:block th:if="${@environment.getProperty('request.feature.visible')}">
+                        <li class="nav-item mt-auto mb-auto ml-3 mr-3 d-lg-block d-none">
+                            <a th:href="${@environment.getProperty('request.feature.url')}" class="btn btn-primary btn-sm" th:text="#{template.request.feature}">Request a Feature</a>
+                        </li>
+                    </th:block>
+
                     <!-- Spinner -->
                     <th:block th:replace="~{frontend-resource/global/main-page-fragments::navbar-spinner}"></th:block>
 
                     <!-- Nav Item - Alerts -->
                     <div th:replace="~{notification-dropdown :: notifications(${readNotificationsList}, ${unreadNotificationsList}, ${userEntityId})}"></div>
+
+
+                    <th:block th:if="${organizationEntity != null
+                        and #strings.contains(#ctx.springRequestContext.requestUri,'organization')
+                        and !#strings.contains(#ctx.springRequestContext.requestUri,'organization/all')}">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="${@url.organizationDashboard(organizationEntity.id)}">
+                                <i class="fas fa-circle fa-sm fa-fw mr-2 text-primary-light"></i>
+                                <span class="d-lg-inline text-gray-600 small" th:text="${organizationEntity.name}"></span>
+                            </a>
+                        </li>
+                    </th:block>
 
                     <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -160,19 +188,30 @@
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="userDropdown">
-                            <a class="dropdown-item" th:href="${@url.userSettings(@user.getUserId())}" onclick="app.adminMode(false)" th:text="#{template.profile}">
-                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Profile
+
+                            <a th:each="org : ${@user.organizations()}" class="dropdown-item" th:href="${@url.organizationDashboard(org.key)}">
+                                <i th:class="'fas fa-circle fa-sm fa-fw mr-2 ' + ${#strings.contains(#ctx.springRequestContext.requestUri,org.key) ? 'text-primary-light' : 'text-gray-400'}"></i>
+                                <th:block th:text="${org.value}">Organization</th:block>
                             </a>
+                            <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}" th:href="${@url.adminDashboard()}">
+                                <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Admin
+                            </a>
+                            <a class="dropdown-item" th:href="${@url.userSettings(@user.getUserId())}" onclick="app.adminMode(false)">
+                                <i class="fas fa-id-card fa-sm fa-fw mr-2 text-gray-400"></i>
+                                <th:block th:text="#{template.profile}">Profile</th:block>
+                            </a>
+                            <div class="dropdown-divider"></div>
                             <form th:if="${!@auth.isSpoofMode()}"  method="POST" action="/logout">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button class="dropdown-item" type="submit" th:text="#{template.logout}">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout
+                                <button class="dropdown-item" type="submit">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    <th:block th:text="#{template.logout}">Logout</th:block>
                                 </button>
                             </form>
                             <a th:if="${@auth.isSpoofMode()}" class="dropdown-item" th:href="${@url.exitSpoof()}">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Exit Spoof
+                                <th:block>Exit Spoof</th:block>
                             </a>
 
                         </div>
@@ -204,7 +243,7 @@
         <footer class="sticky-footer">
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
-                    <span>Copyright &copy; <th:block th:text="${@environment.getProperty('application.name')}"></th:block> 2023</span>
+                    <span>Copyright &copy; <th:block th:text="${@environment.getProperty('application.name')}"></th:block> 2024</span>
                 </div>
             </div>
         </footer>
@@ -226,6 +265,8 @@
 
 <!-- Core plugin JavaScript-->
 <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<script src="/vendor/bootstrap-select/bootstrap-select.min.js"></script>
 
 <!-- Custom scripts for all pages-->
 <script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>

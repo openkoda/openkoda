@@ -27,7 +27,7 @@ package com.openkoda.core.service.email;
  */
 
 public interface StandardEmailTemplates {
-    String EMAIL_BASE = "frontend-resource/email/";
+    String EMAIL_BASE = "frontend-resource/global/email/";
     String INVITE_EXISTING = EMAIL_BASE + "invite-existing";
     String INVITE_NEW = EMAIL_BASE + "invite-new";
     String NEW_INVOICE_EMAIL = EMAIL_BASE + "new-invoice-email";

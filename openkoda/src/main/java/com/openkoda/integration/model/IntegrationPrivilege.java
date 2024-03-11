@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.integration.model;
 
 import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.PrivilegeGroup;
 
 /**
  * @author Martyna Litkowska (mlitkowska@stratoflow.com)
@@ -29,23 +30,34 @@ import com.openkoda.model.PrivilegeBase;
  */
 public enum IntegrationPrivilege implements PrivilegeBase, IntegrationPrivilegeName {
 
-    canIntegrateWithSlack("Can Integrate With Slack", _canIntegrateWithSlack),
-    canIntegrateWithMsTeams("Can Integrate With Ms Teams", _canIntegrateWithMsTeams),
-    canIntegrateWithGitHub("Can Integrate With GitHub", _canIntegrateWithGitHub),
-    canIntegrateWithJira("Can Integrate With Jira", _canIntegrateWithJira),
-    canIntegrateWithBasecamp("Can Integrate With Basecamp", _canIntegrateWithBasecamp),
-    canIntegrateWithTrello("Can Integrate With Trello", _canIntegrateWithTrello);
+    canIntegrateWithSlack("Slack", _canIntegrateWithSlack),
+    canIntegrateWithMsTeams("Ms Teams", _canIntegrateWithMsTeams),
+    canIntegrateWithGitHub("GitHub", _canIntegrateWithGitHub),
+    canIntegrateWithJira("Jira", _canIntegrateWithJira),
+    canIntegrateWithBasecamp("Basecamp", _canIntegrateWithBasecamp),
+    canIntegrateWithTrello("Trello", _canIntegrateWithTrello);
 
     private String label;
+    private String category = "Integration";
 
     IntegrationPrivilege(String label, String nameCheck) {
-        this.label = "Integration - " + label;
+        this.label = label;
         checkName(nameCheck);
     }
 
     @Override
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public PrivilegeGroup getGroup() {
+        return null;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
     }
 
 }

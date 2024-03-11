@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository.specifications;
 
 import com.openkoda.core.helper.ReadableCode;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.file.File;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;

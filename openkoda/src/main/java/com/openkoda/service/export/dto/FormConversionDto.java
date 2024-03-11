@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-public class FormConversionDto {
+public class FormConversionDto extends ComponentDto {
     private String name;
     private String code;
     private String readPrivilege;
@@ -29,6 +29,7 @@ public class FormConversionDto {
     private boolean registerApiCrudController;
     private boolean registerHtmlCrudController;
     private String tableColumns;
+    private String tableName;
 
     public String getName() {
         return name;
@@ -84,5 +85,13 @@ public class FormConversionDto {
 
     public void setTableColumns(String tableColumns) {
         this.tableColumns = tableColumns;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

@@ -41,6 +41,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -94,7 +95,7 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
         return (root, query, cb) -> {
              Predicate[] searchPredicates = new Predicate[searchTerm.length];
              for (int i = 0; i < searchTerm.length; i++) {
-                 searchPredicates[i] = cb.like(root.get("indexString"), "%" + StringUtils.lowerCase(StringUtils.defaultString(searchTerm[i], "")) + "%");
+                 searchPredicates[i] = cb.like(cb.lower(root.get("indexString")), "%" + StringUtils.lowerCase(StringUtils.defaultString(searchTerm[i], "")) + "%");
              }
              return cb.and(searchPredicates);
         };
@@ -268,6 +269,7 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
     }
 
     @Override
+    @Transactional
     default boolean deleteOne(SecurityScope scope, Object idOrEntity) {
         if (idOrEntity == null) {return false;}
         Long entityId = extractEntityId(idOrEntity);

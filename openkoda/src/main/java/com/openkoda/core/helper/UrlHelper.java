@@ -26,10 +26,10 @@ package com.openkoda.core.helper;
 
 import com.openkoda.controller.common.URLConstants;
 import com.openkoda.core.multitenancy.TenantResolver;
-import com.openkoda.model.FrontendResource;
 import com.openkoda.model.Organization;
 import com.openkoda.model.common.LongIdEntity;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.model.component.event.EventListenerEntry;
 import com.openkoda.model.file.File;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,8 +64,8 @@ public class UrlHelper implements URLConstants, ReadableCode {
     private final static Random random = new SecureRandom();
 
     private static final Pattern htmlOrganizationPath = Pattern.compile(URLConstants._HTML_ORGANIZATION + "/([0-9]+).*$");
-    private static final Pattern entityKeyPath = Pattern.compile(URLConstants._HTML + "(" + _ORGANIZATION + "/[0-9]+)?/([A-Za-z]+)/.*$");
-    private static final Pattern organizationIdAndEntityKeyPath = Pattern.compile(URLConstants._HTML + "(" + _ORGANIZATION + "/([0-9]+))?/([A-Za-z]+)?(/.*)?$");
+    private static final Pattern mappingKeyPath = Pattern.compile(URLConstants._HTML + "(" + _ORGANIZATION + "/[0-9]+)?/([0-9A-Za-z-_]+)/.*$");
+    private static final Pattern organizationIdAndEntityKeyPath = Pattern.compile(URLConstants._HTML + "(" + _ORGANIZATION + "/([0-9]+))?/([0-9A-Za-z-_]+)?(/.*)?$");
 
 
     @Value("${base.url:http://localhost:8080}")
@@ -127,6 +127,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String form(Long organizationId, String entityKey, Long entityId) {
         return operation(organizationId, entityKey, entityId, _SETTINGS);
+    }
+
+    public String view(Long organizationId, String entityKey, Long entityId) {
+        return operation(organizationId, entityKey, entityId, _VIEW);
     }
 
     public String remove(Long organizationId, String entityKey, Long entityId) {
@@ -423,6 +427,12 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return _HTML + _DASHBOARD;
     }
 
+//    COMPONENTS
+
+    public String components() {
+        return _HTML + _COMPONENTS;
+    }
+
 //    SCHEDULER URLS
 
     public String allSchedulers(){
@@ -470,6 +480,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return entityBase(SYSTEM_HEATH);
     }
 
+    public String systemDatabaseValidation() {
+        return entityBase(SYSTEM_HEATH) + _VALIDATE;
+    }
+
 //   AFFILIATION
 
     public String affiliationCodeAll(long orgId) {
@@ -489,6 +503,11 @@ public class UrlHelper implements URLConstants, ReadableCode {
     public String exportAllYamlResources(){
         return operation(ORGANIZATION, _EXPORT_YAML + _ALL);
     }
+
+    public String importComponentsZip(){
+        return operation(COMPONENT, _IMPORT + _ZIP);
+    }
+
     public String exportAllYamlResourcesForOrg(long id) {
         return operation(ORGANIZATION, id, _EXPORT_YAML + _ALL);
     }
@@ -529,6 +548,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
     }
     public String yamlScheduler(long id){
         return operation(SCHEDULER, id, _EXPORT_YAML);
+    }
+
+    public String integrations() {
+        return entityBase(INTEGRATIONS);
     }
 
 //    OTHER
@@ -613,12 +636,12 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return "/features";
     }
 
-    public static String getPublicFileURL(File f) {
-        return String.format("/frontend-resource-asset-%d/%s", f.getId(), encode(f.getFilename()));
+    public static String getFileURL(File f) {
+        return String.format((f.isPublicFile() ? "" : _HTML) + FILE_ASSET + "%d/%s", f.getId(), encode(f.getFilename()));
     }
 
     public String getAbsoluteFileURL(File f) {
-        return getBaseUrl() + getPublicFileURL(f);
+        return getBaseUrl() + getFileURL(f);
     }
 
     public static String encode(String string) {
@@ -636,8 +659,8 @@ public class UrlHelper implements URLConstants, ReadableCode {
     }
 
 
-    public String getEntityKeyOrNull(HttpServletRequest request) {
-        Matcher m = entityKeyPath.matcher(request.getServletPath());
+    public String getMappingKeyOrNull(HttpServletRequest request) {
+        Matcher m = mappingKeyPath.matcher(request.getServletPath());
 
         if (not(m.matches())) {
             return null;
@@ -669,7 +692,7 @@ public class UrlHelper implements URLConstants, ReadableCode {
         Long orgId = orgIdString == null ? null : Long.parseLong(orgIdString);
         String entityKey = m.group(3);
 
-        if(entityKey.equals(CN) || entityKey.equals(CI)) {
+        if(StringUtils.isNotEmpty(entityKey) && (entityKey.equals(CN) || entityKey.equals(CI))) {
             entityKey = null;
         }
 
@@ -708,6 +731,18 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return baseUrl +
                 (organizationId == null ? _HTML + _WEBENDPOINT : _HTML_ORGANIZATION + "/" + organizationId + _WEBENDPOINT)
                 + "/" + frontendResourceId + _SETTINGS;
+    }
+
+    public String getFrontendResourcePreviewUrl(FrontendResource frontendResource, boolean draft, boolean resource) {
+        String accessLevelPath = "";
+
+        if (frontendResource.getAccessLevel().equals(FrontendResource.AccessLevel.GLOBAL)) {
+            accessLevelPath = _HTML;
+        } else if (frontendResource.getAccessLevel().equals(FrontendResource.AccessLevel.ORGANIZATION)) {
+            accessLevelPath = _HTML_ORGANIZATION + (frontendResource.getOrganizationId() != null ? "/" + frontendResource.getOrganizationId() : "");
+        }
+
+        return accessLevelPath + "/" + frontendResource.getName() + (draft ? "?draft" : "") + (resource ? "?resource" : "");
     }
 
 }

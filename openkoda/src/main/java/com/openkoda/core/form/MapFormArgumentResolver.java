@@ -63,11 +63,11 @@ public class MapFormArgumentResolver implements HandlerMethodArgumentResolver, H
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        String entityKey = urlHelper.getEntityKeyOrNull((HttpServletRequest) webRequest.getNativeRequest());
+        String mappingKey = urlHelper.getMappingKeyOrNull((HttpServletRequest) webRequest.getNativeRequest());
 
         AbstractOrganizationRelatedEntityForm form = null;
-        if(entityKey != null) {
-            CRUDControllerConfiguration conf = htmlCRUDControllerConfigurationMap.get(entityKey);
+        if(mappingKey != null) {
+            CRUDControllerConfiguration conf = htmlCRUDControllerConfigurationMap.get(mappingKey);
             if (conf != null) {
                 form = conf.createNewForm();
                 bindForm(mavContainer, webRequest, binderFactory, form);

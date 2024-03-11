@@ -21,15 +21,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository;
 
-import com.openkoda.model.ServerJs;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.model.component.ServerJs;
 import org.springframework.stereotype.Repository;
 
 import static com.openkoda.controller.common.URLConstants.SERVERJS;
 
 @Repository
 @SearchableRepositoryMetadata(
-        entityKey = SERVERJS,
+        entityKey = "serverJs",
         descriptionFormula = "(''||name)",
         entityClass = ServerJs.class
 )

@@ -6,6 +6,7 @@
 
 
     <div layout:fragment="content" th:attr="data-menu-item='logs'">
+        <nav th:replace="~{navigation-fragments::log-monitoring-nav-tabs('audit')}"></nav>
         <form th:replace="~{entity-forms::logger-settings-form-new}"/>
     </div>
 </div>

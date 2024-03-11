@@ -24,7 +24,8 @@ package com.openkoda.repository;
 import com.openkoda.core.flow.Tuple;
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.OpenkodaModule;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -43,7 +44,7 @@ import java.util.stream.Stream;
  *
  */
 @Repository
-public interface FrontendResourceRepository extends UnsecuredFunctionalRepositoryWithLongId<FrontendResource>, HasSecurityRules {
+public interface FrontendResourceRepository extends UnsecuredFunctionalRepositoryWithLongId<FrontendResource>, HasSecurityRules, ComponentEntityRepository<FrontendResource> {
 
     String FRONTEND_RESOURCES = "frontendResources";
 
@@ -114,7 +115,14 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
     @Query("select new com.openkoda.core.flow.Tuple(fr.id, fr.name) FROM FrontendResource fr where fr.embeddable = TRUE and fr.resourceType = 'UI_COMPONENT' order by fr.name")
     List<Tuple> findAllEmbeddableUiComponents();
 
+    @Query("select fr.name FROM FrontendResource fr where fr.embeddable = FALSE and fr.resourceType = 'RESOURCE' order by fr.name")
+    Object[] findAllNonEmbeddableResourcesNames();
+
     @Query("select fr FROM FrontendResource fr where fr.id = :id and fr.resourceType = 'DASHBOARD'")
     FrontendResource findDashboardDefinition(@Param("id") Long id);
+
+    @Modifying
+    @Query("delete from FrontendResource where module = :module")
+    void deleteByModule(OpenkodaModule module);
 
 }

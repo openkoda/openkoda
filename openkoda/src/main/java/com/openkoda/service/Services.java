@@ -24,7 +24,6 @@ package com.openkoda.service;
 import com.openkoda.core.customisation.CustomisationService;
 import com.openkoda.core.customisation.ServerJSRunner;
 import com.openkoda.core.flow.TransactionalExecutor;
-import com.openkoda.core.helper.SystemStatHelper;
 import com.openkoda.core.helper.UrlHelper;
 import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.security.RunAsService;
@@ -39,11 +38,16 @@ import com.openkoda.core.service.event.SchedulerService;
 import com.openkoda.core.service.form.FormService;
 import com.openkoda.core.service.module.ModuleService;
 import com.openkoda.core.service.pdf.PdfConstructor;
+import com.openkoda.core.service.system.DatabaseValidationService;
+import com.openkoda.core.service.system.SystemHealthStatusService;
 import com.openkoda.service.captcha.CaptchaService;
-import com.openkoda.service.export.YamlExportService;
+import com.openkoda.service.dynamicentity.DynamicEntityRegistrationService;
+import com.openkoda.service.export.ComponentExportService;
+import com.openkoda.service.export.ComponentImportService;
 import com.openkoda.service.notification.NotificationService;
 import com.openkoda.service.organization.OrganizationService;
 import com.openkoda.service.user.*;
+import com.openkoda.uicomponent.JsParser;
 import com.openkoda.uicomponent.live.LiveDataServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
@@ -78,7 +82,8 @@ public class Services {
     @Inject public LogConfigService logConfig;
     @Inject public PdfConstructor pdfConstructor;
     @Inject public NotificationService notification;
-    @Inject public SystemStatHelper systemStatus;
+    @Inject public SystemHealthStatusService systemStatus;
+    @Inject public DatabaseValidationService databaseValidationService;
     @Inject public ApiKeyService apiKey;
     @Inject public ClusterEventSenderService clusterEventSender;
     @Inject public ThymeleafService thymeleaf;
@@ -92,6 +97,9 @@ public class Services {
     @Inject public LiveDataServices data;
     @Inject public CustomisationService customisation;
     @Inject public FormService form;
-    @Inject public YamlExportService yamlExportService;
-
+    @Inject public ComponentExportService componentExport;
+    @Inject public ComponentImportService componentImport;
+    @Inject public DatabaseValidationService databaseValidation;
+    @Inject public DynamicEntityRegistrationService dynamicEntityRegistration;
+    @Inject public JsParser jsParser;
 }

@@ -24,7 +24,7 @@ package com.openkoda.service;
 import com.openkoda.AbstractTest;
 import com.openkoda.core.service.event.EventConsumer;
 import com.openkoda.core.service.event.EventListenerService;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.EventListenerEntry;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -21,6 +21,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.model;
 
+import static com.openkoda.model.PrivilegeGroup.*;
+
 /**
  * <p>Privilege class.</p>
  *
@@ -29,65 +31,63 @@ package com.openkoda.model;
  */
 public enum Privilege implements PrivilegeBase, PrivilegeNames {
 
-    isUser("Global Settings - Is User", _isUser),
+    isUser(GLOBAL_SETTINGS,"Is User", _isUser),
+    //   ADMIN
+    canAccessGlobalSettings(GLOBAL_SETTINGS,"Access", _canAccessGlobalSettings),
 
     //ORGANIZATION DATA
-    readOrgData("Organization - Can Read", _readOrgData),
-    manageOrgData("Organization - Can Manage", _manageOrgData),
-    canChangeEntityOrganization("Organization - Can Change Entity", _canChangeEntityOrganization),
+    readOrgData(ORGANIZATION,"Read", _readOrgData),
+    manageOrgData(ORGANIZATION,"Manage", _manageOrgData),
+    canChangeEntityOrganization(ORGANIZATION,"Change Entity", _canChangeEntityOrganization),
 
-    //   ADMIN
-    canAccessGlobalSettings("Global Settings - Can Access", _canAccessGlobalSettings),
 
     //   USER DATA
-    canRecoverPassword("User - Can recover password", _canRecoverPassword, true),
-    canSeeUserEmail("User - Can see Email", _canSeeUserEmail),
+    canRecoverPassword(USER,"Recover Password", _canRecoverPassword, true),
+    canSeeUserEmail(USER,"See Email", _canSeeUserEmail),
 
-    canImpersonate("User - Can Impersonate", _canImpersonate),
+    canImpersonate(USER,"Impersonate", _canImpersonate),
 
-    canResetPassword("User - Can Reset Passwords", _canResetPassword),
-    canVerifyAccount("User - Can verify password", _canVerifyAccount, true),
+    canResetPassword(USER,"Reset Passwords", _canResetPassword),
+    canVerifyAccount(USER,"Verify Password", _canVerifyAccount, true),
 
-    readUserData("User - Can Read Profiles", _readUserData),
-    manageUserData("User - Can Manage Profiles Data", _manageUserData),
+    readUserData(USER,"Read Profiles", _readUserData),
+    manageUserData(USER,"Manage Profiles Data", _manageUserData),
 
-    readUserRole("User Role - Can Read", _readUserRole),
-    manageUserRoles("User Role - Can Manage", _manageUserRoles),
+    readUserRole(USER_ROLE,"Read", _readUserRole),
+    manageUserRoles(USER_ROLE,"Manage", _manageUserRoles),
 
-
-    //   PAYMENTS
-    @Deprecated
-    administratePayments("Payments - Can Administrate", _administratePayments),
 
     //   HISTORY, LOGS, SYSTEM HEALTH
-    canReadSupportData("Support - Can Read", _canReadSupportData),
-    canManageSupportData("Support - Can Manage", _canManageSupportData),
-
+    canReadSupportData(SUPPORT,"Read", _canReadSupportData),
+    canManageSupportData(SUPPORT,"Manage", _canManageSupportData),
 
 
     //TODO - to be removed
-    readOrgAudit("History - Can Read Organization History", _readOrgAudit),
+    readOrgAudit(HISTORY,"Read Organization History", _readOrgAudit),
 
     //   FRONTEND RESOURCE
-    readFrontendResource("Frontend Resource - Can Read", _readFrontendResource),
-    manageFrontendResource("Frontend Resource - Can Manage", _manageFrontendResource),
+    readFrontendResource(FRONTEND_RESOURCE,"Read", _readFrontendResource),
+    manageFrontendResource(FRONTEND_RESOURCE,"Manage", _manageFrontendResource),
 
     // REFRESHER TOKEN
-    canRefreshTokens("Token - Can Refresh", _canRefreshTokens),
+    canRefreshTokens(TOKEN,"Refresh", _canRefreshTokens),
 
     //ROLES, SERVER JS, EVENT LISTENERS, SCHEDULERS, THREADS
-    canReadBackend("Backend - Can Read", _canReadBackend),
-    canManageBackend("Backend - Can Manage", _canManageBackend);
+    canReadBackend(BACKEND,"Read", _canReadBackend),
+    canManageBackend(BACKEND,"Manage", _canManageBackend);
 
+    private String category = "General";
+    private PrivilegeGroup group;
     private String label;
     private boolean hidden;
 
-    Privilege(String label, String nameCheck) {
-        this(label, nameCheck, false);
+    Privilege(PrivilegeGroup group, String label, String nameCheck) {
+        this(group, label, nameCheck,false);
     }
 
-    Privilege(String label, String nameCheck, boolean hidden) {
-        this.label = "General - " + label;
+    Privilege(PrivilegeGroup group, String label, String nameCheck, boolean hidden) {
+        this.label = label;
+        this.group = group;
         this.hidden = hidden;
         checkName(nameCheck);
     }
@@ -95,6 +95,16 @@ public enum Privilege implements PrivilegeBase, PrivilegeNames {
     @Override
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public PrivilegeGroup getGroup() {
+        return group;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
     }
 
     @Override

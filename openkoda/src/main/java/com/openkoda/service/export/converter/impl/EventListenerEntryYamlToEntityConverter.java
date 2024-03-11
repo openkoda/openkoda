@@ -22,11 +22,13 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.EventListenerEntry;
 import com.openkoda.service.export.converter.YamlToEntityConverter;
 import com.openkoda.service.export.converter.YamlToEntityParentConverter;
 import com.openkoda.service.export.dto.EventListenerEntryConversionDto;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @YamlToEntityParentConverter(dtoClass = EventListenerEntryConversionDto.class)
@@ -48,7 +50,16 @@ public class EventListenerEntryYamlToEntityConverter extends ComponentProvider i
         eventListenerEntry.setStaticData2(dto.getStaticData2());
         eventListenerEntry.setStaticData3(dto.getStaticData3());
         eventListenerEntry.setStaticData4(dto.getStaticData4());
-
+        eventListenerEntry.setModuleName(dto.getModule());
+        eventListenerEntry.setOrganizationId(dto.getOrganizationId());
         return repositories.secure.eventListener.saveOne(eventListenerEntry);
+    }
+
+    @Override
+    public EventListenerEntry convertAndSave(EventListenerEntryConversionDto dto, String filePath, Map<String, String> resources) {
+        debug("[convertAndSave]");
+        EventListenerEntry eventListenerEntry = convertAndSave(dto, filePath);
+        services.eventListener.registerListenerClusterAware(eventListenerEntry);
+        return eventListenerEntry;
     }
 }

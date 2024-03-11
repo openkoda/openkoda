@@ -23,7 +23,8 @@ package com.openkoda.repository.event;
 
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.ModelConstants;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.Scheduler;
+import com.openkoda.repository.ComponentEntityRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -34,6 +35,6 @@ import org.springframework.stereotype.Repository;
  * @since 2019-03-20
  */
 @Repository
-public interface SchedulerRepository extends UnsecuredFunctionalRepositoryWithLongId<Scheduler>, ModelConstants {
+public interface SchedulerRepository extends UnsecuredFunctionalRepositoryWithLongId<Scheduler>, ModelConstants, ComponentEntityRepository<Scheduler> {
 
 }

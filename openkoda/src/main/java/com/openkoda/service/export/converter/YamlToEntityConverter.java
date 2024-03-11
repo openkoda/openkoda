@@ -23,9 +23,11 @@ package com.openkoda.service.export.converter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public interface YamlToEntityConverter<T, D>{
     T convertAndSave(D dto, String filePath);
+    T convertAndSave(D dto, String filePath, Map<String, String> resources);
     default String loadResourceAsString(String path) {
         try {
             if (this.getClass().getClassLoader().getResourceAsStream(path) == null){

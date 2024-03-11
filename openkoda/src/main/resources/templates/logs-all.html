@@ -4,12 +4,10 @@
 <body>
 <div class="container-fluid">
 
-
-
     <div layout:fragment="content" th:attr="data-menu-item='logs'">
+        <nav th:replace="~{navigation-fragments::log-monitoring-nav-tabs('logs')}"></nav>
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row justify-content-between">
-                <h6 class="m-0 font-weight-bold">Logs</h6>
                 <div class="dropdown no-arrow dropdown-sm">
                     <a class="dropdown-toggle" href="#" role="button" id="logMenuLink"
                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -27,7 +25,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div class="table-responsive table-no-ellipsis">
                     <table class="table table-hover">
                         <thead>
                             <tr>

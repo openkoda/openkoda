@@ -34,6 +34,7 @@ import com.openkoda.model.common.EntityWithRequiredPrivilege;
 import com.openkoda.model.common.LongIdEntity;
 import com.openkoda.model.common.OrganizationRelatedEntity;
 import jakarta.persistence.criteria.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Array;
@@ -385,7 +386,7 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
         Predicate search = specification == null ? cb.conjunction() : specification.toPredicate(root, query, cb);
 
         //security scope is ALL, returning all by predicate
-        if (scope == SecurityScope.ALL) {
+       if (scope == SecurityScope.ALL) {
             return search;
         }
 
@@ -401,11 +402,14 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
         }
 
         if (scope.currentOrganization) {
-            Long currentOrganizationId = TenantResolver.getTenantedResource().organizationId;
-            if (!isOrganizationEntity || currentOrganizationId == null) {
-                search = cb.disjunction();
+            if(isOrganizationEntity){
+                Long currentOrganizationId = TenantResolver.getTenantedResource().organizationId;
+                if(currentOrganizationId != null){
+                    search = cb.and(search, cb.equal(root.get("organizationId"), currentOrganizationId));
+                } else {
+                    search = cb.and(search, cb.isNull(root.get("organizationId")));
+                }
             }
-            search = cb.and(search, cb.equal(root.get("organizationId"), currentOrganizationId));
             if (scope == SecurityScope.ORGANIZATION) {
                 return search;
             }

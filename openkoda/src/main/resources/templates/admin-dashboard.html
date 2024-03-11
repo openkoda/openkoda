@@ -4,26 +4,96 @@
 <body>
 <div class="container-fluid">
     <div layout:fragment="content" th:attr="data-menu-item='admin-dashboard'">
-        <div class="row" id="registered-cruds">
-            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposed()}">
-                <div class="col-lg-2">
-                    <div class="card shadow mb-4">
+        <th:block th:if="${!#lists.isEmpty(@htmlCRUDControllerConfigurationMap.getExposedSorted())}">
+            <div class="row col gap-10 mb-4" id="registered-cruds">
+                <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="card shadow entity-link text-primary" th:href="${@url.form('form')}">
+                    <div class="flex-grow-1 flex-shrink-1 flex-none d-flex align-items-center justify-content-center flex-column justify-start">
+                        <div class="icon-div"><i class="fas fa-circle-plus"></i></div>
+                        <span class="text-center text-sm" th:text="#{template.new}"></span>
+                    </div>
+                </a>
+                <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposedSorted()}">
+                    <a class="card shadow entity-link text-secondary" th:href="${@url.all(entry.value.organizationId, entry.key)}">
+                        <div class="flex-grow-1 flex-shrink-1 flex-none d-flex align-items-center justify-content-center flex-column justify-center">
+                            <div class="icon-div"><i class="fas fa-table-list"></i></div>
+                            <span class="text-center text-sm" th:text="${@messages.getFieldLabel(entry.key, entry.value.getFrontendMappingDefinition().name)}"></span>
+                        </div>
+                    </a>
+                </th:block>
+            </div>
+        </th:block>
+        <div class="row">
+            <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'development')}">
+                <div class="col-lg-4 pb-4">
+                    <div class="card shadow mb-4 h-100">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold" th:text="#{template.development}">Development Kit</h6>
+                        </div>
                         <div class="card-body">
-                            <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(entry.key, entry.key)}"></h6>
-                            <div class="m-0 justify-content-end">
-                                <a class="mr-1" th:href="${@url.all(organizationEntityId, entry.key)}">All</a>
-                                <a th:href="${@url.form(organizationEntityId, entry.key)}">New</a>
-                            </div>
+                            <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allForm()}" th:text="#{template.forms}">Forms</a>
+                            <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allServerJs()}" th:text="#{template.serverJs}">Server Side-Code</a>
+                            <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" th:href="${@url.allUIComponents()}" th:text="#{template.frontendElements}">Web Endpoints</a>
+                            <a class="d-block p-2" th:if="${@environment.getProperty('chat.gpt.api.key') != '' && @auth.hasGlobalPrivilege('canReadBackend')}" th:href="${'/html/cn/ai'}" th:text="#{template.ai}">AI</a>
                         </div>
                     </div>
                 </div>
             </th:block>
+            <div class="col-lg-4 pb-4">
+                <div class="card shadow mb-4 h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold" th:text="#{template.configuration}">Configuration</h6>
+                    </div>
+                    <div class="card-body">
+                        <a class="d-block p-2" th:href="${@url.allFiles()}">Files</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}" th:href="${@url.allFrontendResource()}" th:text="#{template.frontendResources}">Resources</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allPageBuilder()}" th:text="#{template.pageBuilder}">Page Builder</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.components()}" th:text="#{template.components}">Components</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" th:href="${@url.integrations()}" th:text="#{template.integrations}">Email</span></a>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 pb-4">
+                <div class="card shadow mb-4 h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold" th:text="#{template.security}">Security</h6>
+                    </div>
+                    <div class="card-body">
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('readUserData')}" th:href="${@url.users()}" th:text="#{template.users}">Users</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('readOrgData')}" th:href="${@url.allOrganizations()}" th:text="#{template.organizations}">Organizations</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allRoles()}" th:text="#{template.roles}">Roles</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 pb-4">
+                <div class="card shadow mb-4 h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold" th:text="#{template.automation}">Automation</h6>
+                    </div>
+                    <div class="card-body">
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allSchedulers()}" th:text="#{template.schedulers}">Schedulers</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allEventListeners()}" th:text="#{template.eventListeners}">Event Listeners</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 pb-4">
+                <div class="card shadow mb-4 h-100">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold" th:text="#{template.logMonitoring}">Log Monitoring</h6>
+                    </div>
+                    <div class="card-body">
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" th:href="${@url.allAudit()}" th:text="#{template.audit}">Audit</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" th:href="${@url.allLogs()}" th:text="#{template.logs}">Logs</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadSupportData')}" th:href="${@url.systemHealth()}" th:text="#{template.systemHealth}">System Health</a>
+                        <a class="d-block p-2" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.allThreads()}" th:text="#{template.threads}">Threads</a>
+                        <a class="d-block p-2" href='javascript:;' th:text="#{template.restart}" onclick="app.confirmAndSendGetAndCallback('System is going to restart. It will take approx. 15 seconds.','/html/restart',null)"></a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="web-endpoints">
-            <div th:replace="~{tables::frontend-element-dashboard(${frontendResourcePage}, #{template.frontendElements})}"/>
-        </div>
-        <a class="btn-primary btn btn-sm" th:href="${@url.exportAllYamlResources()}" th:download="${@environment.getProperty('components.export.zip.filename')}" th:text="#{template.exportAllToYaml}">Export Everything</a>
+
     </div>
 </div>
 </body>
+
 </html>

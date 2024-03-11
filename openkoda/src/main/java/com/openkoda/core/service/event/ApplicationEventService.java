@@ -138,17 +138,18 @@ import java.util.function.Consumer;
                                                                     Class eventConsumerClass,
                                                                     String eventConsumerMethodName,
                                                                     String description,
+                                                                    EventConsumerCategory category,
                                                                     Class... methodStaticParamsClass) {
         debug("[registerEventConsumerWithMethod] methodName: {} description: {}", eventConsumerMethodName, description);
         try {
             EventConsumer<T> eventConsumer;
 
             if (methodStaticParamsClass.length == 0) {
-                eventConsumer = new EventConsumer<>(eventConsumerClass.getMethod(eventConsumerMethodName, eventClass), eventClass, 0, description);
+                eventConsumer = new EventConsumer<>(eventConsumerClass.getMethod(eventConsumerMethodName, eventClass), eventClass, 0, description, category);
             } else {
                 Class[] eventClassInArray = {eventClass};
                 Class[] allMethodParamsClass = ArrayUtils.addAll(eventClassInArray, methodStaticParamsClass);
-                eventConsumer = new EventConsumer<>(eventConsumerClass.getMethod(eventConsumerMethodName, allMethodParamsClass), eventClass, methodStaticParamsClass.length, description);
+                eventConsumer = new EventConsumer<>(eventConsumerClass.getMethod(eventConsumerMethodName, allMethodParamsClass), eventClass, methodStaticParamsClass.length, description, category);
             }
 
             info("Registering Event Consumer {} with method {} for event type {}. {}", eventConsumerClass, eventConsumerMethodName, eventClass, description);

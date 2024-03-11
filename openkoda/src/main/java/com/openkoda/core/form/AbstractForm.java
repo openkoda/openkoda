@@ -135,10 +135,6 @@ public abstract class AbstractForm<D> extends Form implements DtoAndEntity<D, Lo
      * @param dictionaryRepository {@link SecureEntityDictionaryRepository}
      */
     public static void setSecureEntityDictionaryRepositoryOnce(SecureEntityDictionaryRepository dictionaryRepository) {
-        if (AbstractForm.dictionaryRepository != null) {
-            System.out.println("WARN: SecureRepositories already initialized");
-            return;
-        }
         AbstractForm.dictionaryRepository = dictionaryRepository;
     }
 

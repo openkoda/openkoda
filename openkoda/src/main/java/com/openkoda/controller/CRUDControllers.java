@@ -24,8 +24,8 @@ package com.openkoda.controller;
 import com.openkoda.core.customisation.CustomisationService;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.form.PageBuilderForm;
-import com.openkoda.model.FrontendResource;
 import com.openkoda.model.Privilege;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.repository.SecureFormRepository;
 import com.openkoda.repository.SecureFrontendResourceRepository;
 import com.openkoda.repository.SecureServerJsRepository;
@@ -72,13 +72,18 @@ public class CRUDControllers {
         customisationService.registerOnApplicationStartListener(
                 a -> htmlCrudControllerConfigurationMap.registerCRUDController(PAGE_BUILDER_FORM,
                                 PageBuilderForm.pageBuilderForm, frontendResourceRepository, PageBuilderForm.class, Privilege.canAccessGlobalSettings,Privilege.canAccessGlobalSettings)
-                        .setGenericTableFields("name","urlPath")
+                        .setGenericTableFields("name")
+                        .setNavigationFragment("navigation-fragments::configuration-nav-tabs('builder')")
+                        .setMenuItem("configuration")
                         .setAdditionalPredicate((r, q, cb) -> cb.equal(r.get("resourceType"), FrontendResource.ResourceType.DASHBOARD)));
         customisationService.registerOnApplicationStartListener(
                 a -> htmlCrudControllerConfigurationMap.registerCRUDController(
                                 frontendResourceForm, frontendResourceRepository, ReflectionBasedEntityForm.class)
-                        .setGenericTableFields("name","includeInSitemap","type","urlPath")
-                        .setTableView("frontend-resource-all"));
+                        .setGenericTableFields("name","includeInSitemap","type")
+                        .setNavigationFragment("navigation-fragments::configuration-nav-tabs('resources')")
+                        .setMenuItem("resources")
+                        .setTableView("frontend-resource-all")
+                        .setAdditionalPredicate((root, query, cb) -> cb.and(cb.equal(root.get("resourceType"), FrontendResource.ResourceType.RESOURCE))));
 
     }
 

@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-public class EventListenerEntryConversionDto {
+public class EventListenerEntryConversionDto extends ComponentDto {
 
     private String consumerClassName;
     private String consumerMethodName;
@@ -122,4 +122,5 @@ public class EventListenerEntryConversionDto {
     public void setStaticData4(String staticData4) {
         this.staticData4 = staticData4;
     }
+
 }

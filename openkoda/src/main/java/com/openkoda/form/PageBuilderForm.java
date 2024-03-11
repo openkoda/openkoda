@@ -27,7 +27,7 @@ package com.openkoda.form;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.dto.system.FrontendResourceDto;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.validation.BindingResult;
 
 import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCEREGEX;

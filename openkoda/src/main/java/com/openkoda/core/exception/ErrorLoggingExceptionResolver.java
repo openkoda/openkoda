@@ -36,6 +36,7 @@ import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 
 import java.io.IOException;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -64,8 +65,8 @@ public class ErrorLoggingExceptionResolver extends
 	protected ModelAndView doResolveException(HttpServletRequest request,
 											  HttpServletResponse response, Object handler, Exception exception) {
 		if (shouldErrorLogException(exception, request)) {
-			error(exception, "Error message: {}, Status: {}, URI: {}",
-					exception == null ? "" : exception.getLocalizedMessage(), response.getStatus(), request.getRequestURI());
+			error(exception, "Error message: {}, Status: {}, URI: {}, \ncause: {}",
+					exception == null ? "" : exception.getLocalizedMessage(), response.getStatus(), request.getRequestURI(), defaultIfNull(exception.getCause(),"not attached"));
 		}
 		HttpStatus errorStatus = (exception instanceof HttpStatusException) ?
 				((HttpStatusException) exception).status :

@@ -23,12 +23,28 @@ package com.openkoda.repository;
 
 import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.Form;
+import com.openkoda.model.OpenkodaModule;
+import com.openkoda.model.component.Form;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
+
 @Repository
-public interface FormRepository extends UnsecuredFunctionalRepositoryWithLongId<Form>, HasSecurityRules {
+public interface FormRepository extends UnsecuredFunctionalRepositoryWithLongId<Form>, HasSecurityRules, ComponentEntityRepository<Form> {
 
     Form findByName(String name);
+    default Map<String,String> getNameAndTableNameAsMap(){
+        return getNameAndTableName().stream().collect(toMap(o -> (String) o[0], o-> (String) o[1]));
+    }
+    @Query(value = "SELECT name, tableName FROM Form")
+    List<Object[]> getNameAndTableName();
 
+    @Modifying
+    @Query("delete from Form where module = :module")
+    void deleteByModule(OpenkodaModule module);
 }

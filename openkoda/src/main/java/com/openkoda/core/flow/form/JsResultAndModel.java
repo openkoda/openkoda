@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.flow.form;
 
+import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.flow.ResultAndModel;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
@@ -34,6 +35,13 @@ public class JsResultAndModel<R, CP, F extends AbstractOrganizationRelatedEntity
     protected JsResultAndModel(PageModelMap model, R result, CP services, Map<String, Object> params, F form) {
         super(model, result, services, params);
         this.form = form;
+    }
+
+    //TODO: class to one package up, make this class package
+    public static <CP, FP extends AbstractOrganizationRelatedEntityForm> JsResultAndModel constructNew(CP services, Map params, FP form) {
+        JsResultAndModel result = new JsResultAndModel(new PageModelMap(), null, services, Flow.initParamsMap(params), form);
+        return result;
+
     }
 
 

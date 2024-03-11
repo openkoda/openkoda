@@ -28,6 +28,7 @@ import reactor.util.function.Tuple2;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FrontendMappingDefinition {
 
@@ -82,6 +83,19 @@ public class FrontendMappingDefinition {
         return fields;
     }
 
+    public FrontendMappingFieldDefinition[] getDbTypeFields(){
+        return Arrays.stream(getFields())
+                .filter(s -> s.getType() != null && s.getType().getDbType() != null)
+                .toArray(FrontendMappingFieldDefinition[]::new);
+    }
+
+
+    public Map<String, FrontendMappingFieldDefinition> getFieldNameDbTypeMap(){
+        return Arrays.stream(getFields())
+                .filter(s -> s.getType() != null && s.getType().getDbType() != null)
+                .collect(Collectors.toMap(FrontendMappingFieldDefinition::getName, field -> field));
+    }
+
     public String[] getNamesOfValuedTypeFields(){
         return Arrays.stream(getFields())
                 .filter(s -> s.getType() != null && s.getType().hasValue())
@@ -98,4 +112,7 @@ public class FrontendMappingDefinition {
         return null;
     }
 
+    public String getMappingKey() {
+        return name.toLowerCase();
+    }
 }

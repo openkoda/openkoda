@@ -43,10 +43,16 @@ public interface URLConstants {
     String _EXIT = "/exit";
     String _ZIP = "/zip";
     String _YAML = "/yaml";
-    String _EXPORT = "/export";
+    String COMPONENT = "component";
+    String _COMPONENT = "/" + COMPONENT;
     String EXPORT = "export";
+    String _EXPORT = "/" + EXPORT;
     String _EXPORT_YAML = _EXPORT + _YAML;
     String EXPORT_YAML = EXPORT + _YAML;
+
+    String IMPORT = "import";
+    String _IMPORT = "/" + IMPORT;
+
     String _PUBLISH = "/publish";
     String _CLEAR = "/clear";
     String _RELOAD = "/reload";
@@ -65,11 +71,14 @@ public interface URLConstants {
     String _LOGIN = "/login";
     String FORM = "form";
     String _FORM = "/" + FORM;
+    String OPENKODA_MODULE = "openkodaModule";
+    String _OPENKODA_MODULE = "/" + OPENKODA_MODULE;
     String _RULE = "/rule";
     String _RULE_LINE = "/rule-line";
     String _LOGOUT = "/logout";
     String _ANY = "/**";
     String ORGANIZATION = "organization";
+    String EMAIL_CONFIG = "emailConfig";
     String SETTINGS = "settings";
     String TEST = "test";
     String INVITE = "invite";
@@ -89,7 +98,7 @@ public interface URLConstants {
     String VERIFY_TOKEN = "verifyToken";
     String KEY = "key";
     String PASSWORD = "password";
-    String FRONTENDRESOURCE = "frontendResource";
+    String FRONTENDRESOURCE = "frontendresource";
     String _FRONTENDRESOURCE = "/" + FRONTENDRESOURCE;
 
     String UI_COMPONENT = "uiComponent";
@@ -97,7 +106,7 @@ public interface URLConstants {
     String WEBENDPOINT = "webEndpoint";
     String PAGEBUILDER = "pageBuilder";
     String CONTROLLER_ENDPOINT = "controllerEndpoint";
-    String SERVERJS = "serverJs";
+    String SERVERJS = "serverjs";
     String ROLE = "role";
     String PRIVILEGES = "privileges";
     String MODULE = "module";
@@ -133,6 +142,7 @@ public interface URLConstants {
     String _PAGEBUILDER = "/" + PAGEBUILDER;
     String _SERVERJS = "/" + SERVERJS;
     String _ORGANIZATION = "/" + ORGANIZATION;
+    String _EMAIL_CONFIG = "/" + EMAIL_CONFIG;
     String _DASHBOARD = "/" + DASHBOARD;
     String _HISTORY = "/" + HISTORY;
     String _EVENTS = "/" + EVENTS;
@@ -157,6 +167,8 @@ public interface URLConstants {
     String _HTML_ROLE = _HTML + _ROLE ;
     String _USER_SETTINGS = "/" + USER + _USERID + _SETTINGS;
     String _PREVIEW = "/" + PREVIEW;
+    String VIEW = "view";
+    String _VIEW = "/" + VIEW;
 
     String _MODULE_MODULENAME_SETTINGS = _MODULE + _MODULENAME + _SETTINGS;
     String _MODULE_MODULENAME_USER_SETTINGS = _MODULE + _MODULENAME + _USER_SETTINGS;
@@ -182,6 +194,8 @@ public interface URLConstants {
     String _MARK_READ = "/mark-read";
     String SYSTEM_HEATH = "system-health";
     String _SYSTEM_HEATH = "/" + SYSTEM_HEATH;
+    String VALIDATE = "validate";
+    String _VALIDATE = "/" + VALIDATE;
     String THREAD = "thread";
     String _THREAD = "/" + THREAD;
     String _THREAD_ID_INTERRUPT = _THREAD + _ID + _INTERRUPT;
@@ -191,9 +205,13 @@ public interface URLConstants {
     String _SEND = "/" + SEND;
     String _EMIT = "/emit";
     String _VERIFICATION = "/verification";
+    String _COMPONENTS = "/components";
+    String INTEGRATIONS = "integrations";
+    String _INTEGRATIONS = "/" + INTEGRATIONS;
 
-    String FRONTENDRESOURCEREGEX = "[0-9a-zA-Z\\-]*(?:\\.css|\\.js|\\.xml|\\.txt|\\.csv|\\.json|\\.html)?";
+    String FRONTENDRESOURCEREGEX = "[0-9a-zA-Z\\-\\/]*\\@?(?:\\.css|\\.js|\\.xml|\\.txt|\\.csv|\\.json|\\.html)?";
     String FRONTENDRESOURCE_ORGID_PARAM_REGEX = "(?:\\?organizationId=?.*)?";
+    String EMAILRESOURCE_DISCRIMINATOR = "@";
 
     String FRONTENDRESOURCE_AUTH_PARAMS_REGEX = "(\\?(.*=?.*)?(\\&.*=?.*)?)?";
     String LANGUAGEPREFIX = "pl";
@@ -201,6 +219,7 @@ public interface URLConstants {
     String URL_WITH_DASH_REGEX = "[0-9a-zA-Z\\-]+";
     String URL_REGEX = "[hH][Tt][Tt][Pp][Ss]?://.*";
     String IP_COMMA_SEPARATED_LIST = "(((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([4-9]|[12][0-9]|3[0-2]))?)([,]|$))*";
+    String LOWERCASE_NUMERIC_UNDERSCORE_REGEXP = "[a-z0-9_]+$";
 
     String DEBUG_MODEL = "debugModel";
     String DRAFT = "draft";
@@ -244,5 +263,7 @@ public interface URLConstants {
     String _CI = "/" + CI;
     String CN = "cn";
     String _CN = "/" + CN;
+    
+    String FILE_ASSET = "/file-asset-";
 
 }

@@ -24,18 +24,18 @@ package com.openkoda.uicomponent;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.flow.form.JsFlow;
+import com.openkoda.core.flow.form.JsResultAndModel;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
+import com.openkoda.repository.SecureServerJsRepository;
 import com.openkoda.uicomponent.live.LiveComponentProvider;
 import jakarta.inject.Inject;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.PolyglotException;
-import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.*;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.util.function.Tuples;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -59,10 +59,25 @@ public class JsFlowRunner {
     @Autowired(required = false)
     private PreviewComponentProviderInterface previewComponentProviderInterface;
 
-    private Flow evaluateJsFlow(String jsFlow, Flow initializedFlow) {
-        Context c = contextBuilder.build();
+    @Autowired
+    private SecureServerJsRepository serverJsRepository;
+    @Autowired
+    private JsParser jsParser;
+    @Inject
+    private FileSystemImpl fileSystemImp;
+
+    private Flow evaluateJsFlow(String jsFlow, Flow initializedFlow, JsResultAndModel initialResultAndModel) {
+        Context c = Context.newBuilder("js")
+                .fileSystem(fileSystemImp)
+                .allowIO(true)
+                .allowHostAccess(HostAccess.ALL)
+                .allowAllAccess(true)
+                .allowHostClassLoading(true)
+                .allowHostClassLookup(className -> true)
+                .build();
         Value b = c.getBindings("js");
         b.putMember("flow", initializedFlow);
+        b.putMember("context", initialResultAndModel);
         b.putMember("dateNow", (Supplier<LocalDate>) () -> componentProvider.util.dateNow());
         b.putMember("dateTimeNow", (Supplier<LocalDateTime>) () -> componentProvider.util.dateTimeNow());
         b.putMember("parseInt", (Function<String, Integer>) s -> componentProvider.util.parseInt(s));
@@ -76,12 +91,16 @@ public class JsFlowRunner {
         b.putMember("decodeURI", (Function<String, String>) s -> componentProvider.util.decodeURI(s));
         b.putMember("encodeURI", (Function<String, String>) s -> componentProvider.util.encodeURI(s));
 
-        String finalScript = "let result = " + jsFlow + ";\nresult";
-        return c.eval("js", finalScript).as(initializedFlow.getClass());
+        String finalScript = jsFlow.replaceFirst("flow", "let result = flow");
+        finalScript +=   ";\nresult";
+        try {
+            return c.eval(Source.newBuilder("js", finalScript, "test.mjs").build()).as(initializedFlow.getClass());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-    private PageModelMap executeFlow(Flow f) {
-        return f.execute();
+    private PageModelMap executeFlow(Flow f, PageModelMap initialModel) {
+        return f.execute(initialModel);
     }
 
     public PageModelMap runPreviewFlow(String jsFlow, Map<String, String> params, Long organizationId, long userId, AbstractOrganizationRelatedEntityForm form) {
@@ -89,7 +108,8 @@ public class JsFlowRunner {
                 .thenSet(organizationEntityId, userEntityId, a -> Tuples.of(organizationId, userId));
 
         try {
-            return executeFlow(evaluateJsFlow(jsFlow, f));
+            JsResultAndModel initialResultAndModel = JsResultAndModel.constructNew(componentProvider, params, form);
+            return executeFlow(evaluateJsFlow(jsFlow, f, initialResultAndModel), initialResultAndModel.model);
         } catch (PolyglotException e) {
             PageModelMap pageModelMap = new PageModelMap();
             pageModelMap.put(errorMessage, e.getMessage());
@@ -101,7 +121,7 @@ public class JsFlowRunner {
         Flow f = JsFlow.init(componentProvider, params, form)
                 .thenSet(organizationEntityId, userEntityId, a -> Tuples.of(organizationId, userId));
 
-        return executeFlow(evaluateJsFlow(jsFlow, f));
+        JsResultAndModel initialResultAndModel = JsResultAndModel.constructNew(componentProvider, params, form);
+        return executeFlow(evaluateJsFlow(jsFlow, f, initialResultAndModel), initialResultAndModel.model);
     }
-
 }

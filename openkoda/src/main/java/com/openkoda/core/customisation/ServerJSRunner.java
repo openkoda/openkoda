@@ -25,7 +25,7 @@ import com.openkoda.controller.ComponentProvider;
 import com.openkoda.controller.common.PageAttributes;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
-import com.openkoda.model.ServerJs;
+import com.openkoda.model.component.ServerJs;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +46,6 @@ import java.util.concurrent.Executors;
  */
 @Service
 public class ServerJSRunner extends ComponentProvider {
-    public static final List<LoggingFutureWrapper> manuallyStartedThreads = new ArrayList<>();
-    private static final ExecutorService manuallyStartedThreadsPool = Executors.newFixedThreadPool(4);
 
     /**
      * Context of the script engine.
@@ -146,7 +144,8 @@ public class ServerJSRunner extends ComponentProvider {
             }
             return evaluateScript(script, map, resultType, null);
         } catch (Exception e) {
-            error(e, "[evaluateServerJsScript] When evaluating {}", serverJs.getName());
+            error(e, "[evaluateServerJsScript] When evaluating {} : {}", serverJs.getName(),
+                    e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             throw new RuntimeException("Error when evaluating js", e);
         }
     }

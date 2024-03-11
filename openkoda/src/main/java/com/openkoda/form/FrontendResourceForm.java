@@ -29,7 +29,7 @@ import com.openkoda.core.form.FieldType;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.dto.system.FrontendResourceDto;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 

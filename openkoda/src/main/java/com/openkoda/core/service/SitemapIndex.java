@@ -25,7 +25,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 
 import java.io.Serializable;
 import java.util.ArrayList;

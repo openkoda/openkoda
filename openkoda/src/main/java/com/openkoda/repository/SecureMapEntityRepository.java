@@ -30,7 +30,7 @@ import static com.openkoda.model.common.ModelConstants.ORGANIZATION_ID;
 
 @Repository
 @SearchableRepositoryMetadata(
-        entityKey = "mapentity",
+        entityKey = "mapEntity",
         globalPathFormula = "'" + _HTML + "/' || key || '/' || id || '" + _SETTINGS + "'",
         organizationRelatedPathFormula = "'" + _HTML + _ORGANIZATION + "/' || " + ORGANIZATION_ID
             + " || '/' || key || '/' || id || '" + _SETTINGS + "'",

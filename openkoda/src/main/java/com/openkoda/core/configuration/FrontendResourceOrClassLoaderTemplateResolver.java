@@ -22,13 +22,14 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.configuration;
 
 import com.openkoda.controller.common.URLConstants;
+import com.openkoda.core.configuration.TemplatePathFilteringProcessor.FilteredTemplatePath;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
-import com.openkoda.model.FrontendResource;
-import com.openkoda.model.FrontendResource.Type;
-import com.openkoda.service.export.YamlImportService;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.model.component.FrontendResource.Type;
+import com.openkoda.service.export.ComponentImportService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,9 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCEREGEX;
 import static com.openkoda.core.service.FrontendResourceService.frontendResourceFolderClasspath;
 import static com.openkoda.core.service.FrontendResourceService.frontendResourceTemplateNamePrefix;
 import static com.openkoda.service.export.FolderPathConstants.FRONTEND_RESOURCE_;
@@ -59,10 +55,6 @@ import static com.openkoda.service.export.FolderPathConstants.UI_COMPONENT_;
  * <p>Also supports a few special parameters for testing or reading the template always from resources. </p>
  */
 public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTemplateResolver implements LoggingComponentWithRequestId {
-
-    private static final Pattern accessLevelPath = Pattern.compile(FRONTEND_RESOURCE_
-            + "(" + Arrays.stream(FrontendResource.AccessLevel.values()).map(al -> al.toString().toLowerCase()).collect(Collectors.joining("|")) + ")/"
-            + FRONTENDRESOURCEREGEX + "$");
 
     /**
      * Always read frontend resource from filesystem (classpath resource)
@@ -80,24 +72,28 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
      * Frontend resource service
      */
     FrontendResourceService frontendResourceService;
-    YamlImportService yamlImportService;
+    ComponentImportService componentImportService;
 
     /**
      * Query executor for database operations
      */
     QueryExecutor queryExecutor;
 
+    private final TemplatePathFilteringProcessor pathFilteringProcessor;
+
 
     public FrontendResourceOrClassLoaderTemplateResolver(QueryExecutor queryExecutor,
                                                          FrontendResourceService frontendResourceService,
-                                                         YamlImportService yamlImportService,
+                                                         ComponentImportService componentImportService,
                                                          boolean frontendResourceLoadAlwaysFromResources,
-                                                         boolean frontendResourceCreateIfNotExist) {
+                                                         boolean frontendResourceCreateIfNotExist,
+                                                         TemplatePathFilteringProcessor pathFilteringProcessor) {
         this.queryExecutor = queryExecutor;
         this.frontendResourceService = frontendResourceService;
-        this.yamlImportService = yamlImportService;
+        this.componentImportService = componentImportService;
         this.frontendResourceLoadAlwaysFromResources = frontendResourceLoadAlwaysFromResources;
         this.frontendResourceCreateIfNotExist = frontendResourceCreateIfNotExist;
+        this.pathFilteringProcessor = pathFilteringProcessor;
     }
 
     @Override
@@ -106,32 +102,26 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
 
         //if the template name starts with the frontendResourceTemplateNamePrefix, use the custom routine
         if (StringUtils.startsWith(template, frontendResourceTemplateNamePrefix)) {
-
             TenantResolver.TenantedResource tenantedResource = TenantResolver.getTenantedResource();
 
-            //resolve template access level
-            Matcher m = accessLevelPath.matcher(template);
-            FrontendResource.AccessLevel accessLevel = tenantedResource.accessLevel;
-            if (m.matches()) {
-                accessLevel = FrontendResource.AccessLevel.valueOf(m.group(1).toUpperCase());
-            }
-
             //resolve the actual template name
-            int emailPath = template.indexOf("email");
-            String frontendResourceEntryName = emailPath > -1 ? StringUtils.substring(template, emailPath) : StringUtils.substringAfterLast(template, "/");
+            FilteredTemplatePath filteredTemplatePath = pathFilteringProcessor.processTemplatePath(template,
+                    resourceName, tenantedResource.accessLevel);
 
             //if request has URLConstants#RESOURCE parameter, then return template content from filesystem, not from the DB
             boolean isResourceTesting = (isHttpRequest() && request.getParameter(URLConstants.RESOURCE) != null);
             if(isResourceTesting) {
-                return new StringTemplateResource(getResourceContent(frontendResourceEntryName, accessLevel, tenantedResource.organizationId));
+                return new StringTemplateResource(
+                        getResourceContent(filteredTemplatePath.getFrontendResourceEntryName(),
+                                filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId));
             }
 
 
             //...else, try to find template in database
-            FrontendResource.AccessLevel finalAccessLevel = accessLevel;
+            FrontendResource.AccessLevel finalAccessLevel = filteredTemplatePath.getAccessLevel();
             List<FrontendResource> entries = queryExecutor.runEntityManagerOperationInTransaction(em ->
                     em.createQuery("select c from FrontendResource c where name = ?1 and accessLevel = ?2 and (organizationId = ?3 OR organizationId is NULL) order by organizationId limit 1", FrontendResource.class)
-                            .setParameter(1, frontendResourceEntryName)
+                            .setParameter(1, filteredTemplatePath.getFrontendResourceEntryName())
                             .setParameter(2, finalAccessLevel)
                             .setParameter(3, tenantedResource.organizationId)
                             .getResultList());
@@ -140,16 +130,21 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
             //if entry not found in the database...
             if (entry == null) {
 
-                entry = (FrontendResource) yamlImportService.loadResourceFromFile(FRONTEND_RESOURCE_, accessLevel, tenantedResource.organizationId, frontendResourceEntryName);
+                entry = (FrontendResource) componentImportService.loadResourceFromFile(FRONTEND_RESOURCE_,
+                        filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId,
+                        filteredTemplatePath.getFrontendResourceEntryName());
 
                 if (entry == null) {
 //                    try ui component
-                    entry = (FrontendResource) yamlImportService.loadResourceFromFile(UI_COMPONENT_, accessLevel, tenantedResource.organizationId, frontendResourceEntryName);
+                    entry = (FrontendResource) componentImportService.loadResourceFromFile(UI_COMPONENT_,
+                            filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId,
+                            filteredTemplatePath.getFrontendResourceEntryName());
                 }
 
                 if (entry == null) {
                     //...try to create if from filesystem
-                    entry = createEntry(frontendResourceEntryName, accessLevel, tenantedResource.organizationId);
+                    entry = createEntry(filteredTemplatePath.getFrontendResourceEntryName(),
+                            filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId);
                 }
 
                 //if the entry was not created (eg. not found in filesystem), return error template
@@ -158,10 +153,14 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
                 }
             } else if (frontendResourceLoadAlwaysFromResources) {
                 // else set content from filesystem if the resource should always be read from filesystem
-                entry.setContent(getContentOrNull(entry.getType(), frontendResourceEntryName, accessLevel, tenantedResource.organizationId));
+                entry.setContent(
+                        getContentOrNull(entry.getType(), filteredTemplatePath.getFrontendResourceEntryName(),
+                                filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId));
             } else if (not(entry.isContentExists())) {
                 // else if the database entry does not have content, read it from filesystem
-                entry = fillFrontendResourceEntryContentFromResource(entry, frontendResourceEntryName, accessLevel, tenantedResource.organizationId);
+                entry = fillFrontendResourceEntryContentFromResource(entry,
+                        filteredTemplatePath.getFrontendResourceEntryName(), filteredTemplatePath.getAccessLevel(),
+                        tenantedResource.organizationId);
             }
 
             // if request parameter indicates it's a test of draft version of the Frontend resource,
@@ -174,6 +173,8 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
         return super.computeTemplateResource(configuration, ownerTemplate,
                 template, resourceName, characterEncoding, templateResolutionAttributes);
     }
+
+
 
     private ITemplateResource getErrorTemplate(IEngineConfiguration configuration, String ownerTemplate, String template, String characterEncoding, Map<String, Object> templateResolutionAttributes) {
         warn("[computeTemplateResource] template '{}' not found neither in db nor in resources", template);

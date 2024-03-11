@@ -25,14 +25,16 @@ import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.form.ReflectionBasedEntityForm;
 import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.core.service.event.EventConsumerCategory;
 import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.component.FrontendResource;
 
 import java.util.Map;
 
 import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCEREGEX;
 import static com.openkoda.controller.common.URLConstants.ORGANIZATION;
 import static com.openkoda.core.form.FrontendMappingDefinition.createFrontendMappingDefinition;
+import static com.openkoda.core.form.Validator.notBlank;
 import static com.openkoda.model.Privilege.*;
 
 public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFormFieldNames {
@@ -44,6 +46,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     String LOGGER_FORM = "loggerForm";
     String FRONTEND_RESOURCE_FORM = "frontendResource";
     String PAGE_BUILDER_FORM = "pageBuilder";
+    String MODULE_FORM = "moduleForm";
     String FRONTEND_RESOURCE_PAGE_FORM = "frontendResourcePageForm";
     String UI_COMPONENT_FRONTEND_RESOURCE_FORM = "uiComponentFrontendResource";
     String CONTROLLER_ENDPOINT_FORM = "controllerEndpointForm";
@@ -54,12 +57,12 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     String GLOBAL_ORG_ROLE_FORM = "globalOrgRoleForm";
     String INVITE_USER_FORM_NAME = "inviteUserForm";
     String TABLE_COMPACT_CSS = "table-compact ";
-
+    String EMAIL_CONFIG_FORM = "emailConfigForm";
 
     FrontendMappingDefinition roleForm = createFrontendMappingDefinition(ROLE_FORM, canReadBackend, canManageBackend,
         a -> a  .text(NAME_)
                 .dropdown(TYPE_, ROLE_TYPES_)
-                .checkboxList(PRIVILEGES_, PRIVILEGES_).additionalCss(TABLE_COMPACT_CSS));
+                .checkboxListGrouped(PRIVILEGES_, "privilegesGrouped").additionalCss(TABLE_COMPACT_CSS));
 
     FrontendMappingDefinition userForm = createFrontendMappingDefinition(USER_FORM, null, (PrivilegeBase) null,
         a -> a  .text(EMAIL_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IF_CAN_WRITE_USER)
@@ -99,6 +102,20 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 //                            (u, e) -> e != null && HybridMultiTenantConnectionProvider.isMultitenancy() && u.hasGlobalPrivilege(canAccessGlobalSettings))
     );
 
+    FrontendMappingDefinition emailConfigForm = createFrontendMappingDefinition(EMAIL_CONFIG_FORM, canReadBackend, canManageBackend,
+            a -> a  .text(EMAIL_MAILGUN_API_KEY)
+                    .text(EMAIL_HOST)
+                    .number(EMAIL_PORT)
+                    .text(EMAIL_USERNAME)
+                    .text(EMAIL_PASSWORD)
+                    .text(EMAIL_FROM)
+                    .text(EMAIL_REPLY_TO)
+                    .checkbox(EMAIL_SSL)
+                    .checkbox(EMAIL_SMTP_AUTH)
+                    .checkbox(EMAIL_STARTTLS)
+                    
+    );
+    
     FrontendMappingDefinition loggerForm = createFrontendMappingDefinition(LOGGER_FORM, canReadSupportData, canManageSupportData,
             a -> a  .text(BUFFER_SIZE_FIELD_)
                     .checkboxList(LOGGING_CLASSES_, (f, d) -> d.getLoggersDictionary()).additionalCss(TABLE_COMPACT_CSS)
@@ -107,7 +124,9 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     FrontendMappingDefinition eventListenerForm = createFrontendMappingDefinition(EVENT_LISTENER_FORM, canReadBackend, canManageBackend,
             a -> a  .organizationSelect(ORGANIZATION_ID_)
                     .dropdown(EVENT_, EVENTS_)
-                    .radioList(CONSUMER_, CONSUMERS_)
+                    .datalist("consumerCategories", r -> r.enumsToMapWithLabels(EventConsumerCategory.values()))
+                    .dropdown("consumerCategory", "consumerCategories")
+                    .dropdown(CONSUMER_, CONSUMERS_)
                     .text(STATIC_DATA_1_)
                     .text(STATIC_DATA_2_)
                     .text(STATIC_DATA_3_)
@@ -122,7 +141,7 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
                     .dropdown(REQUIRED_PRIVILEGE_, PRIVILEGES_, true)
                     .sectionWithDropdown(TYPE_, FRONTEND_RESOURCE_TYPE_)
                         //.valueType(FrontendResource.Type.class)
-                        .additionalCss("frontendResourceType").validate(v -> v != null ? null : "not.empty")
+                        .additionalCss("frontendResourceType").validate(notBlank())
                     .checkbox(INCLUDE_IN_SITEMAP_)
                     .checkbox(EMBEDDABLE_)
                     .datalist(ACCESS_LEVELS, d -> d.enumDictionary(FrontendResource.AccessLevel.values()))

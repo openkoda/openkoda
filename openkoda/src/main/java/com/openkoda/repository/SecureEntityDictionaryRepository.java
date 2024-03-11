@@ -32,13 +32,13 @@ import com.openkoda.core.tracker.DebugLogsDecoratorWithRequestId;
 import com.openkoda.dto.file.FileDto;
 import com.openkoda.form.rule.LogicalOperator;
 import com.openkoda.form.rule.Operator;
-import com.openkoda.model.ControllerEndpoint;
-import com.openkoda.model.FrontendResource;
 import com.openkoda.model.OptionWithLabel;
 import com.openkoda.model.common.ModelConstants;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.model.component.ControllerEndpoint;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.file.EntityWithFiles;
 import com.openkoda.model.file.File;
 import com.openkoda.service.user.RoleService;
@@ -205,13 +205,18 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         return JsonHelper.to(commonDictionaries);
     }
 
+    public Map<String, Object> getCommonDictionariesMap() {
+        return commonDictionaries;
+    }
+
     public void setupCommonDictionaries() throws JSONException {
         Map<String, Object> newCommonDictionaries = new HashMap<>();
         newCommonDictionaries.clear();
         newCommonDictionaries.put("booleanValues", toJsonString(Map.of("true", "YES", "false", "NO")));
-        newCommonDictionaries.put("privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString());
+        newCommonDictionaries.put("privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(true));
+        newCommonDictionaries.put("privilegesGrouped", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(false));
         newCommonDictionaries.put("frontendResourceType", enumsToJsonString(FrontendResource.Type.values()));
-        newCommonDictionaries.put("consumers", mapObjectArraysToJsonString(services.eventListener.getConsumersArray()));
+        newCommonDictionaries.put("consumers", mapToJsonString(services.eventListener.getConsumersArray()));
         newCommonDictionaries.put("organizationRoles", listTupleToJsonString(repositories.unsecure.organizationRole.findAllAsTupleWithLabelName()));
         newCommonDictionaries.put("globalRoles", listTupleToJsonString(repositories.unsecure.globalRole.findAllAsTupleWithLabelName()));
         newCommonDictionaries.put("languages", toJsonString(languages));
@@ -238,6 +243,14 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         Map<Object, String> result = new LinkedHashMap<>(allByOrganizationId.size());
         for (Tuple t : allByOrganizationId) {
             result.put(t.v(Object.class, 0), t.v(String.class, 1));
+        }
+        return result;
+    }
+
+    public Map<Object, String> toLinkedMap(Object[] values) {
+        Map<Object, String> result = new LinkedHashMap<>(values.length);
+        for (Object t : values) {
+            result.put(t, t.toString());
         }
         return result;
     }
@@ -313,6 +326,22 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
             result = new JSONObject();
             result.put("k", entry.getKey());
             result.put("v", entry.getValue());
+            results.put(result);
+        }
+        return results.toString();
+    }
+
+    private String mapToJsonString(Map<Object, Map<String, String>> map) throws JSONException {
+        JSONArray results = new JSONArray();
+        JSONObject result;
+        for (var entry : map.entrySet()) {
+            result = new JSONObject();
+            result.put("k", entry.getKey());
+            JSONObject value = new JSONObject();
+            for (var valueEntry : entry.getValue().entrySet()) {
+                value.put(valueEntry.getKey(), valueEntry.getValue());
+            }
+            result.put("v", value);
             results.put(result);
         }
         return results.toString();

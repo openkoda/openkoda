@@ -26,7 +26,7 @@ package com.openkoda.core.service;
 
 import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.exception.FrontendResourceValidationException;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -145,9 +145,13 @@ public class FrontendResourceService extends ComponentProvider {
 
     public String getContentOrDefault(FrontendResource.Type type, String frontendResourceName, FrontendResource.AccessLevel accessLevel, Long organizationId) {
         debug("[getContent] {}", frontendResourceName);
-        String resourceName = organizationId == null ?
-                frontendResourceFolderClasspath + accessLevel.getPath() + frontendResourceName + type.getExtension() :
-                frontendResourceFolderClasspath + accessLevel.getPath() + SUBDIR_ORGANIZATION_PREFIX + organizationId + "/" + frontendResourceName + type.getExtension();
+        String contentBasePath = frontendResourceFolderClasspath;
+        contentBasePath += accessLevel.getPath();
+
+        String resourceName = (organizationId == null || accessLevel == FrontendResource.AccessLevel.GLOBAL)
+                ?
+                contentBasePath + frontendResourceName + type.getExtension() :
+                contentBasePath + SUBDIR_ORGANIZATION_PREFIX + organizationId + "/" + frontendResourceName + type.getExtension();
         try {
             InputStream resourceIO = this.getClass().getResourceAsStream(resourceName);
             if (resourceIO != null) {
@@ -161,7 +165,18 @@ public class FrontendResourceService extends ComponentProvider {
 
     public URL resourceURL(FrontendResource frontendResource) {
         String extension = frontendResource.getType() == FrontendResource.Type.HTML ? ".html" : "";
-        return this.getClass().getResource(frontendResourceFolderClasspath + frontendResource.getName() + extension);
+        return  frontendResource.getOrganizationId() == null ?
+                this.getClass().getResource(frontendResourceFolderClasspath
+                        + frontendResource.getAccessLevel().getPath()
+                        + frontendResource.getName()
+                        + extension)
+                : this.getClass().getResource(frontendResourceFolderClasspath
+                        + frontendResource.getAccessLevel().getPath()
+                        + SUBDIR_ORGANIZATION_PREFIX
+                        + frontendResource.getOrganizationId()
+                        + "/"
+                        + frontendResource.getName()
+                        + extension);
     }
 
     public boolean resourceExists(FrontendResource frontendResource) {

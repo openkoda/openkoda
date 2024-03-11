@@ -42,6 +42,7 @@ public class UrlHelperTest extends AbstractTest {
     public void init() {
         request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getServletPath()).thenReturn("/html/organization/123/shoe/567/action");
+        Mockito.when(request.getRequestURI()).thenReturn("/html/organization/123/shoe/567/action");
         Mockito.when(request.getLocalAddr()).thenReturn("localhost");
         Mockito.when(request.getMethod()).thenReturn("post");
     }
@@ -56,6 +57,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResourceWhenOrgId() {
         Mockito.when(request.getServletPath()).thenReturn("/html/organization/123/");
+        Mockito.when(request.getRequestURI()).thenReturn("/html/organization/123/");
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         assertEquals(Long.valueOf(123L), t.organizationId);
         Assertions.assertNull(t.entityKey);
@@ -64,6 +66,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResourceWhenEntityKey() {
         Mockito.when(request.getServletPath()).thenReturn("/html/shoe/123/action");
+        Mockito.when(request.getRequestURI()).thenReturn("/html/shoe/123/action");
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         Assertions.assertNull(t.organizationId);
         assertEquals("shoe", t.entityKey);
@@ -72,6 +75,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResource1() {
         Mockito.when(request.getServletPath()).thenReturn("/html/organization/123/shoe/new/setting");
+        Mockito.when(request.getRequestURI()).thenReturn("/html/organization/123/shoe/new/setting");
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         assertEquals(Long.valueOf(123L), t.organizationId);
         assertEquals("shoe", t.entityKey);
@@ -80,6 +84,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResource2() {
         Mockito.when(request.getServletPath()).thenReturn("/html/organization/123/organization/setting");
+        Mockito.when(request.getRequestURI()).thenReturn("/html/organization/123/organization/setting");
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         assertEquals(Long.valueOf(123L), t.organizationId);
         assertEquals("organization", t.entityKey);
@@ -88,6 +93,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResource3() {
         Mockito.when(request.getServletPath()).thenReturn(_HTML_ORGANIZATION + _NEW + _ORGANIZATION + _SETTINGS);
+        Mockito.when(request.getRequestURI()).thenReturn(_HTML_ORGANIZATION + _NEW + _ORGANIZATION + _SETTINGS);
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         Assertions.assertNull(t.organizationId);
         assertEquals("organization", t.entityKey);
@@ -96,6 +102,7 @@ public class UrlHelperTest extends AbstractTest {
     @Test
     public void getTenantedResource4() {
         Mockito.when(request.getServletPath()).thenReturn(_HTML_ORGANIZATION + "/232" + _ORGANIZATION + _SETTINGS);
+        Mockito.when(request.getRequestURI()).thenReturn(_HTML_ORGANIZATION + "/232" + _ORGANIZATION + _SETTINGS);
         TenantResolver.TenantedResource t = urlHelper.getTenantedResource(request);
         assertEquals(Long.valueOf(232L), t.organizationId);
         assertEquals("organization", t.entityKey);

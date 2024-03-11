@@ -70,7 +70,7 @@ public class FileControllerHtml extends AbstractFileController {
             @RequestParam("w") int width) {
         debug("[rescale] fileId: {}", fileId);
         return rescaleFile(fileId, width)
-                .mav(a -> "Done. Refresh the page.", a -> a.get(message));
+                .mav(a -> "Done.", a -> a.get(message));
     }
 
 

@@ -21,8 +21,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository;
 
-import com.openkoda.model.ControllerEndpoint;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.model.component.ControllerEndpoint;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

@@ -136,7 +136,7 @@ public class PasswordRecoveryController extends AbstractController {
         if (organizationUser.getUserId() != passwordChangeForm.getUserId()) {
             warn("[passwordChange] possible hacker attack - blocking password change");
             SecurityContextHolder.clearContext();
-            ModelAndView mav =  new ModelAndView(frontendResourceTemplateNamePrefix + "password-recovery");
+            ModelAndView mav =  new ModelAndView(frontendResourceTemplateNamePrefix + "email/password-recovery");
             mav.addObject("passwordChangeForm", null);
             return mav;
         }

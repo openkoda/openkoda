@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.controller.event;
 
 import com.openkoda.form.SchedulerForm;
+import com.openkoda.model.component.Scheduler;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +47,7 @@ import static com.openkoda.core.controller.generic.AbstractController.*;
 public class SchedulerControllerHtml extends AbstractSchedulerController {
 
     /**
-     * Prepares model and view to display all {@link com.openkoda.model.event.Scheduler} page
+     * Prepares model and view to display all {@link Scheduler} page
      * See also {@link AbstractSchedulerController}
      *
      * @param pageable
@@ -64,7 +65,7 @@ public class SchedulerControllerHtml extends AbstractSchedulerController {
     }
 
     /**
-     * Prepares model and view for {@link com.openkoda.model.event.Scheduler} settings page
+     * Prepares model and view for {@link Scheduler} settings page
      * See also {@link AbstractSchedulerController}
      *
      * @param schedulerId
@@ -79,7 +80,7 @@ public class SchedulerControllerHtml extends AbstractSchedulerController {
     }
 
     /**
-     * Prepares model and view for the new {@link com.openkoda.model.event.Scheduler} configuration page
+     * Prepares model and view for the new {@link Scheduler} configuration page
      * See also {@link AbstractSchedulerController}
      *
      * @return java.lang.Object
@@ -93,7 +94,7 @@ public class SchedulerControllerHtml extends AbstractSchedulerController {
     }
 
     /**
-     * Triggers update of the {@link com.openkoda.model.event.Scheduler} and prepares model and view for the result page
+     * Triggers update of the {@link Scheduler} and prepares model and view for the result page
      * See also {@link AbstractSchedulerController}
      *
      * @param schedulerId
@@ -111,7 +112,7 @@ public class SchedulerControllerHtml extends AbstractSchedulerController {
     }
 
     /**
-     * Saves new {@link com.openkoda.model.event.Scheduler} in the database and prepares model and view for the resulting page
+     * Saves new {@link Scheduler} in the database and prepares model and view for the resulting page
      * See also {@link AbstractSchedulerController}
      *
      * @param schedulerForm
@@ -128,7 +129,7 @@ public class SchedulerControllerHtml extends AbstractSchedulerController {
     }
 
     /**
-     * Removes {@link com.openkoda.model.event.Scheduler} from the database and prepares the result response
+     * Removes {@link Scheduler} from the database and prepares the result response
      * See also {@link AbstractSchedulerController}
      *
      * @param schedulerId

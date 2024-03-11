@@ -6,7 +6,9 @@
 
 
     <div layout:fragment="content" th:attr="data-menu-item=${menuItem}">
-
+        <th:block th:if="${genericViewNavigationFragment != null}">
+            <nav th:replace="~{__${genericViewNavigationFragment}__}"></nav>
+        </th:block>
         <form th:replace="~{generic-settings-entity-form::generic-settings-form-new}" />
 
     </div>

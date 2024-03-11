@@ -33,12 +33,17 @@ import com.openkoda.uicomponent.MessagesServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class LiveMessagesServices implements MessagesServices {
 
-    private static final String defaultEmailTemplate = "frontend-resource/email/default";
+    private static final String DEFAULT_EMAIL_TEMPLATE = "default";
+    
+    private static final String EMAIL_TEMPLATE_PATH = "frontend-resource/global/email/";
+    
     @Inject
     UserRepository userRepository;
     @Inject EmailService emailService;
@@ -51,13 +56,34 @@ public class LiveMessagesServices implements MessagesServices {
     public Email sendEmail(Long userId, String subject, String message) {
         PageModelMap model = new PageModelMap();
         model.put(PageAttributes.message, message);
-        return emailService.sendAndSaveEmail(userRepository.findOne(userId), subject, defaultEmailTemplate, model);
+        return sendEmail(userRepository.findOne(userId).getEmail(), subject, DEFAULT_EMAIL_TEMPLATE, model, null);
     }
 
     public Email sendEmail(String email, String subject, String message, List<File> filesToAttach) {
         PageModelMap model = new PageModelMap();
         model.put(PageAttributes.message, message);
-        return emailService.sendAndSaveEmail(email, subject, defaultEmailTemplate, model, filesToAttach == null ? null : filesToAttach.toArray(File[]::new));
+        return sendEmail(email, subject, DEFAULT_EMAIL_TEMPLATE, model, filesToAttach);
+    }
+    
+    @Override
+    public Email sendEmail(String email, String subject, String message, List<File> attachments, LocalDateTime sendOn) {
+        PageModelMap model = new PageModelMap();
+        model.put(PageAttributes.message, message);
+        return sendEmail(email, subject, DEFAULT_EMAIL_TEMPLATE, model, attachments, sendOn);
+    }
+
+    @Override
+    public Email sendEmail(String email, String subject, String resourceName, Map<String, Object> messageModel,
+            List<File> attachments) {
+        return sendEmail(email, subject, resourceName, messageModel, attachments, null);
+    }
+
+    @Override
+    public Email sendEmail(String email, String subject, String resourceName, Map<String, Object> messageModel,
+            List<File> attachments, LocalDateTime sendOn) {
+        PageModelMap model = new PageModelMap();
+        model.putAll(messageModel);
+        return emailService.sendAndSaveEmail(email, subject, EMAIL_TEMPLATE_PATH + resourceName, model, sendOn, attachments == null ? null : attachments.toArray(File[]::new));
     }
 
     public boolean sendToWebsocketUser(User user, String channelName, Object payload) {
@@ -66,5 +92,4 @@ public class LiveMessagesServices implements MessagesServices {
     public boolean sendToWebsocketChannel(String channelName, Object payload){
         return websocketService.sendToChannel(channelName, payload);
     }
-
 }

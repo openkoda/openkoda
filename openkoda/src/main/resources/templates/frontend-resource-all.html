@@ -4,7 +4,8 @@
 <body>
 <div class="container-fluid">
 
-    <div layout:fragment="content" th:attr="data-menu-item='frontendresource'">
+    <div layout:fragment="content" th:attr="data-menu-item='configuration'">
+        <nav th:replace="~{navigation-fragments::configuration-nav-tabs('resources')}"></nav>
         <div th:replace="tables::frontend-resource(${organizationRelatedEntityPage}, #{template.frontendResources})"/>
     </div>
 </div>

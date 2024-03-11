@@ -2,7 +2,7 @@ package cucumber.page;
 
 import com.openkoda.TestDataLoader;
 import com.openkoda.core.flow.LoggingComponent;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.Organization;
 import com.openkoda.model.Privilege;
 import cucumber.common.StepsBase;

@@ -64,6 +64,7 @@ public interface OrganizationRepository extends UnsecuredFunctionalRepositoryWit
 
     @Query("select o.id from Organization o where o.name not like '(disabled)%'")
     List<Long> findActiveOrganizationIdsAsList();
+    boolean existsById(Long id);
 
 
     @Transactional

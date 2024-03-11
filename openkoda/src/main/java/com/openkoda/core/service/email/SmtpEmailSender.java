@@ -21,12 +21,12 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
-import com.openkoda.model.file.File;
-import jakarta.inject.Inject;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeUtility;
-import jakarta.servlet.ServletContext;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,10 +38,16 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.concurrent.Executors;
+import com.openkoda.model.EmailConfig;
+import com.openkoda.model.file.File;
+
+import jakarta.inject.Inject;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.ServletContext;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 /**
  * <p>Sending mail via Smtp</p>
@@ -66,7 +72,8 @@ public class SmtpEmailSender extends EmailSender {
 
     @Inject
     private MessageSource messageSource;
-
+    
+    @Inject SmtpEmailSender self;
 
     /**
      * {@inheritDoc}
@@ -75,11 +82,13 @@ public class SmtpEmailSender extends EmailSender {
     public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL, List<File> attachments) {
         debug("[sendEmail] {} -> {} Subject: {}", fullFrom, fullTo, subject);
         try {
+            EmailConfig emailConfig = emailConfigRepository.findAll().stream().findFirst().orElse(null);
+
             final MimeMessage mimeMessage = mailSender.createMimeMessage();
             final MimeMessageHelper message = new MimeMessageHelper( mimeMessage , true , "UTF-8" );
             message.setSubject( subject );
-            message.setFrom( fullFrom );
-            message.setReplyTo( replyTo );
+            message.setFrom( StringUtils.defaultIfBlank(emailConfig != null ? emailConfig.getFrom() : null, fullFrom) );
+            message.setReplyTo( StringUtils.defaultIfBlank(emailConfig != null ? emailConfig.getReplyTo() : null, replyTo) );
             message.addTo( fullTo );
             message.setText( html , true );
 
@@ -106,19 +115,24 @@ public class SmtpEmailSender extends EmailSender {
                 }
             }
 
-            Executors.defaultThreadFactory().newThread( () -> {
-                try {
-                    mailSender.send( mimeMessage );
-                } catch (MailException e) {
-                    error( "[sendEmail] Error sending email to {} : {}", fullTo, e );
-
-                }
-                info( "[sendEmail] Mail to {} sent", fullTo );
-            } ).start();
+            // invoke method via 'self' instance in order to handle this call by Spring's
+            // AOP which handles Transactional annotation
+            CompletableFuture.runAsync(() -> self.sendEmailViaMailSender(fullTo, mimeMessage));
         } catch (MessagingException e) {
             error("[sendEmail] Error sending email to {} : {}", fullTo, e);
         }
         return true;
+    }
+
+    @Transactional(value = TxType.REQUIRES_NEW)
+    void sendEmailViaMailSender(String fullTo, final MimeMessage mimeMessage) {
+        try {
+            mailSender.send( mimeMessage );
+        } catch (MailException e) {
+            error( "[sendEmail] Error sending email to {} : {}", fullTo, e );
+
+        }
+        info( "[sendEmail] Mail to {} sent", fullTo );
     }
 
 

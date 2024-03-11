@@ -26,7 +26,6 @@ import com.openkoda.core.flow.ValidationException;
 import com.openkoda.model.file.File;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.engine.jdbc.BlobProxy;
@@ -36,6 +35,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -48,6 +48,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.concurrent.*;
 
 import static com.openkoda.core.service.FileService.StorageType.database;
 import static com.openkoda.core.service.FileService.StorageType.filesystem;
@@ -60,7 +61,7 @@ public class FileService extends ComponentProvider {
         database, filesystem, amazon
     }
 
-    @Value("${spring.http.multipart.max-file-size}")
+    @Value("${spring.servlet.multipart.max-file-size}")
     private String maxUploadSizeInBytesExpression;
     private Long maxUploadSizeInBytes;
 
@@ -69,6 +70,12 @@ public class FileService extends ComponentProvider {
 
     @Value("${file.storage.filesystem.path:/tmp}")
     private String storageFilesystemPath;
+
+    @Value("${file.storage.filesystem.failover:/tmp2}")
+    private String failoverStorageFilesystemPath;
+
+    @Value("${file.storage.filesystem.failover.writable:false}")
+    private boolean writableFailoverStoreageFilesystem;
 
     @Value("${file.storage.amazon.bucket:bucket-name}")
     private String storageAmazonBucket;
@@ -95,10 +102,6 @@ public class FileService extends ComponentProvider {
         return storageType;
     }
 
-    public String getStorageFilesystemPath() {
-        return storageFilesystemPath;
-    }
-
     public String prepareStoredFileName(Long orgId, String uuid, String fileName) {
         debug("[prepareStoredFileName]");
         String name = (orgId == null ? 0L : orgId) + "-" + uuid + "-" + fileName;
@@ -116,7 +119,17 @@ public class FileService extends ComponentProvider {
             throw new ValidationException("Null or not an image");
         }
         try {
-            BufferedImage bi = ImageIO.read(in.getContentStream());
+            BufferedImage bi = tryInputOutput(() -> ImageIO.read(in.getContentStream()));
+            if (bi == null) {
+                error("[saveAndPrepareFileEntity] Error while attempting to read and scale image [{}] ", in.toAuditString());
+                String failoverPath = in.getFilesystemPath().replaceFirst(storageFilesystemPath, failoverStorageFilesystemPath);
+                bi = tryInputOutput(() -> ImageIO.read(new FileInputStream(failoverPath)));
+                if (bi == null) {
+                    error("[saveAndPrepareFileEntity] Error while attempting failover to read and scale image [{}] ", in.toAuditString());
+                    return null;
+                }
+            }
+            
             int originalWidth = bi.getWidth();
             int originalHeight = bi.getHeight();
             if (width > originalWidth) {
@@ -127,17 +140,18 @@ public class FileService extends ComponentProvider {
             Image resultImage = bi.getScaledInstance(width, height, Image.SCALE_SMOOTH);
             BufferedImage buffered = new BufferedImage(width, height, TYPE_INT_RGB);
             buffered.getGraphics().drawImage(resultImage, 0, 0, null);
+            
+            //create in memory only input/outptu streams to avoid dangling unused temporary images in containerized (docker) context
+            FastByteArrayOutputStream os = new FastByteArrayOutputStream(buffered.getData().getDataBuffer().getSize() / 8);
+            String ext = in.getFilename().substring(in.getFilename().lastIndexOf('.') + 1).toLowerCase();
+            ImageIO.write(buffered, ext, os);
 
-            java.io.File temporaryFile = java.io.File.createTempFile("scale", "image");
-            ImageIO.write(buffered, "jpg", temporaryFile);
-
-            long fileSize = FileUtils.sizeOf(temporaryFile);
+            long fileSize = os.size();
             int lastDotIndex = in.getFilename().lastIndexOf(".");
             String filename = in.getFilename().substring(0, lastDotIndex) + "-" + width + in.getFilename().substring(lastDotIndex);
-            try (FileInputStream fis = new FileInputStream(temporaryFile)) {
-                MultipartFile multipartFile = new MockMultipartFile(filename, IOUtils.toByteArray(fis));
-                return saveAndPrepareFileEntity(in.getOrganizationId(), null, filename, fileSize, filename, multipartFile.getInputStream());
-            }
+            MultipartFile multipartFile = new MockMultipartFile(filename, os.toByteArrayUnsafe());
+            return saveAndPrepareFileEntity(in.getOrganizationId(), null, filename, fileSize, filename, multipartFile.getInputStream());
+            
         } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
         }
@@ -154,11 +168,8 @@ public class FileService extends ComponentProvider {
         String mimeType = Files.probeContentType(path);
         StorageType actualStorageType = getStorageType();
         if (actualStorageType == filesystem) {
-            String targetFileName = prepareStoredFileName(orgId, uuid, fileName);
-            try (FileOutputStream fileOnDisk = new FileOutputStream(targetFileName)) {
-                IOUtils.copy(inputStream, fileOnDisk);
-            }
-            f = new File(orgId, originalFilename, mimeType, totalFileSize, uuid, actualStorageType, targetFileName);
+            f = handleFilesystemWrite(orgId, uuid, fileName, totalFileSize, originalFilename, inputStream, f, mimeType,
+                    actualStorageType);
         } else if (actualStorageType == database) {
             Blob b = BlobProxy.generateProxy(inputStream, totalFileSize);
             f = new File(orgId, originalFilename, mimeType, totalFileSize, uuid, actualStorageType);
@@ -167,6 +178,38 @@ public class FileService extends ComponentProvider {
         return f;
     }
 
+    private File handleFilesystemWrite(Long orgId, String uuid, String fileName, long totalFileSize,
+            String originalFilename, InputStream inputStream, File f, String mimeType, StorageType actualStorageType) {
+        String targetFileName = prepareStoredFileName(orgId, uuid, fileName);
+        var ioResult = tryIOOperation(() -> {
+            try (FileOutputStream fileOnDisk = new FileOutputStream(targetFileName)) {
+                IOUtils.copy(inputStream, fileOnDisk);
+            }
+        });
+                
+        if(!ioResult) {
+            error("[saveAndPrepareFileEntity] Error while attempting to write [{}, {}, {}] [{}]", orgId, uuid, fileName, targetFileName);
+            
+            if(writableFailoverStoreageFilesystem) {
+                String failoverPath = targetFileName.replaceFirst(storageFilesystemPath, failoverStorageFilesystemPath);
+                ioResult = tryIOOperation(() -> {
+                    try (FileOutputStream fileOnDisk = new FileOutputStream(failoverPath)) {
+                        IOUtils.copy(inputStream, fileOnDisk);
+                    }
+                });
+                
+                if(!ioResult) {
+                    error("[saveAndPrepareFileEntity] Error while attempting to write to failover path [{}, {}, {}] [{}]}", orgId, uuid, fileName, targetFileName);
+                }
+            }
+        }
+        
+        if(ioResult) {
+            f = new File(orgId, originalFilename, mimeType, totalFileSize, uuid, actualStorageType, targetFileName);
+        }
+        return f;
+    }
+    
     //public for access in tests in FileServiceTest, because this method was in FileService
     //and creating test class for this controller creates problem with setting FileService.storageType in test cases
     public HttpServletResponse getFileContentAndPrepareResponse(File f, boolean download, HttpServletResponse response) throws IOException, SQLException {
@@ -176,17 +219,109 @@ public class FileService extends ComponentProvider {
         if (download) response.addHeader("Content-Disposition", "attachment; filename=\"" + f.getFilename() + "\"");
         LocalDateTime updatedOn = f.getUpdatedOn() == null ? LocalDateTime.now() : f.getUpdatedOn();
         response.addDateHeader("Last-Modified", updatedOn.toEpochSecond(ZoneOffset.UTC) * 1000);
-
+        OutputStream os = response.getOutputStream();
         StorageType storageType = f.getStorageType();
         if (storageType == filesystem || storageType == database) {
             response.addHeader("Accept-Ranges", "bytes");
-            response.addHeader("Cache-Control", "max-age=604800, public");
-            OutputStream os = response.getOutputStream();
+            response.addHeader("Cache-Control", "max-age=604800, public");            
+        }
+        
+        if (storageType == filesystem) {
+            handleFilesystemRead(f, os);
+        } else if(storageType == database) {
+            try (InputStream is = f.getContentStream()) {
+                IOUtils.copy(is, os);
+            }   
+        }
+              
+        os.flush();
+        return response;
+    }
+
+    private void handleFilesystemRead(File f, OutputStream os) {
+        var ioResult = tryIOOperation( () -> {
             try (InputStream is = f.getContentStream()) {
                 IOUtils.copy(is, os);
             }
-            os.flush();
+        });
+        
+        if(!ioResult) {
+            error("[saveAndPrepareFileEntity] Error while attempting to read [{}] ", f.toAuditString());
+            String failoverPath = f.getFilesystemPath().replaceFirst(storageFilesystemPath, failoverStorageFilesystemPath);
+            ioResult = tryIOOperation( () -> {
+                try (InputStream failoverStream = new FileInputStream(failoverPath)) {
+                    IOUtils.copy(failoverStream, os);
+                }
+            });
+            
+            if(!ioResult) {
+                error("[saveAndPrepareFileEntity] Error while attempting failover to read [{}] ", f.toAuditString());
+            }
         }
-        return response;
+    }
+    
+    private interface ThrowableRunnable {
+        public abstract void run() throws IOException, SQLException, RuntimeException;
+    }
+
+    private interface ThrowableSupplier<E> {
+        public abstract E get() throws IOException, SQLException, RuntimeException;
+    }
+    
+    /**
+     * attempts to perform IO operation. After a fixed number of seconds OR a IOException it attempts to perform write to a fallback location
+     * 
+     * @param action
+     * @return
+     */
+    protected boolean tryIOOperation(ThrowableRunnable action) {
+        boolean result = false;
+        Future<Boolean> future = CompletableFuture.supplyAsync( () -> {
+            try {
+                action.run();
+                return true;
+            } catch (IOException iexc) {
+                error("[tryIOOperation] IO Error {}", iexc.toString());
+                return false;
+            } catch (SQLException | RuntimeException e) {
+                // can't happen for fs storage
+                return false;
+            }
+        });
+        
+        try {
+            // actual system I/O timeout may occur after several seconds or even can cause Java thread be indefinitely blocked 
+            result = future.get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            error("[tryInputOutput] {}", e);
+            throw new RuntimeException(e);
+        }
+        
+        return result;
+    }
+    
+    protected <E> E  tryInputOutput(ThrowableSupplier<E> supplier) {
+        E result = null;
+        Future<E> future = CompletableFuture.supplyAsync( () -> {
+            try {
+                return supplier.get();
+            } catch (IOException iexc) {
+                error("[tryIOOperation] IO Error {}", iexc.toString());
+                return null;
+            } catch (SQLException | RuntimeException e) {
+                // can't happen for fs storage
+                return null;
+            }
+        });
+        
+        try {
+            // actual system I/O timeout may occur after several seconds or even can cause Java thread be indefinitely blocked 
+            result = future.get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            error("[tryInputOutput] {}", e);
+            throw new RuntimeException(e);
+        }
+        
+        return result;
     }
 }

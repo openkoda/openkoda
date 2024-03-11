@@ -23,11 +23,12 @@ package com.openkoda.core.exception;
 
 
 import com.openkoda.core.flow.HttpStatusException;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.http.HttpStatus;
 
 //TODO: check why we can not use ValidationException instead
 /**
- * Exception used for validation of {@link com.openkoda.model.FrontendResource}
+ * Exception used for validation of {@link FrontendResource}
  *
  * @author Arkadiusz Drysch (adrysch@stratoflow.com)
  * 

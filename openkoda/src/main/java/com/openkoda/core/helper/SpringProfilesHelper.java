@@ -24,16 +24,35 @@ package com.openkoda.core.helper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SpringProfilesHelper {
 
     public static final String INITIALIZATION_PROFILE = "drop_and_init_database";
     public static final String TEST_PROFILE = "test";
+    public static final String SPRING_PROFILES_ACTIVE_PROP = "spring.profiles.active";
+    public static final String SPRING_PROFILES_ACTIVE_ENV = "SPRING_PROFILES_ACTIVE";
 
+    private final static Pattern PROFILE_PATTERN = Pattern.compile(".*--spring\\.profiles\\.active=([\\w,]+) .*");
+    
     public static boolean isActiveProfile(String profile) {
-        String profilesCommaSeparated = System.getProperty("spring.profiles.active");
+        String profilesCommaSeparated = System.getProperty(SPRING_PROFILES_ACTIVE_PROP);
+        if (profilesCommaSeparated == null) {
+            Matcher m = PROFILE_PATTERN.matcher(System.getProperty("sun.java.command"));
+            if (m.matches() ) {
+                profilesCommaSeparated = m.group(1);
+            }
+        }
+
+        if (profilesCommaSeparated == null) {
+            profilesCommaSeparated = System.getenv(SPRING_PROFILES_ACTIVE_ENV);
+        }
+
         if (profilesCommaSeparated == null) {
             return false;
         }
+        
         return ArrayUtils.contains(StringUtils.split(profilesCommaSeparated, ','), profile);
     }
 

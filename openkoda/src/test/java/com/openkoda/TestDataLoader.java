@@ -28,9 +28,10 @@ import com.openkoda.core.security.UserProvider;
 import com.openkoda.form.RegisterUserForm;
 import com.openkoda.model.*;
 import com.openkoda.model.common.Audit;
-import com.openkoda.model.event.EventListenerEntry;
-import com.openkoda.model.event.Scheduler;
-import com.openkoda.service.export.YamlImportService;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.model.component.Scheduler;
+import com.openkoda.model.component.event.EventListenerEntry;
+import com.openkoda.service.export.ComponentImportService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,8 +59,8 @@ public class TestDataLoader extends BaseDatabaseInitializer {
     public TestDataLoader(
             @Autowired QueryExecutor queryExecutor,
             @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
-            @Autowired YamlImportService yamlImportService) {
-        super(queryExecutor, initializationScripts, yamlImportService);
+            @Autowired ComponentImportService componentImportService) {
+        super(queryExecutor, initializationScripts, null, componentImportService);
     }
 
     @Transactional

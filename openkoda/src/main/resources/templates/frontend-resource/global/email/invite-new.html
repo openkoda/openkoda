@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Invitation</title>
+</head>
+<body>
+<div>
+    <th:block th:replace="~{frontend-resource/public/email-fragments::hello-text}"/>
+    <th:block th:if="${!#strings.isEmpty(userEntity.firstName) && !#strings.isEmpty(userEntity.lastName)}"
+              th:text="${' ' + userEntity.firstName + ' ' + userEntity.lastName}"/>!
+</div>
+<br/>
+<div>
+    It is great to meet you! You have been invited <th:block th:if="${!#strings.isEmpty(invitedBy)}" th:text="${'by ' + invitedBy}"/> to join your organization <th:block th:text="${organizationEntity.name}"/> in Recostream, an e-commerce personalized recommendation engine.
+</div>
+<br/><div>
+    You are just one click away, just <a th:href="${passwordRecoveryLink}">follow this link</a> to set up your password and log in to your dashboard.
+</div>
+<br/>
+<footer>
+    <div>
+        P.S. This message has been generated automatically. Please contact your administrator for further information.
+    </div>
+</footer>
+
+</body>
+</html>

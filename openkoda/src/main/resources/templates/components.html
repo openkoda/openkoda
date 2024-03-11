@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+
+
+    <div class="" layout:fragment="content" th:attr="data-menu-item='configuration'">
+        <nav th:replace="~{navigation-fragments::configuration-nav-tabs('components')}"></nav>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <div class="card-header-buttons">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <a class="btn-primary btn btn-sm" th:href="${@url.exportAllYamlResources()}"
+                       th:download="${@environment.getProperty('components.export.zip.filename')}"
+                       th:text="#{template.exportAllToYaml}">Export All</a>
+                </div>
+
+                <div class="mb-3">
+                    <form method="POST" th:action="${@url.importComponentsZip()}" enctype="multipart/form-data">
+                        <label for="componentsImportFile" class="form-label" th:text="#{template.components.import}"></label>
+                        <input class="form-control" type="file" id="componentsImportFile" name="file" accept=".zip">
+                        <input type="submit" class="btn-primary btn btn-sm mt-3" th:value="#{template.import}">
+                    </form>
+                </div>
+                <pre class="mb-3"><th:block th:text="${importLog}"></th:block></pre>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>

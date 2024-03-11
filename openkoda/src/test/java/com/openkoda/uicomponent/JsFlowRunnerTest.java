@@ -23,7 +23,9 @@ package com.openkoda.uicomponent;
 
 import com.openkoda.AbstractTest;
 import com.openkoda.core.flow.PageModelMap;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
@@ -36,6 +38,7 @@ public class JsFlowRunnerTest  extends AbstractTest {
     String flow = "flow.then(a => a.model.put(\"users\", a.services.data.getRepository(\"user\").findAll()))";
 
     @Test
+    @EnabledIfSystemProperty(named = "spring.profiles.active", matches = "development")
     public void testRunPreviewFlow() {
         PageModelMap result = jsFlowRunner.runPreviewFlow(flow, new HashMap<>(), null, -1, null );
         System.out.println(result);

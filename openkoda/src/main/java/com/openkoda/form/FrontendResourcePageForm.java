@@ -28,7 +28,7 @@ import com.openkoda.core.helper.ReadableCode;
 import com.openkoda.core.helper.UrlHelper;
 import com.openkoda.dto.FrontendResourcePageDto;
 import com.openkoda.dto.file.FileDto;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.file.File;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -60,7 +60,7 @@ public class FrontendResourcePageForm extends FrontendResourceForm<FrontendResou
     }
 
     public static FileDto toFileDto(File a) {
-        return new FileDto(a.getId(), a.getOrganizationId(), a.getFilename(), a.getContentType(), UrlHelper.getPublicFileURL(a));
+        return new FileDto(a.getId(), a.getOrganizationId(), a.getFilename(), a.getContentType(), UrlHelper.getFileURL(a));
     }
 
     @Override

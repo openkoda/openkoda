@@ -26,7 +26,7 @@ import com.openkoda.core.helper.ClusterHelper;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.tracker.RequestIdHolder;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.Scheduler;
 import jakarta.inject.Inject;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,6 +169,7 @@ public class SchedulerService extends ComponentProvider implements HasSecurityRu
                     scheduler.getEventData(),
                     scheduler.getOrganizationId(),
                     scheduler.isOnMasterOnly(),
+                            scheduler.isAsync(),
                     LocalDateTime.now());
 
             currentlyScheduled.put(scheduler.getId(),
@@ -220,7 +221,11 @@ public class SchedulerService extends ComponentProvider implements HasSecurityRu
                 return;
             }
             debug("[SchedulerTask] {}", executedScheduler.notificationMessage());
-            services.applicationEvent.emitEvent(ApplicationEvent.SCHEDULER_EXECUTED, executedScheduler);
+            if (!executedScheduler.isAsync()) {
+                services.applicationEvent.emitEvent(ApplicationEvent.SCHEDULER_EXECUTED, executedScheduler);
+            } else {
+                services.applicationEvent.emitEventAsync(ApplicationEvent.SCHEDULER_EXECUTED, executedScheduler);
+            }
         }
 
     }

@@ -6,23 +6,18 @@
 <div class="container-fluid">
 
     <div layout:fragment="content" th:attr="data-menu-item='dashboard'">
-
-        <div th:utext="#{template.dashboard.default.message(${@url.allFrontendResource()})}"></div>
-        <div class="row" id="registered-cruds">
-            <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposed()}">
-                <div class="col-lg-2">
-                    <div class="card shadow mb-4">
-                        <div class="card-body">
-                            <h6 class="m-0 font-weight-bold" th:text="${@messages.getFieldLabel(entry.key, entry.key)}"></h6>
-                            <div class="m-0 justify-content-end">
-                                <a class="mr-1" th:href="${@url.all(organizationEntityId, entry.key)}">All</a>
-                                <a th:href="${@url.form(organizationEntityId, entry.key)}">New</a>
+        <th:block th:if="${!#lists.isEmpty(@htmlCRUDControllerConfigurationMap.getExposedSorted(organizationEntityId))}">
+            <div class="row col gap-10 mb-4" id="registered-cruds">
+                <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposedSorted()}">
+                        <a class="card shadow entity-link large text-secondary" th:href="${@url.all(organizationEntity.id, entry.key)}">
+                            <div class="flex-grow-1 flex-shrink-1 flex-none d-flex align-items-center justify-content-center flex-column justify-center">
+                                <div class="icon-div"><i class="fas fa-table-list fa-2x"></i></div>
+                                <span class="text-center text-lg" th:text="${@messages.getFieldLabel(entry.key, entry.value.getFrontendMappingDefinition().name)}"></span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </th:block>
-        </div>
+                        </a>
+                </th:block>
+            </div>
+        </th:block>
     </div>
 </div>
 </body>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<ul class="nav nav-tabs dashboard-nav" th:fragment="security-nav-tabs(activeTab)">
+    <li class="nav-item" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
+        <a th:class="'nav-link ' + ${activeTab == 'users' ? 'active' : ''}" th:href="${@url.users()}" th:text="#{template.users}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'organizations' ? 'active' : ''}" th:href="${@url.allOrganizations()}" th:text="#{template.organizations}"></a>
+    </li>
+    <li class="nav-item" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
+        <a th:class="'nav-link ' + ${activeTab == 'roles' ? 'active' : ''}" th:href="${@url.allRoles()}" th:text="#{template.roles}"></a>
+    </li>
+</ul>
+
+<ul class="nav nav-tabs dashboard-nav" th:fragment="configuration-nav-tabs(activeTab)">
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'files' ? 'active' : ''}" th:href="${@url.allFiles()}" th:text="#{template.files}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'resources' ? 'active' : ''}" th:href="${@url.allFrontendResource()}" th:text="#{template.frontendResources}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'builder' ? 'active' : ''}" th:href="${@url.allPageBuilder()}" th:text="#{template.pageBuilder}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'components' ? 'active' : ''}" th:href="${@url.components()}" th:text="#{template.components}"></a>
+    </li>
+</ul>
+
+
+<ul class="nav nav-tabs dashboard-nav" th:fragment="automation-nav-tabs(activeTab)">
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'schedulers' ? 'active' : ''}" th:href="${@url.allSchedulers()}" th:text="#{template.schedulers}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'event-listeners' ? 'active' : ''}" th:href="${@url.allEventListeners()}" th:text="#{template.eventListeners}"></a>
+    </li>
+</ul>
+
+<ul class="nav nav-tabs dashboard-nav" th:fragment="log-monitoring-nav-tabs(activeTab)">
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'audit' ? 'active' : ''}" th:href="${@url.allAudit()}" th:text="#{template.audit}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'logs' ? 'active' : ''}" th:href="${@url.allLogs()}" th:text="#{template.logs}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'system-health' ? 'active' : ''}" th:href="${@url.systemHealth()}" th:text="#{template.systemHealth}"></a>
+    </li>
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'threads' ? 'active' : ''}" th:href="${@url.allThreads()}" th:text="#{template.threads}"></a>
+    </li>
+</ul>
+</html>

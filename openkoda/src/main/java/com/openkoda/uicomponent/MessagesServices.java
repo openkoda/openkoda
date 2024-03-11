@@ -24,13 +24,29 @@ package com.openkoda.uicomponent;
 import com.openkoda.model.User;
 import com.openkoda.model.file.File;
 import com.openkoda.model.task.Email;
+import com.openkoda.uicomponent.annotation.Autocomplete;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface MessagesServices {
+
+    @Autocomplete(doc="Send an email message")
     Email sendEmail(String email, String subject, String message, List<File> attachments);
-//    Email sendEmail(User recipient, String emailTemplateName, PageModelMap model, Long orgId);
+    
+    @Autocomplete(doc="Send a scheduled email message")
+    Email sendEmail(String email, String subject, String message, List<File> attachments, LocalDateTime sendOn);
+    
+    @Autocomplete(doc="Send an email message based on a template")
+    Email sendEmail(String email, String subject, String resourceName, Map<String, Object> model, List<File> attachments);
+    
+    @Autocomplete(doc="Send a scheduled email message based on a template")
+    Email sendEmail(String email, String subject, String resourceName, Map<String, Object> model, List<File> attachments, LocalDateTime sendOn);
+    
+    @Autocomplete(doc="Send message to a specific user through WebSocket")
     boolean sendToWebsocketUser(User user, String channelName, Object payload);
+    @Autocomplete(doc="Send message to a specific WebSocket channel")
     boolean sendToWebsocketChannel(String channelName, Object payload);
 
 }

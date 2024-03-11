@@ -3,8 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
 <body>
 <div class="container-fluid">
-    <div layout:fragment="content" th:attr="data-menu-item='admin-dashboard'">
-        <h2 class="ml-2" th:text="${frontendResourceEntity.name}"></h2>
+    <div layout:fragment="content" th:attr="data-menu-item=${frontendResourceEntity.name}">
         <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
         <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
         <style>
@@ -20,6 +19,9 @@
             items = JSON.parse(items);
             var grid = GridStack.init({styleInHead: true, staticGrid: true});
             grid.load(items);
+			$('iframe').each(function () {
+				$(this).attr('src', app.passCurrentQueryParams($(this).attr('src')));
+            });
         </script>
     </div>
 </div>

@@ -5,7 +5,8 @@
 <div class="container-fluid">
 
 
-    <div layout:fragment="content">
+    <div layout:fragment="content" th:attr="data-menu-item='automation'">
+        <nav th:replace="~{navigation-fragments::automation-nav-tabs('event-listeners')}"></nav>
         <form th:replace="~{entity-forms::eventlistener-choose-event}"/>
 
     </div>

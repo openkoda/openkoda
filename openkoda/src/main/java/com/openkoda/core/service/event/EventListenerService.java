@@ -25,8 +25,8 @@ import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.helper.ClusterHelper;
 import com.openkoda.core.helper.NameHelper;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.event.Consumer;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.Consumer;
+import com.openkoda.model.component.event.EventListenerEntry;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Arrays;
@@ -50,7 +50,7 @@ public class EventListenerService extends ComponentProvider implements HasSecuri
 
     private Map<Object, String> events = new LinkedHashMap<>();
     private Map<Object, String> consumers = new LinkedHashMap<>();
-    private Map<Object, Object[]> consumersArray = new LinkedHashMap<>();
+    private Map<Object, Map<String, String>> consumersArray = new LinkedHashMap<>();
 
     private List<Class> eventClasses = new ArrayList<>();
 
@@ -153,7 +153,7 @@ public class EventListenerService extends ComponentProvider implements HasSecuri
                                 ec.getConsumerMethod().getParameterTypes()[0].getName(),
                                 ec.getConsumerMethod().getParameterTypes().length - 1);
                         consumers.put(canonicalName, ec.getDescription());
-                        consumersArray.put(canonicalName, ec.propertiesToTuple().toArray());
+                        consumersArray.put(canonicalName, ec.propertiesToMap());
                     }
                 }
             }
@@ -365,7 +365,7 @@ public class EventListenerService extends ComponentProvider implements HasSecuri
         return false;
     }
 
-    public Map<Object, Object[]> getConsumersArray() {
+    public Map<Object, Map<String, String>> getConsumersArray() {
         return consumersArray;
     }
 }

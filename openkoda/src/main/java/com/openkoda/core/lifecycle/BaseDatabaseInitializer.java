@@ -26,11 +26,13 @@ import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.security.UserProvider;
 import com.openkoda.model.GlobalRole;
+import com.openkoda.model.OpenkodaModule;
 import com.openkoda.model.OrganizationRole;
-import com.openkoda.model.ServerJs;
 import com.openkoda.model.User;
-import com.openkoda.service.export.YamlImportService;
+import com.openkoda.model.component.ServerJs;
+import com.openkoda.service.export.ComponentImportService;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,9 +86,21 @@ public class BaseDatabaseInitializer extends ComponentProvider {
     public static final String ROLE_ORG_USER = "ROLE_ORG_USER";
 
     /**
+     * Default organization level user role created in application initialization
+     */
+    public static final String CORE_MODULE = "core";
+
+    /**
      * List of SQL initialization scripts executed on application initialization
      */
     List<String> globalInitializationScripts = Collections.emptyList();
+
+    /**
+     * Content of a script to be executed on database init. Used for example in
+     * cloud instance setup, when post-init script cannot be added as a resource
+     * file like the `init.sql`
+     */
+    private String initializationExternalScript;
 
     @Inject
     private PasswordEncoder passwordEncoder;
@@ -100,6 +114,10 @@ public class BaseDatabaseInitializer extends ComponentProvider {
     @Value("${init.admin.password}")
     private String initAdminPassword;
 
+    @Value("${init.admin.firstName:Mark}") private String initAdminFirstName;
+
+    @Value("${init.admin.lastName:Administrator}") private String initAdminLastName;
+
     @Value("${base.url:http://localhost:8080}")
     private String baseUrl;
 
@@ -110,17 +128,24 @@ public class BaseDatabaseInitializer extends ComponentProvider {
 
     private QueryExecutor queryExecutor;
 
-    private YamlImportService yamlImportService;
+    private ComponentImportService componentImportService;
 
     public BaseDatabaseInitializer(
             @Autowired QueryExecutor queryExecutor,
             @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
-            @Autowired YamlImportService yamlImportService) {
+            @Value("${global.initialization.externalScript:}") String initializationExternalScript,
+            @Autowired ComponentImportService componentImportService) {
         this.queryExecutor = queryExecutor;
         if (StringUtils.isNotBlank(initializationScripts)) {
             globalInitializationScripts = Arrays.stream(initializationScripts.split(",")).map(a -> StringUtils.trim(a)).collect(Collectors.toList());
         }
-        this.yamlImportService = yamlImportService;
+        
+        if (StringUtils.isNotBlank(initializationExternalScript)) {
+            // need to unescape double quotes most likely inserted by a bash scripts
+            this.initializationExternalScript = initializationExternalScript.replace("\"", "");
+        }
+        
+        this.componentImportService = componentImportService;
     }
 
     /**
@@ -139,10 +164,11 @@ public class BaseDatabaseInitializer extends ComponentProvider {
 
         try {
             UserProvider.setCronJobAuthentication();
+            createCoreModule();
             createInitialRoles();
             createRegistrationFormServerJs();
             runInitializationScripts();
-            yamlImportService.loadResourcesFromFiles();
+            componentImportService.loadResourcesFromFiles();
             alreadySetup = true;
         } finally {
             UserProvider.clearAuthentication();
@@ -157,6 +183,10 @@ public class BaseDatabaseInitializer extends ComponentProvider {
         for(String s : globalInitializationScripts) {
             info("[runInitializationScripts] executing script {}", s);
             queryExecutor.runQueryFromResourceInTransaction(s);
+        }
+
+        if (this.initializationExternalScript != null) {
+            queryExecutor.runQueriesInTransaction(this.initializationExternalScript);
         }
     }
 
@@ -202,7 +232,7 @@ public class BaseDatabaseInitializer extends ComponentProvider {
         OrganizationRole orgUser = services.role.createOrUpdateOrgRole(ROLE_ORG_USER, orgUserPrivileges, false);
 
         if (repositories.unsecure.user.findByLogin(initAdminUsername) == null) {
-            User u = services.user.createUser("Mark", "Administrator", applicationAdminEmail, true,
+            User u = services.user.createUser(initAdminFirstName, initAdminLastName, applicationAdminEmail, true,
                     new String[]{ROLE_ADMIN}, new Tuple2[]{});
             u.setLoginAndPassword(initAdminUsername, initAdminPassword, true);
             repositories.unsecure.loginAndPassword.save(u.getLoginAndPassword());
@@ -210,4 +240,8 @@ public class BaseDatabaseInitializer extends ComponentProvider {
         }
     }
 
+    private void createCoreModule() {
+        OpenkodaModule openkodaModule = new OpenkodaModule(CORE_MODULE);
+        repositories.unsecure.openkodaModule.save(openkodaModule);
+    }
 }

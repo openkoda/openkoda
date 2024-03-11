@@ -24,7 +24,7 @@ package com.openkoda.controller.admin;
 import com.openkoda.App;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,6 +42,14 @@ public class SystemHealthController extends AbstractSystemHealthController imple
         debug("[systemHealth]");
         return getSystemHealth()
                 .mav("system-health");
+    }
+
+    @PreAuthorize(CHECK_CAN_READ_SUPPORT_DATA)
+    @GetMapping(_SYSTEM_HEATH + _VALIDATE)
+    public Object validateDatabase() {
+        debug("[validateDatabase]");
+        return validate()
+                .mav("system-health::database-validation");
     }
 
     @PreAuthorize(CHECK_CAN_READ_BACKEND)
@@ -77,6 +85,16 @@ public class SystemHealthController extends AbstractSystemHealthController imple
                 .mav("admin-dashboard");
 
     }
+
+    @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
+    @GetMapping(_COMPONENTS)
+    public Object components() {
+        return Flow.init()
+                .execute()
+                .mav("components");
+
+    }
+
     @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
     @GetMapping("/restart")
     public Object restart() {
@@ -84,4 +102,5 @@ public class SystemHealthController extends AbstractSystemHealthController imple
         return null;
 
     }
+
 }

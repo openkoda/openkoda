@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.controller.api.v2;
 
 import com.openkoda.controller.api.CRUDApiController;
-import com.openkoda.model.ServerJs;
+import com.openkoda.model.component.ServerJs;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

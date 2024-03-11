@@ -39,7 +39,7 @@ public class GlobalSearchSpecifications {
         return new Specification<GlobalEntitySearch>() {
             @Override
             public Predicate toPredicate(Root<GlobalEntitySearch> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-                Predicate search = cb.like(root.get("indexString"), "%" + StringUtils.lowerCase(StringUtils.defaultString(searchTerm, "")) + "%");
+                Predicate search = cb.like(cb.lower(root.get("indexString")), "%" + StringUtils.lowerCase(StringUtils.defaultString(searchTerm, "")) + "%");
                 Optional<OrganizationUser> optionalUser = UserProvider.getFromContext();
 
                 if (!optionalUser.isPresent()) {
@@ -49,7 +49,7 @@ public class GlobalSearchSpecifications {
                 OrganizationUser user = optionalUser.get();
 
                 search = cb.and(
-                        root.get("requiredReadPrivilege").in(user.getGlobalPrivileges()),
+                        cb.or(cb.isNull(root.get("requiredReadPrivilege")), root.get("requiredReadPrivilege").in(user.getGlobalPrivileges())),
                         search);
 
                 return search;

@@ -22,7 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.service;
 
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;

@@ -44,8 +44,11 @@ import com.openkoda.model.*;
 import com.openkoda.model.authentication.ApiKey;
 import com.openkoda.model.common.Audit;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
-import com.openkoda.model.event.EventListenerEntry;
-import com.openkoda.model.event.Scheduler;
+import com.openkoda.model.component.ControllerEndpoint;
+import com.openkoda.model.component.Form;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.model.component.Scheduler;
+import com.openkoda.model.component.event.EventListenerEntry;
 import com.openkoda.model.notification.Notification;
 import com.openkoda.repository.notifications.NotificationKeeper;
 import org.springframework.data.domain.Page;
@@ -97,6 +100,9 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<Organization> organizationEntity = new PageAttr<>(ORGANIZATION_ENTITY);
     PageAttr<OrganizationDto> organizationDto = new PageAttr<>("organizationDto");
     PageAttr<OrganizationForm> organizationForm = new PageAttr<>("organizationForm", () -> new OrganizationForm());
+    PageAttr<EmailConfigForm> emailConfigForm = new PageAttr<>("emailConfigForm", () -> new EmailConfigForm());
+    PageAttr<EmailConfig> emailConfig = new PageAttr<>("emailConfig");
+    PageAttr<SystemHealthStatus> integrations = new PageAttr<>("integrations");    
     PageAttr<EditUserForm> editUserForm = new PageAttr<>("editUserForm");
     PageAttr<InviteUserForm> inviteUserForm = new PageAttr<>("inviteUserForm");
     PageAttr<GlobalOrgRoleForm> globalOrgRoleForm = new PageAttr<>("globalOrgRoleForm");
@@ -147,6 +153,8 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<Integer> bufferSize = new PageAttr<>("bufferSize");
     PageAttr<Page<GlobalEntitySearch>> searchPage = new PageAttr<>("searchPage");
     PageAttr<OrganizationRelatedObject> organizationRelatedObject = new PageAttr<>("organizationRelatedObject");
+    PageAttr<Map<String, Object>> organizationRelatedObjectMap = new PageAttr<>("organizationRelatedObjectMap");
+    PageAttr<String> organizationRelatedObjectKey = new PageAttr<>("organizationRelatedObjectKey");
     PageAttr<SearchableOrganizationRelatedEntity> organizationRelatedEntity = new PageAttr<>("organizationRelatedEntity");
     PageAttr<Page<SearchableOrganizationRelatedEntity>> organizationRelatedEntityPage = new PageAttr<>("organizationRelatedEntityPage");
     PageAttr<ModelAndView> modelAndView = new PageAttr<>("modelAndView");
@@ -161,6 +169,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<String> notificationMessage = new PageAttr<>("notificationMessage");
     PageAttr<String> menuItem = new PageAttr<>("menuItem");
     PageAttr<SystemHealthStatus> systemHealthStatus = new PageAttr<>("systemHealthStatus");
+    PageAttr<String> databaseUpdateScript = new PageAttr<>("databaseUpdateScript");
     PageAttr<CanonicalObject> canonicalObject = new PageAttr<>("canonicalObject");
 
     PageAttr<Integer> unreadNotificationsNumber = new PageAttr<>("unreadNotificationsNumber");
@@ -179,6 +188,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<List<Object[]>> genericTableViewList = new PageAttr<>("genericTableViewList");
     PageAttr<List<Map<String,Object>>> genericTableViewMap = new PageAttr<>("genericTableViewMap");
     PageAttr<List<FrontendMappingFieldDefinition>> genericTableViewHeaders = new PageAttr<>("genericTableViewHeaders");
+    PageAttr<String> genericViewNavigationFragment = new PageAttr<>("genericViewNavigationFragment");
     PageAttr<Boolean> isMapEntity = new PageAttr<>("isMapEntity");
     PageAttr<Boolean> isPageEditor = new PageAttr<>("isPageEditor");
     PageAttr<Map<Object, Object[]>> rulesSelectedElements = new PageAttr<>("rulesSelectedElements");
@@ -187,6 +197,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<String> redirectUrl = new PageAttr<>("redirectUrl");
     PageAttr<String> reload = new PageAttr<>("reload");
     PageAttr<PageBuilderController.EmbeddableComponents> embeddableComponents = new PageAttr<>("embeddableComponents");
+    PageAttr<String> importLog = new PageAttr<>("importLog");
 
 
 

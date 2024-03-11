@@ -26,6 +26,7 @@ import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.form.RoleForm;
+import com.openkoda.model.Privilege;
 import com.openkoda.model.Role;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

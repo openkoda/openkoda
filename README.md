@@ -8,7 +8,7 @@
 
 <div align="center">
     <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-18B2C6.svg"/></a>
-    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.4.3" src="https://img.shields.io/static/v1?label=Openkoda&message=1.4.3&color=18B2C6"/></a>
+    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.5.0" src="https://img.shields.io/static/v1?label=Openkoda&message=1.5.0&color=18B2C6"/></a>
     <img alt="Java: 17.0.2" src="https://img.shields.io/static/v1?label=Java&message=17.0.2&color=18B2C6"/>
     <img alt="Spring Boot: 3.0.5" src="https://img.shields.io/static/v1?label=Spring%20Boot&message=3.0.5&color=18B2C6"/>
 </div>
@@ -254,9 +254,9 @@ How to contribute:
 
 ### 📢 Follow, learn, and spread the word 
 
-[Openkoda Community](https://github.com/orgs/openkoda/repositories): Become a part of Openkoda
-[YouTube](https://www.youtube.com/channel/UCN0LzuxOYIDdKDX9W0sGFlg): Learn how to use Openkoda
-[LinkedIn](https://www.linkedin.com/company/openkoda): Stay up to date
+[Openkoda Community](https://github.com/orgs/openkoda/repositories): Become a part of Openkoda\
+[YouTube](https://www.youtube.com/channel/UCN0LzuxOYIDdKDX9W0sGFlg): Learn how to use Openkoda\
+[LinkedIn](https://www.linkedin.com/company/openkoda): Stay up to date\
 [About us](https://openkoda.com/about-us/): Let us introduce ourselves
 
 ### 🗃️ Release notes
@@ -265,11 +265,9 @@ Openkoda is constantly evolving. Check out the changelog:
 
 #### Openkoda 1.5. 🚀
 
-* **Dynamic Entities**: Now create database tables, perform full CRUD operations, and generate forms without needing to compile the app.
+* **Dynamic Entities**: Now create database tables, perform full CRUD operations and generate forms.
 * **New Dashboard UI**: Enhanced for better readability and smoother navigation flow.
 * **Files Assignment**: Support for dynamically registered entities.
-* **Entity Form Code Editor Helper**: Simplified code editing for entity forms.
-* **Improved Entity Form Validation**: Enhanced validation for more reliable data entry.
 * **Organization-Level Email Configuration**: Customize email settings at the organization level.
 * **Bug Fixes**: Various fixes for improved app stability and performance.
 

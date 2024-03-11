@@ -188,14 +188,22 @@ public class PrivilegeHelper implements HasSecurityRules {
         return result;
     }
 
-    public static String allEnumsAsPrivilegeBaseJsonString() throws JSONException {
+    public static String allEnumsAsPrivilegeBaseJsonString(boolean concatLabel) throws JSONException {
         JSONArray results = new JSONArray();
         JSONObject result;
         for (var e : nameToEnum.entrySet()) {
             PrivilegeBase pb = (PrivilegeBase) e.getValue();
             result = new JSONObject();
             result.put("k", pb.name());
-            result.put("v", pb.getLabel());
+            if(!concatLabel) {
+                result.put("c", pb.getCategory());
+                if(pb.getGroup() != null) {
+                    result.put("g", pb.getGroup().getLabel());
+                }
+                result.put("v", pb.getLabel());
+            } else {
+                result.put("v", (pb.getGroup() != null ? pb.getGroup().getLabel() : pb.getCategory()) + ": " + pb.getLabel());
+            }
             result.put("hidden", String.valueOf(pb.isHidden()));
             results.put(result);
         }

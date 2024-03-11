@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+  <div layout:fragment="content" th:attr="data-menu-item=${menuItem}">
+    <th:block th:if="${genericViewNavigationFragment != null}">
+      <nav th:replace="~{__${genericViewNavigationFragment}__}"></nav>
+    </th:block>
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center ">
+        <a th:href="${@url.all(organizationEntityId, organizationRelatedObjectKey)}" class="mr-2"><i class="fas fa-arrow-left mr-1"></i><th:block th:text="#{template.all}">All</th:block></a>
+        <div class="card-header-buttons">
+          <a class="btn-primary btn btn-sm ml-4" th:href="${@url.form(organizationEntityId, organizationRelatedObjectKey, organizationRelatedEntity.id)}">Edit</a>
+        </div>
+      </div>
+      <div class="card-header py-0 d-flex flex-row align-items-center">
+        <h6 class="m-0 font-weight-bold" th:if="${navigationFragment == null}" th:text="${#strings.capitalize(organizationRelatedObjectKey)}"></h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <th:block th:each="entry : ${organizationRelatedObjectMap}">
+              <th:block th:if="${!#strings.contains('requiredReadPrivilege requiredWritePrivilege', entry.key)}">
+                <tr th:replace="~{forms::show-tr-value(${entry.value}, ${@messages.getFieldLabel(null, entry.key)})}"/>
+              </th:block>
+            </th:block>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

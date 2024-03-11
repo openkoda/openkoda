@@ -44,6 +44,10 @@ public class SearchIndexUpdaterJob implements LoggingComponentWithRequestId {
         for (String s: SearchableRepositories.getSearchIndexUpdates()) {
             entityManager.createNativeQuery(s).executeUpdate();
         }
+//        dynamic entities
+        for (String s: SearchableRepositories.getSearchIndexUpdatesForDynamicEntities()) {
+            entityManager.createNativeQuery(s).executeUpdate();
+        }
     }
 
 }

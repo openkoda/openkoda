@@ -4,8 +4,9 @@
 <body>
 <div class="container-fluid">
 
-    <div layout:fragment="content" th:attr="data-menu-item='files'">
-        <div th:replace="~{forms::global-file-upload('*/*', false, '')}"/>
+    <div layout:fragment="content" th:attr="data-menu-item='configuration'">
+        <nav th:replace="~{navigation-fragments::configuration-nav-tabs('files')}"></nav>
+        <div th:replace="~{forms::global-file-upload('*/*', false, 'first-card')}"/>
         <div th:replace="~{file-tables::file(${filePage}, 'File')}"/>
     </div>
 </div>

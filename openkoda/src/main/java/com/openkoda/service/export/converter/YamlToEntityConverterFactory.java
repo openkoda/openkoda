@@ -21,7 +21,10 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.converter;
 
-import com.openkoda.core.flow.LoggingComponent;
+import com.openkoda.controller.ComponentProvider;
+import com.openkoda.model.OpenkodaModule;
+import com.openkoda.model.Organization;
+import com.openkoda.service.export.dto.ComponentDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class YamlToEntityConverterFactory implements LoggingComponent {
+public class YamlToEntityConverterFactory extends ComponentProvider {
     private static Map<Class<?>, YamlToEntityConverter<?, ?>> parentConverters = new HashMap<>();
 
     @Autowired
@@ -45,7 +48,30 @@ public class YamlToEntityConverterFactory implements LoggingComponent {
 
     @SuppressWarnings("unchecked")
     public <T, D> T processYamlDto(D dto, String filePath) {
-        debug("[processYamlDto]");
+        debug("[processYamlDto] {}", filePath);
+
+        if (dto == null) {
+            return null;
+        }
+        Long organizationId = ((ComponentDto) dto).getOrganizationId();
+        if(organizationId != null && !repositories.unsecure.organization.existsById(organizationId)){
+            repositories.unsecure.organization.save(new Organization(organizationId));
+        }
+        if(!repositories.unsecure.openkodaModule.existsByName(((ComponentDto) dto).getModule())) {
+            repositories.unsecure.openkodaModule.save(new OpenkodaModule(((ComponentDto) dto).getModule()));
+        }
+
+        YamlToEntityConverter<T, D> converter = (YamlToEntityConverter<T, D>) parentConverters.get(dto.getClass());
+
+        if (converter == null) {
+            throw new IllegalArgumentException("No parent converter found for DTO class: " + dto.getClass().getName());
+        }
+        debug("[processYamlDto] Converting dto: " + dto.getClass().getName());
+        return converter.convertAndSave(dto, filePath);
+    }
+
+    public <T, D> T processYamlDto(D dto, String filePath, Map<String, String> resources) {
+        debug("[processYamlDto] {}", filePath);
 
         if (dto == null) {
             return null;
@@ -57,6 +83,6 @@ public class YamlToEntityConverterFactory implements LoggingComponent {
             throw new IllegalArgumentException("No parent converter found for DTO class: " + dto.getClass().getName());
         }
         debug("[processYamlDto] Converting dto: " + dto.getClass().getName());
-        return converter.convertAndSave(dto, filePath);
+        return converter.convertAndSave(dto, filePath, resources);
     }
 }

@@ -23,7 +23,7 @@ package com.openkoda.dto.system;
 
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.dto.OrganizationRelatedObject;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 
 
 /**

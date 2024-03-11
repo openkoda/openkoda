@@ -23,7 +23,7 @@ package com.openkoda.service;
 
 import com.openkoda.AbstractTest;
 import com.openkoda.core.service.FrontendResourceService;
-import com.openkoda.model.FrontendResource;
+import com.openkoda.model.component.FrontendResource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;

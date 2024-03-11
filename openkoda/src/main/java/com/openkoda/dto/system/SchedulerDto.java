@@ -28,17 +28,23 @@ public class SchedulerDto implements CanonicalObject, OrganizationRelatedObject 
 
     public SchedulerDto() {}
 
-    public SchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly) {
+    public SchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly, boolean async) {
         this.cronExpression = cronExpression;
         this.eventData = eventData;
         this.organizationId = organizationId;
         this.onMasterOnly = onMasterOnly;
+        this.async = async;
+    }
+
+    public SchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly) {
+        this(cronExpression, eventData, organizationId, onMasterOnly, false);
     }
 
     public String cronExpression;
     public String eventData;
     public Long organizationId;
     public boolean onMasterOnly;
+    private boolean async;
 
     public String getCronExpression() {
         return cronExpression;
@@ -70,6 +76,14 @@ public class SchedulerDto implements CanonicalObject, OrganizationRelatedObject 
 
     public void setOnMasterOnly(boolean onMasterOnly) {
         this.onMasterOnly = onMasterOnly;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
     }
 
     @Override

@@ -7,17 +7,18 @@
     <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}">
 
     <!-- Custom CSS -->
-    <th:block th:replace="~{frontend-resource/head-customization::css}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
     <!-- App css -->
-    <link th:href="@{/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
+    <link th:href="@{~/vendor/openkoda/app.css(v=${resourcesVersion})}" rel="stylesheet" type="text/css">
     <!-- Custom head scripts -->
-    <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::scripts}"></th:block>
+
 </head>
 <body class="h-100 home">
 <div class="container h-100">
     <div class="h-50 d-flex flex-column align-items-center justify-content-center">
         <div class="mb-5">
-            <th:block th:replace="~{/frontend-resource/main-page-fragments::logo}"></th:block>
+            <th:block th:replace="~{/frontend-resource/global/main-page-fragments::logo}"></th:block>
         </div>
         <h1 th:text="${'Error ' + errorHttpStatus.value}"></h1>
         <th:block th:if="${requestId != null}">

@@ -262,5 +262,8 @@ public class File extends OpenkodaEntity {
         return requiredWritePrivilege;
     }
 
-
+    @Override
+    public String toString() {
+        return id + "\t" + contentType + "\t" + filename;
+    }
 }

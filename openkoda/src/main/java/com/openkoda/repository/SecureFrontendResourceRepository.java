@@ -21,8 +21,8 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.repository;
 
-import com.openkoda.model.FrontendResource;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
+import com.openkoda.model.component.FrontendResource;
 import org.springframework.stereotype.Repository;
 
 import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCE;
@@ -33,7 +33,7 @@ import static com.openkoda.model.common.ModelConstants.DEFAULT_ORGANIZATION_RELA
  */
 @Repository
 @SearchableRepositoryMetadata(
-        entityKey = FRONTENDRESOURCE,
+        entityKey = "frontendResource",
         descriptionFormula = "(''||name)",
         entityClass = FrontendResource.class,
         searchIndexFormula = "lower(name || ' ' || type) || ' ' ||"

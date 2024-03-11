@@ -204,7 +204,7 @@ app.submitToUrlAndReplace = function( domForm , targetUrl) {
 app.confirmAndSubmitAndCallback = function(confirmText, domForm, callback ) {
   $(domForm).dirty("setAsClean");
   var confirmation = confirm(confirmText);
-  if(confirmation){
+  if(confirmation === true){
       let form = $(domForm);
       let postParam = {
           url : form.attr('action'),
@@ -220,6 +220,25 @@ app.confirmAndSubmitAndCallback = function(confirmText, domForm, callback ) {
       };
       $.post(postParam);
   }
+};
+
+app.confirmAndSendGetAndCallback = function(confirmText, targetUrl, callback ) {
+    var confirmation = confirm(confirmText);
+    if(confirmation === true){
+        let getParam = {
+            url : targetUrl,
+            success : (data) => {
+                if (app.assertNotRedirectToLogin(data)) {
+                    if(typeof callback == "function") {
+                        callback( data );
+                    } else if (callback !== null) {
+                        eval(callback)( data );
+                    }
+                }
+            }
+        };
+        $.get(getParam);
+    }
 };
 
 app.confirmSubmitToUrlAndCallback = function(confirmText, domForm, targetUrl, callback) {
@@ -239,9 +258,18 @@ app.dictionaryToOptions = function (dictionaryName, fieldName, selectedValue, sh
     try {
         var arr = JSON.parse(a)
         arr.forEach(e => {
+            let label = e['v'];
+            let data = '';
+            if(Object.hasOwn(e['v'], 'v')) {
+                let option = e['v'];
+                label = option['v'];
+                Object.keys(option).forEach(key => {
+                    data += `data-${key}="${option[key]}" `;
+                })
+            }
             let selected = (selectedValue === e['k']) ? " selected='selected'" : "";
             let disabled = (e['disabled'] === false) ? " disabled " : "";
-            result = result + "<option value='" + e['k'] + "'" + selected + disabled + ">" + e['v'] + "</option>";
+            result = result + `<option value="${e['k']}" ${selected} ${disabled} ${data}>${label}</option>`;
         })
     } catch (exception) {
         for (e in a) {
@@ -256,70 +284,70 @@ app.dictionaryToRadiobuttonTable = function (dictionaryName, fieldName, selected
     let a = commonDictionaries[dictionaryName];
     let result = "";
     let fieldNameClass = "radio-option " + fieldName.replace(".", "-")
-    try {
-        let arr = JSON.parse(a)
-        arr.forEach(e => {
-            let row = e['v'];
-            let key = e['k'];
-            let isArray = Array.isArray(row);
-            let labels = "";
-            if (isArray) {
-                for (td in row) {
-                    labels = labels + "<td class='" + fieldNameClass + "'>" + row[td] + "</td>"
-                }
-            } else {
-                labels = "<td class='" + fieldNameClass + "'>" + row + "</td>";
+    let arr = JSON.parse(a)
+    arr.forEach(e => {
+        let row = Object.hasOwn(e, 'v') ? e['v'] : a[e];
+        let isArray = Array.isArray(row);
+        let labels = "";
+        if (isArray) {
+            for (td in row) {
+                labels = labels + "<td class='" + fieldNameClass + "'>" + row[td] + "</td>"
             }
-            let selected = (!!selectedValue && selectedValue.toString() === e) ? " checked='checked'" : "";
-            result += "<tr><td><input class='" + fieldNameClass + "' type='radio'  name='" + fieldName + "' value='" + key + "'" + selected + "/></td>" + labels + "</tr>";
-        })
-    } catch (exception) {
-        for (e in a) {
-            let row = a[e];
-            let isArray = Array.isArray(row);
-            let labels = "";
-            if (isArray) {
-                for (td in row) {
-                    labels = labels + "<td class='" + fieldNameClass + "'>" + row[td] + "</td>"
-                }
-            } else {
-                labels = "<td class='" + fieldNameClass + "'>" + row + "</td>";
-            }
-            let selected = (!!selectedValue && selectedValue.toString() === e) ? " checked='checked'" : "";
-            result += "<tr><td><input class='" + fieldNameClass + "' type='radio'  name='" + fieldName + "' value='" + e + "'" + selected + "/></td>" + labels + "</tr>";
+        } else {
+            labels = row ;
         }
-    }
+        let val = Object.hasOwn(e, 'k') ? e['k'] : e;
+        let selected = (!!selectedValue && selectedValue.toString() === val) ? " checked='checked'" : "";
+        result += `<tr><td class="${fieldNameClass}"><input type="radio" name="${fieldName}" value="${val}" ${selected}/><label class="checkbox-label">${labels}</label></td></tr>`;
+
+    })
     return result;
 };
 
 app.createFileGalleryCard = function(fieldName, file, selected, multipleSelection, entityRelated) {
-    let isImage = file.contentType.indexOf("image/") == 0;
-    let isVideo = file.contentType.indexOf("video/") == 0;
     let selectedPart = selected ? " checked='checked'" : "";
     let fieldType = multipleSelection ? "checkbox" : "radio";
 
     let cardId = "file-card-" + file.id;
     let confirmationText = "Are you sure?";
-    let callback = "data => app.removeElemOnSuccess(&quot;" + cardId + "&quot;, data, function() {alert(&quot;File could not be deleted.&quot;)})";
+    let callback = `data => app.removeElemOnSuccess(&quot;${cardId}&quot;, data, function() {alert(&quot;File could not be deleted.&quot;)})`;
+    let deleteButton = "";
+    let checkbox = "";
+    let select = `<div style='padding:5px;' class=''><span style='display:inline-block;vertical-align: baseline; width:1.25em;'><input type='${fieldType}' name='${fieldName}' value='${file.id}' ${selectedPart}/></span>Select<br/>`;
+    let divClose = "</div>";
+    if(entityRelated) {
+        deleteButton = `<button type='button' class='files-btn btn btn-i btn-sm mr-1' onclick='app.confirmSubmitToUrlAndCallback(&quot;${confirmationText}&quot;, this.form, &quot;${file.deleteUrl}&quot;,${callback})'><i class='fas fa-trash-alt'></i></button>`;
+        checkbox = `<input type='checkbox' name='${fieldName}' value='${file.id}' checked='checked' style='visibility:hidden;'/>`;
+        select = "";
+        divClose = "";
+    }
 
-    return "<div id='" + cardId + "' class='card file-card'>"
-           + (entityRelated? "" : "<div style='padding:5px;' class=''><span style='display:inline-block;vertical-align: baseline; width:1.25em;'><input type='" + fieldType + "' name='" + fieldName + "' value='" + file.id + "'" + selectedPart + "/></span>Select<br/>")
-           + (entityRelated? "<input type='checkbox' name='" + fieldName + "' value='" + file.id + "'" + " checked='checked' " +"style='visibility:hidden;'/>" : "")
-           + "<p class='card-text' style='font-size:0.75em'>" + file.filename + "</p>"
-           + (isImage ? "<img class='' style='object-fit: cover; width:100%; height:150px;margin: 0 auto;' src='" + file.downloadUrl + "'/>" :
-                (isVideo ? "<video controls width='100%' height='150'><source src='" + file.downloadUrl + "'/></video>" : ""))
-           + (entityRelated? "" : "</div>")
-           + "<div>"
-           + "<button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithPrev(&quot;file-card-" + file.id + "&quot;)' type='button'>"
-           + "<i class='fas fa-chevron-left'></i></button>"
-           + "<button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithNext(&quot;file-card-" + file.id + "&quot;)' type='button'>"
-           + "<i class='fas fa-chevron-right'></i></button>"
-           + "</div>"
-           + "<div>"
-           + "<a class='files-btn btn btn-i btn-sm m-1' href='" + file.downloadUrl + "' download='" + file.filename + "'><i class='fas fa-download'></i></a>"
-           + (entityRelated? "<button type='button' class='files-btn btn btn-i btn-sm mr-1' onclick='app.confirmSubmitToUrlAndCallback(&quot;" + confirmationText + "&quot;, this.form, &quot;" + file.deleteUrl + "&quot;," + callback + ")'><i class='fas fa-trash-alt'></i></button>" : "")
-           + "</div>"
-           + "</div>"
+    let contentType = "";
+    if(file.contentType.indexOf("image/") === 0) {
+        contentType = `<img style='object-fit: cover; width:100%; height:150px;margin: 0 auto;' src='${file.downloadUrl}'></img>`;
+    } else if (file.contentType.indexOf("video/") === 0) {
+        contentType = `<video controls width='100%' height='150'><source src='${file.downloadUrl}'></video>`;
+    } else if (file.contentType.indexOf("application/pdf") === 0) {
+        contentType = `<i class='fas fa-file-pdf fa-4x'></i>`;
+    }
+
+    return `<div id='${cardId}' class='card file-card'>
+           ${select}
+           ${checkbox}
+           <p class='card-text' style='font-size:0.75em'>${file.filename}</p>
+           ${contentType}
+           ${divClose}
+           <div>
+           <button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithPrev(&quot;file-card-${file.id}&quot;)' type='button'>
+           <i class='fas fa-chevron-left'></i></button>
+           <button class='btn btn-i btn-sm m-1 files-btn' onclick='app.swapWithNext(&quot;file-card-${file.id}&quot;)' type='button'>
+           <i class='fas fa-chevron-right'></i></button>
+           </div>
+           <div>
+           <a class='files-btn btn btn-i btn-sm m-1' href='${file.downloadUrl}' download='${file.filename}'><i class='fas fa-download'></i></a>
+           ${deleteButton}
+           </div>
+           </div>`
            ;
 
 }
@@ -370,51 +398,62 @@ app.dictionaryToFileGallery = function(dictionaryName, fieldName, selectedValues
    return result;
 };
 
+app.dictionaryToCheckboxTableGrouped = function (dictionaryName, fieldName, selectedValuesArray) {
+    let a = commonDictionaries[dictionaryName];
+    let result = "";
+    selectedValuesArrayWithStringIds = selectedValuesArray == null ? [] : selectedValuesArray.map(a => a + "");
+    let arr = JSON.parse(a);
+    if(arr.some((o) => 'c' in o)) {
+        let arrByCategories = Object.groupBy(arr, ({ c }) => c)
+        Object.keys(arrByCategories).forEach(cat => {
+                result += `<div class="checkbox-table-cat">${cat}</div>`
+                if(arrByCategories[cat].some((o) => 'g' in o)) {
+                    let arrByGroups = Object.groupBy(arr, ({ g }) => g)
+                    result += `<div class="row">`;
+                    Object.keys(arrByGroups).forEach(group => {
+                        if(group !== 'undefined') {
+                            result += `<div class="checkbox-table-group col-3">`;
+                            result += `<div class="checkbox-table-group-name">${group}</div>`
+                            result += app.getCheckboxTableRows(arrByGroups[group], fieldName);
+                            result += `</div>`;
+                        }
+                    });
+                    result += `</div>`;
+                } else {
+                    result += app.getCheckboxTableRows(arrByCategories[cat], fieldName);
+                }
+        });
+    }
+    return result;
+}
+
 app.dictionaryToCheckboxTable = function (dictionaryName, fieldName, selectedValuesArray) {
-
-     let a = commonDictionaries[dictionaryName];
-     let result = "";
-     selectedValuesArrayWithStringIds = selectedValuesArray == null ? [] : selectedValuesArray.map(a => a + "");
-     try {
-         var arr = JSON.parse(a)
-         arr.forEach(e => {
-             let row = e['v'];
-             let isArray = Array.isArray(row);
-             let labels = "";
-             if (isArray) {
-                 for (td in row) {
-                     labels = labels + "<td>" + row[td] + "</td>"
-                 }
-             } else {
-                 labels = "<td>" + row + "</td>";
-             }
-             let selected = "";
-             selected = (selectedValuesArrayWithStringIds.indexOf(e['k']) >= 0) ? " checked='checked'" : "";
-             result += "<tr><td class='td-checkbox'><input type='checkbox' name='" + fieldName + "' value='" + e['k'] + "'" + selected + "/></td>" +
-                 labels + "</tr>";
-
-         })
-     }
-     catch {
-         for (e in a) {
-             let row = a[e];
-             let isArray = Array.isArray(row);
-             let labels = "";
-             if (isArray) {
-                 for (td in row) {
-                     labels = labels + "<td>" + row[td] + "</td>"
-                 }
-             } else {
-                 labels = "<td>" + row + "</td>";
-             }
-             let selected = "";
-             selected = (selectedValuesArrayWithStringIds.indexOf(e) >= 0) ? " checked='checked'" : "";
-             result += "<tr><td class='td-checkbox'><input type='checkbox' name='" + fieldName + "' value='" + e + "'" + selected + "/></td>" +
-                 labels + "</tr>";
-         }
-     }
-     return result;
+    let a = commonDictionaries[dictionaryName];
+    selectedValuesArrayWithStringIds = selectedValuesArray == null ? [] : selectedValuesArray.map(a => a + "");
+    let arr = JSON.parse(a);
+    return app.getCheckboxTableRows(arr, fieldName);
  };
+
+app.getCheckboxTableRows = function (arr, fieldName) {
+    let result = "";
+    arr.forEach(e => {
+        let row = Object.hasOwn(e, 'v') ? e['v'] : a[e];
+        let isArray = Array.isArray(row);
+        let labels = "";
+        if (isArray) {
+            for (td in row) {
+                labels = labels + "<td>" + row[td] + "</td>"
+            }
+        } else {
+            labels = row ;
+        }
+        let val = Object.hasOwn(e, 'k') ? e['k'] : e;
+        let selected = (selectedValuesArrayWithStringIds.indexOf(val) >= 0) ? " checked='checked'" : "";
+        result += `<div class=""><input type="checkbox" name="${fieldName}" value="${val}" ${selected}/><label class="checkbox-label">${labels}</label></div>`;
+
+    })
+    return result;
+}
 
 app.dictionaryTableHeader = function(dictionaryName){
     let row = commonDictionariesHeaders[dictionaryName];
@@ -445,9 +484,10 @@ app.populateRadiobuttonTable = function( selectId, fieldName, fieldValue, datali
     elem.innerHTML = header + app.dictionaryToRadiobuttonTable(datalistId, fieldName, fieldValue);
 };
 
-app.populateCheckboxTable = function( selectId, fieldName, fieldValuesArray, datalistId) {
+app.populateCheckboxTable = function( selectId, fieldName, fieldValuesArray, datalistId, grouped) {
     let elem = document.getElementById(selectId);
-    elem.innerHTML = app.dictionaryToCheckboxTable(datalistId, fieldName, fieldValuesArray);
+    elem.innerHTML = grouped ? app.dictionaryToCheckboxTableGrouped(datalistId, fieldName, fieldValuesArray)
+        : app.dictionaryToCheckboxTable(datalistId, fieldName, fieldValuesArray);
 };
 
 app.populateFileGallery = function(selectId, fieldName, fieldValuesArray, datalistId, allowedContentType, multipleSelection, entityRelated) {
@@ -455,11 +495,18 @@ app.populateFileGallery = function(selectId, fieldName, fieldValuesArray, datali
     elem.innerHTML = app.dictionaryToFileGallery(datalistId, fieldName, fieldValuesArray, allowedContentType, multipleSelection, entityRelated);
 };
 
-app.selectAndReplace = function( selector, url ) {
+app.selectReplaceAndRefresh = function( selector, url ) {
     let elem = $(selector);
     $.get(url, function ( data ) {
         elem.replaceWith( data );
         app.refreshView();
+    });
+};
+
+app.getAndReplace = function( selector, url ) {
+    let elem = $(selector);
+    $.get(url, function ( data ) {
+        elem.replaceWith( data );
     });
 };
 
@@ -717,7 +764,7 @@ app.manageDropdownSwitch = function (sectionClass, selectedValue) {
     selectedElements.css("display", "block");
 }
 
-app.copyUrlToClipboard = function (url, copiedMessage) {
+app.copyToClipboard = function (url, copiedMessage) {
     var textToCopy = url;
     var tempInput = document.createElement("textarea");
     tempInput.value = textToCopy;
@@ -767,3 +814,10 @@ app.initHtmlIdHolder = function(frontendResourceId, editorId, selector) {
     document.querySelector(selector).appendChild(idHolder);
 }
 
+app.passCurrentQueryParams = function (url) {
+    let queryParams = window.location.search;
+    if(queryParams.length && url.indexOf('?') > -1) {
+        queryParams = queryParams.replace('?','&');
+    }
+    return url + queryParams;
+}

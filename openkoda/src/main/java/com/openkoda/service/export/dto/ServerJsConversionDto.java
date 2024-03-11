@@ -21,7 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.dto;
 
-public class ServerJsConversionDto {
+public class ServerJsConversionDto extends ComponentDto {
 
     private String name;
     private String arguments;
@@ -59,4 +59,5 @@ public class ServerJsConversionDto {
     public void setModel(String model) {
         this.model = model;
     }
+
 }

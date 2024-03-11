@@ -204,7 +204,7 @@ public class WebSecurityConfig implements URLConstants {
                         .rememberMeParameter(rememberMeParameter)
                         .key(rememberMeKey)
                 )
-                ;
+        ;
     }
     public HttpSecurity apiAuthHttpSecurity(HttpSecurity http) throws Exception {
         return http.securityMatcher(_API_AUTH_ANT_EXPRESSION)

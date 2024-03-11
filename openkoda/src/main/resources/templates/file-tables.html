@@ -16,7 +16,8 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th th:replace="~{tables::asort('id', '#', 'file', ${filePage})}"></th>
+                    <th th:replace="~{tables::asort('id', #{template.id}, 'file', ${filePage})}"></th>
+                    <th th:replace="~{tables::asort('publicFile', #{template.public}, 'file', ${filePage})}"></th>
                     <th th:replace="~{tables::asort('filename', #{template.file}, 'file', ${filePage})}"></th>
                     <th th:replace="~{tables::asort('contentType', #{template.contentType}, 'file', ${filePage})}"></th>
                     <th th:replace="~{tables::asort('size', #{template.size}, 'file', ${filePage})}"></th>
@@ -26,25 +27,46 @@
                 </thead>
                 <tbody>
                 <tr th:each="a : ${filePage.content}">
-                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.referenceString}">1</a></td>
-                    
-                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.filename}">Coca-Cola</a></td>
-                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.contentType}">Coca-Cola</a></td>
-                    <td><a th:href="${@url.form(a.organizationId, 'file', a.id)}" th:text="${a.size}">Coca-Cola</a></td>
+                    <td><span th:text="${a.id}">1</span></td>
+                    <td>
+                        <th:block th:if="${a.publicFile}">
+                            <i class="fas fa-circle fa-sm fa-fw text-primary-light" data-toggle="tooltip"
+                               data-placement="top" th:title="#{template.public}"></i>
+                        </th:block>
+                    </td>
+                    <td><span th:text="${a.filename}">Coca-Cola</span></td>
+                    <td><span th:text="${a.contentType}">Coca-Cola</span></td>
+                    <td><span th:text="${a.size}">Coca-Cola</span></td>
                     <td><img th:if="${a.isImage()}" style="width:100px" th:src="${a.toFileDto().downloadUrl}"/></td>
                     <td>
-                        <div class="tbuttons d-flex">
+                        <div class="table-row-btns">
+                            <th:block th:replace="~{forms::single-icon-post-form-with-confirm(${@url.remove(a.organizationId, 'file', a.id)},
+                             'fas fa-trash text-danger', #{template.remove}, 'Are you sure you want to remove file '+ ${a.id} + '?')}"/>
                             <th:block th:if="${a.isImage()}">
-                                <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=1024')},
-                                 'Rescale to width 1024', #{template.confirmationPrompt}, app.showMessage, 'btn-sm btn-primary text-nowrap')}"/>
-                                <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=400')},
-                                 'Rescale to width 400', #{template.confirmationPrompt}, app.showMessage, 'btn-sm btn-primary text-nowrap')}"/>
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-maximize text-primary"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink">
+                                        <th:block th:replace="~{forms::single-dropdown-item-post-with-confirm-callback(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=1024')},
+                                         '1024', #{template.confirmationPrompt}, app.showMessageAndReload)}"/>
+                                        <th:block th:replace="~{forms::single-dropdown-item-post-with-confirm-callback(${@url.operation(a.organizationId, 'file', a.id, '/rescale?w=400')},
+                                         '400', #{template.confirmationPrompt}, app.showMessageAndReload)}"/>
+
+                                    </div>
+                                </div>
                             </th:block>
-                            <a class="btn btn-sm btn-primary text-nowrap" th:href="'javascript:app.copyUrlToClipboard(\'' + ${@url.getAbsoluteFileURL(a)} + '\', \'Copied\')'">
-                                <th:block th:text="#{template.copyAbsoluteURLPath}">Copy public path</th:block>
+                            <a class="" th:href="'javascript:app.copyToClipboard(\'' + ${@url.getAbsoluteFileURL(a)} + '\', \'Copied\')'"
+                               data-toggle="tooltip" data-placement="top" th:title="#{template.copyAbsoluteURLPath}">
+                                <i class="fas fa-link text-primary"></i>
                             </a>
-                            <th:block th:replace="~{forms::single-button-post-form-with-confirm-class(${@url.remove(a.organizationId, 'file', a.id)},
-                             #{template.remove}, 'Are you sure you want to remove file '+ ${a.id} + '?', 'text-nowrap')}"/>
+                            <a class="" th:href="${@url.form(a.organizationId, 'file', a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
+                                <i class="fas fa-pen-to-square text-primary"></i>
+                            </a>
+
+
                         </div>
                     </td>
                 </tr>

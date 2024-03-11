@@ -4,7 +4,8 @@
 <body>
 <div class="container-fluid">
 
-    <div layout:fragment="content" th:attr="data-menu-item='roles'">
+    <div layout:fragment="content" th:attr="data-menu-item='security'">
+        <nav th:replace="~{navigation-fragments::security-nav-tabs('roles')}"></nav>
         <div th:replace="~{tables::roles(${rolePage}, #{template.roles})}"/>
     </div>
 </div>

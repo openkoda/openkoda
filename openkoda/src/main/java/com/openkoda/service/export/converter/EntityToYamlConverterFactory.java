@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter;
 
 import com.openkoda.core.flow.LoggingComponent;
+import com.openkoda.model.common.ComponentEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +45,7 @@ public class EntityToYamlConverterFactory implements LoggingComponent {
     }
 
     @SuppressWarnings("unchecked")
-    public ZipOutputStream processEntityToYaml(Object entity, ZipOutputStream zipOut) {
+    public ZipOutputStream exportToZip(Object entity, ZipOutputStream zipOut) {
         debug("[processEntityToYaml]");
 
         EntityToYamlConverter<Object, Object> converter = (EntityToYamlConverter<Object, Object>) converterMap.get(entity.getClass());
@@ -52,12 +53,37 @@ public class EntityToYamlConverterFactory implements LoggingComponent {
         if(converter == null){
             throw new IllegalArgumentException("No parent converter found for entity " + entity.getClass().getName());
         }
-        converter.exportToYamlAndAddToZip(entity, zipOut);
+        converter.addToZip(entity, zipOut);
 
         return zipOut;
     }
+    public ComponentEntity exportToFile(ComponentEntity entity) {
+        debug("[processEntityToYaml]");
+
+        EntityToYamlConverter<Object, Object> converter = (EntityToYamlConverter<Object, Object>) converterMap.get(entity.getClass());
+
+        if(converter == null){
+            throw new IllegalArgumentException("No parent converter found for entity " + entity.getClass().getName());
+        }
+        converter.saveToFile(entity);
+        return entity;
+
+    }
+    public ComponentEntity removeExportedFiles(ComponentEntity entity){
+        EntityToYamlConverter<Object, Object> converter = (EntityToYamlConverter<Object, Object>) converterMap.get(entity.getClass());
+
+        if(converter == null){
+            throw new IllegalArgumentException("No parent converter found for entity " + entity.getClass().getName());
+        }
+        converter.removeExportedFiles(entity);
+        return entity;
+    }
     private static Class<?> getEntityType(EntityToYamlConverter<?, ?> converter) {
-        ParameterizedType type = (ParameterizedType) converter.getClass().getGenericInterfaces()[0];
+        if (converter.getClass().getGenericSuperclass().getClass().getName().equals(Class.class.getName())) {
+            return (Class<?>) converter.getClass().getGenericSuperclass();
+        }
+
+        ParameterizedType type = (ParameterizedType) converter.getClass().getGenericSuperclass();
         return (Class<?>) type.getActualTypeArguments()[0];
     }
 }

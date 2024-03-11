@@ -32,6 +32,7 @@ import jakarta.validation.Valid;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,6 +66,7 @@ public class RestrictedFrontendResourceController extends AbstractFrontendResour
                     _CN + "/{frontendResourcePath:" + EXCLUDE_SWAGGER_UI_REGEX + URL_WITH_DASH_REGEX + "$}/{subPath:" + FRONTENDRESOURCEREGEX + "$}"
             },
             method = {GET, POST})
+    @Transactional
     public Object openFrontendResourcePage(
             @PathVariable(value = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(value = "frontendResourcePath", required = false) String frontendResourcePath,
@@ -94,6 +96,7 @@ public class RestrictedFrontendResourceController extends AbstractFrontendResour
                     _CI + "/{frontendResourceId}/{subPath:" + FRONTENDRESOURCEREGEX + "$}"
             },
             method = {GET, POST})
+    @Transactional
     public Object openFrontendResourcePage(
             @PathVariable(value = ORGANIZATIONID, required = false) Long organizationId,
             @PathVariable(value = "frontendResourceId", required = false) Long frontendResourceId,

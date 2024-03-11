@@ -22,27 +22,33 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.core.flow.LoggingComponent;
-import com.openkoda.model.event.EventListenerEntry;
-import com.openkoda.service.export.converter.EntityToYamlConverter;
+import com.openkoda.model.component.event.EventListenerEntry;
 import com.openkoda.service.export.dto.EventListenerEntryConversionDto;
-import com.openkoda.service.export.util.ZipUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.zip.ZipOutputStream;
-
-import static com.openkoda.service.export.FolderPathConstants.EVENT_BASE_FILES_PATH;
+import static com.openkoda.service.export.FolderPathConstants.EVENT_;
+import static com.openkoda.service.export.FolderPathConstants.EXPORT_CONFIG_PATH_;
 
 @Component
-public class EventListenerEntryEntityToYamlConverter implements EntityToYamlConverter<EventListenerEntry, EventListenerEntryConversionDto>, LoggingComponent {
-
-    @Autowired
-    ZipUtils zipUtils;
+public class EventListenerEntryEntityToYamlConverter extends AbstractEntityToYamlConverter<EventListenerEntry, EventListenerEntryConversionDto> implements  LoggingComponent {
 
     @Override
-    public EventListenerEntryConversionDto exportToYamlAndAddToZip(EventListenerEntry entity, ZipOutputStream zipOut) {
-        debug("[exportToYamlAndAddToZip]");
+    public String getPathToContentFile(EventListenerEntry entity) {
+        return null;
+    }
 
+    @Override
+    public String getContent(EventListenerEntry entity) {
+        return null;
+    }
+
+    @Override
+    public String getPathToYamlComponentFile(EventListenerEntry entity) {
+        return getYamlDefaultFilePath(EXPORT_CONFIG_PATH_ + EVENT_, entity.getEventName(), entity.getOrganizationId());
+    }
+
+    @Override
+    public EventListenerEntryConversionDto getConversionDto(EventListenerEntry entity) {
         EventListenerEntryConversionDto dto = new EventListenerEntryConversionDto();
         dto.setConsumerClassName(entity.getConsumerClassName());
         dto.setEventName(entity.getEventName());
@@ -55,10 +61,8 @@ public class EventListenerEntryEntityToYamlConverter implements EntityToYamlConv
         dto.setStaticData2(entity.getStaticData2());
         dto.setStaticData3(entity.getStaticData3());
         dto.setStaticData4(entity.getStaticData4());
-
-        String resourceFilePath = zipUtils.setResourceFilePath(EVENT_BASE_FILES_PATH, entity.getEventName(), entity.getOrganizationId());
-        zipUtils.addToZipFile(dtoToYamlString(dto), resourceFilePath, zipOut);
-
+        dto.setModule(entity.getModuleName());
+        dto.setOrganizationId(entity.getOrganizationId());
         return dto;
     }
 }

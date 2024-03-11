@@ -40,8 +40,8 @@ import com.openkoda.dto.user.UserRoleDto;
 import com.openkoda.form.EventListenerForm;
 import com.openkoda.form.FrontendMappingDefinitions;
 import com.openkoda.form.SendEventForm;
-import com.openkoda.model.event.Event;
-import com.openkoda.model.event.EventListenerEntry;
+import com.openkoda.model.component.event.Event;
+import com.openkoda.model.component.event.EventListenerEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -112,7 +112,8 @@ public class AbstractEventListenerController extends ComponentProvider implement
         return Flow.init(eventListenerForm, eListenerForm)
                 .then(a -> services.validation.validateAndPopulateToEntity(eListenerForm, br,new EventListenerEntry()))
                 .thenSet(eventListenerEntity, a -> repositories.unsecure.eventListener.save(a.result))
-                .then(a -> services.eventListener.registerListenerClusterAware(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired(a.result))
+                .then(a -> services.eventListener.registerListenerClusterAware((EventListenerEntry) a.result))
                 .thenSet(eventListenerForm, a -> new EventListenerForm())
                 .execute();
     }
@@ -134,7 +135,8 @@ public class AbstractEventListenerController extends ComponentProvider implement
                 .then(a -> repositories.unsecure.eventListener.findOne(eventListenerId))
                 .then(a -> services.validation.validateAndPopulateToEntity(eListenerForm, br, a.result))
                 .then(a -> repositories.unsecure.eventListener.saveAndFlush(a.result))
-                .then(a -> services.eventListener.updateEventListenerClusterAware(a.result))
+                .then(a -> services.componentExport.exportToFileIfRequired(a.result))
+                .then(a -> services.eventListener.updateEventListenerClusterAware((EventListenerEntry) a.result))
                 .execute();
     }
 
@@ -150,6 +152,7 @@ public class AbstractEventListenerController extends ComponentProvider implement
         debug("[remove] ListenerId: {}", eventListenerId);
         return Flow.init(eventListenerId)
                 .thenSet(eventListenerEntityToUnregister, a -> repositories.unsecure.eventListener.findOne(eventListenerId))
+                .then(a -> services.componentExport.removeExportedFilesIfRequired(a.result))
                 .then(a -> repositories.unsecure.eventListener.deleteOne( a.result.getId() ) )
                 .then(a -> services.eventListener.unregisterEventListenerClusterAware(a.model.get(eventListenerEntityToUnregister)))
                 .execute();

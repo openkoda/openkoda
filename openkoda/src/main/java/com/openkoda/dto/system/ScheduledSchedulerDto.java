@@ -27,9 +27,14 @@ public class ScheduledSchedulerDto extends SchedulerDto {
 
     public ScheduledSchedulerDto() {}
 
-    public ScheduledSchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly, LocalDateTime scheduledAt) {
-        super(cronExpression, eventData, organizationId, onMasterOnly);
+    public ScheduledSchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly, boolean async, LocalDateTime scheduledAt) {
+        super(cronExpression, eventData, organizationId, onMasterOnly, async);
         this.scheduledAt = scheduledAt;
+    }
+    
+    public ScheduledSchedulerDto(String cronExpression, String eventData, Long organizationId, boolean onMasterOnly,
+            LocalDateTime scheduledAt) {
+        this(cronExpression, eventData, organizationId, onMasterOnly, false, scheduledAt);
     }
 
     public LocalDateTime scheduledAt;

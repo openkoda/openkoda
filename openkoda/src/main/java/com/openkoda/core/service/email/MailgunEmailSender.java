@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
+import com.openkoda.model.EmailConfig;
 import com.openkoda.model.file.File;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletContext;
@@ -77,16 +78,19 @@ public class MailgunEmailSender extends EmailSender {
     @Override
     public boolean sendEmail(String fullFrom, String fullTo, String subject, String html, String attachmentURL, List<File> attachments) {
         debug("[sendEmail] {} -> {} Subject: {}", fullFrom, fullTo, subject);
+        EmailConfig emailConfig = emailConfigRepository.findAll().stream().findFirst().orElse(null);
+
         RestTemplate rTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        String authorizationHeader = "Basic " + new String(Base64.getEncoder().encode(("api:" + mailgunApiKey).getBytes(Charset.defaultCharset())));
+        String mailgunKey = emailConfig != null ? StringUtils.defaultString(emailConfig.getMailgunApiKey(), mailgunApiKey) : mailgunApiKey;
+        String authorizationHeader = "Basic " + new String(Base64.getEncoder().encode(("api:" + mailgunKey).getBytes(Charset.defaultCharset())));
         headers.set("Authorization", authorizationHeader);
         MultiValueMap<String, Object> mvmap = new LinkedMultiValueMap<>();
-        mvmap.add("from", fullFrom);
+        mvmap.add("from", StringUtils.defaultIfBlank(emailConfig != null ? emailConfig.getFrom() : null, fullFrom) );
         mvmap.add("to", fullTo);
         mvmap.add("subject", subject);
-        mvmap.add("h:Reply-To", replyTo);
+        mvmap.add("h:Reply-To", StringUtils.defaultIfBlank(emailConfig != null ? emailConfig.getReplyTo() : null, replyTo) );
         if(StringUtils.isNotEmpty(appLogoPath)) {
             mvmap.add("inline", new ClassPathResource(appLogoPath));
         }

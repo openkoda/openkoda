@@ -21,49 +21,52 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.converter.impl;
 
-import com.openkoda.controller.ComponentProvider;
-import com.openkoda.model.ControllerEndpoint;
-import com.openkoda.model.FrontendResource;
-import com.openkoda.service.export.converter.EntityToYamlConverter;
+import com.openkoda.model.component.ControllerEndpoint;
+import com.openkoda.model.component.FrontendResource;
+import com.openkoda.repository.SecureFrontendResourceRepository;
 import com.openkoda.service.export.dto.ControllerEndpointConversionDto;
-import com.openkoda.service.export.util.ZipUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
-
-import java.util.zip.ZipOutputStream;
 
 import static com.openkoda.service.export.FolderPathConstants.*;
 
 @Component
-public class ControllerEndpointEntityToYamlConverter extends ComponentProvider implements EntityToYamlConverter<ControllerEndpoint, ControllerEndpointConversionDto> {
+public class ControllerEndpointEntityToYamlConverter extends AbstractEntityToYamlConverter<ControllerEndpoint, ControllerEndpointConversionDto> {
 
-    @Autowired
-    ZipUtils zipUtils;
+
+    @Inject
+    public SecureFrontendResourceRepository frontendResourceRepository;
 
     @Override
-    public ControllerEndpointConversionDto exportToYamlAndAddToZip(ControllerEndpoint entity, ZipOutputStream zipOut) {
-        debug("[exportToYamlAndAddToZip]");
-
-        FrontendResource frontendResource = repositories.secure.frontendResource.findOne(entity.getFrontendResourceId());
-
+    public String getPathToContentFile(ControllerEndpoint entity) {
+        FrontendResource frontendResource = frontendResourceRepository.findOne(entity.getFrontendResourceId());
         String orgPath = entity.getOrganizationId() == null ? "" : SUBDIR_ORGANIZATION_PREFIX + entity.getOrganizationId() + "/";
-
-        String entityExportPath = UI_COMPONENT_ + entity.getFrontendResource().getAccessLevel().getPath() + orgPath;
-        String codeFilePath = EXPORT_CODE_PATH_ + entityExportPath
+        String entityExportPath = UI_COMPONENT_ + frontendResource.getAccessLevel().getPath() + orgPath;
+        return EXPORT_CODE_PATH_ + entityExportPath
                 + String.format("%s-%s-%s.js", frontendResource.getName(), entity.getHttpMethod().name(), entity.getSubPath());
+    }
 
-        zipUtils.addToZipFile(entity.getCode(), codeFilePath, zipOut);
+    @Override
+    public String getContent(ControllerEndpoint entity) {
+        return entity.getCode();
+    }
 
+    @Override
+    public String getPathToYamlComponentFile(ControllerEndpoint entity) {
+        return null;
+    }
 
+    @Override
+    public ControllerEndpointConversionDto getConversionDto(ControllerEndpoint entity) {
         ControllerEndpointConversionDto dto = new ControllerEndpointConversionDto();
-        dto.setCode(codeFilePath);
+        dto.setCode(getResourcePathToContentFile(entity));
         dto.setHttpHeaders(entity.getHttpHeaders());
         dto.setHttpMethod(entity.getHttpMethod().name());
         dto.setModelAttributes(entity.getModelAttributes());
         dto.setSubpath(entity.getSubPath());
         dto.setResponseType(entity.getResponseType().name());
-
+        dto.setModule(entity.getModuleName());
+        dto.setOrganizationId(entity.getOrganizationId());
         return dto;
     }
-
 }

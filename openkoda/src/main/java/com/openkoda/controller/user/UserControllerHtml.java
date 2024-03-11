@@ -100,7 +100,9 @@ public class UserControllerHtml extends AbstractUserController {
                         HttpServletResponse response) {
         debug("[spoof] userId {}", userId);
         return spoofUser(userId, session, request, response)
-                .mav("generic-forms::go-to(url='" + pageAfterAuth + "')");
+                .mav(a -> "generic-forms::go-to(url='"
+                        + (a.get(organizationEntityId) != null ? services.url.organizationDashboard(a.get(organizationEntityId)) : pageAfterAuth)
+                        + "')");
     }
 
     @PreAuthorize(CHECK_IS_SPOOFED)
@@ -108,7 +110,7 @@ public class UserControllerHtml extends AbstractUserController {
     public Object exitSpoof(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
         debug("[exitSpoof]");
         return stopSpoofingUser(session, request, response)
-                .mav("generic-forms::go-to(url='" + pageAfterAuth + "')");
+                .mav("generic-forms::go-to(url='" + services.url.adminDashboard() + "')");
     }
 
     @PreAuthorize(CHECK_IS_THIS_USERID)
