@@ -20,9 +20,7 @@
 * **Use technology you already know**: Java, Spring Boot, JavaScript, HTML, Hibernate, PostgreSQL
 * **Extend as you wish**. Openkoda offers unlimited customization and integration options.
 
-Dashboard
-
-<img alt="openkoda-dashboard" src="https://github.com/openkoda/.github/assets/14223954/f67ca5bc-6592-4f08-86eb-c3ed11da5c53"/>
+![openkoda admin](https://github.com/openkoda/.github/assets/14223954/9acded2e-a3e6-4480-805e-7ac38ebdafc0)
 
 
 ### 📌Contents
@@ -224,34 +222,16 @@ Learn more in our [5-minute guide](https://github.com/openkoda/openkoda/blob/mai
 
 Timelog is a time tracking solution for companies of all sizes. It allows employees to record hours spent on specific tasks, while managers generate monthly performance reports. [Learn more](https://openkoda.com/time-tracking-software/).
 
-Timelog Calendar
-
-<img alt="openkoda-timelog-calendar" src="https://github.com/openkoda/openkoda/assets/14223954/01e0918e-f584-4b08-870a-40487af3d19e"/>
-
-Dashboard
-
-<img alt="openkoda-timelog-dashboard" src="https://github.com/openkoda/openkoda/assets/14223954/43d37711-3183-477c-9e4b-79c82dc4e11f"/>
-
-Report
-
-<img alt="openkoda-timelog-report" src="https://github.com/openkoda/openkoda/assets/14223954/cbe29749-1477-401d-bc7e-1169f0e5a012"/>
+![timelog user](https://github.com/openkoda/openkoda/assets/14223954/ecaf54d2-6112-4c45-a67f-15ac7b150452)
+![timelog admin](https://github.com/openkoda/openkoda/assets/14223954/e9669bef-5929-4fd6-92e8-8e35865a9261)
 
 **Insurance Policy Management** 
 
 Insurance Policy Management is a dynamic policy data storage tool with a variety of embeddable widgets for personalized customer and policy dashboards. 
 Widgets include: message senders, email schedulers, attachment and task lists, notes, and detailed customer/policy information to improve operational efficiency and customer engagement. [Learn more](https://openkoda.com/insurance-policy-management-software/).
 
-Organization Dashboard
-
-<img alt="openkoda-insurance-dashboard" src="https://github.com/openkoda/openkoda/assets/14223954/403d843e-39a4-48ad-8b0a-c49c73381c8f"/>
-
-Policy Data
-
-<img alt="openkoda-insurance-policy-data" src="https://github.com/openkoda/openkoda/assets/14223954/d11a2e41-7c77-4ad7-bd4f-0d0548532fc3"/>
-
-Client Overview
-
-<img alt="openkoda-insurance-client-overview" src="https://github.com/openkoda/openkoda/assets/14223954/97a28044-24ab-4690-8bcf-2b7353791982"/>
+![insurance user](https://github.com/openkoda/openkoda/assets/14223954/cb2f4065-59a4-42da-915d-4fd3d810fc19)
+![insurance admin](https://github.com/openkoda/openkoda/assets/14223954/ac47b4ba-246e-4772-b47c-69bbfe8512fe)
 
 
 ### 💙 Contribution
