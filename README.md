@@ -214,7 +214,8 @@ Application Templates can be easily extended, taking into account both the data 
 
 Learn more in our [5-minute guide](https://github.com/openkoda/openkoda/blob/main/openkoda/doc/5-minute-guide.md).
 
-**Timelog** is a time tracking solution for companies of all sizes. It allows employees to record hours spent on specific tasks, while managers generate monthly performance reports. [Learn more](https://openkoda.com/time-tracking-software/).
+**Timelog**
+Timelog is a time tracking solution for companies of all sizes. It allows employees to record hours spent on specific tasks, while managers generate monthly performance reports. [Learn more](https://openkoda.com/time-tracking-software/).
 
 Timelog Calendar
 <img alt="openkoda-timelog-calendar" src="https://github.com/openkoda/openkoda/assets/14223954/01e0918e-f584-4b08-870a-40487af3d19e"/>
@@ -225,7 +226,8 @@ Dashboard
 Report
 <img alt="openkoda-timelog-report" src="https://github.com/openkoda/openkoda/assets/14223954/cbe29749-1477-401d-bc7e-1169f0e5a012"/>
 
-**Insurance Policy Management** is a dynamic policy data storage tool with a variety of embeddable widgets for personalized customer and policy dashboards. 
+**Insurance Policy Management** 
+Insurance Policy Management is a dynamic policy data storage tool with a variety of embeddable widgets for personalized customer and policy dashboards. 
 Widgets include: message senders, email schedulers, attachment and task lists, notes, and detailed customer/policy information to improve operational efficiency and customer engagement. [Learn more](https://openkoda.com/insurance-policy-management-software/).
 
 Organization Dashboard
