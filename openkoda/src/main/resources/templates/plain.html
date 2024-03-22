@@ -13,7 +13,7 @@
     <title><th:block th:text="${@environment.getProperty('application.name')}"></th:block> - Dashboard</title>
 
     <!-- Custom CSS -->
-    <th:block th:replace="~{frontend-resource/head-customization::css}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
 
     <!-- Custom fonts -->
     <link href="/vendor/fontawesome-free/css/fontawesome.min.css" rel="stylesheet">
@@ -38,7 +38,7 @@
     <script th:src="@{~/vendor/openkoda/custom.js(v=${resourcesVersion})}"></script>
 
     <!-- Custom head scripts -->
-    <th:block th:replace="~{frontend-resource/head-customization::scripts}"></th:block>
+    <th:block th:replace="~{frontend-resource/global/head-customization::scripts}"></th:block>
 
     <!--Chart scripts-->
     <script src="/vendor/chart.js/chart.min.js"></script>
@@ -100,7 +100,7 @@
 
 <!-- Custom scripts for all pages-->
 <script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>
-
+<script th:src="@{~/vendor/openkoda/finalCustomizations.js(v=${resourcesVersion})}"></script>
 </body>
 
 </html>

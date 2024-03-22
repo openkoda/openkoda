@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -67,6 +68,16 @@ public class UtilServices implements LoggingComponent {
     @Autocomplete(doc="Parse date string to date object")
     public LocalDate parseDate(String s) {
         return LocalDate.parse(s);
+    }
+    @Autocomplete(doc="Parse time string to time object")
+    public LocalTime parseTime(String s) {
+        return LocalTime.parse(s);
+    }
+    @Autocomplete(doc="Parse date time string to date time object")
+    public LocalDateTime parseDateTime(String s, String t) {
+        LocalTime time = LocalTime.parse(t);
+        LocalDate date = LocalDate.parse(s);
+        return date.atTime(time);
     }
     @Autocomplete(doc="Get string value of the object")
     public String toString(Object o) {

@@ -35,6 +35,7 @@ public class FrontendResourceConversionDto extends ComponentDto{
     private String resourceType;
     private String content;
     private List<ControllerEndpointConversionDto> controllerEndpoints;
+    public boolean embeddable;
 
     public boolean getIncludeInSitemap() {
         return includeInSitemap;
@@ -98,5 +99,17 @@ public class FrontendResourceConversionDto extends ComponentDto{
 
     public void setControllerEndpoints(List<ControllerEndpointConversionDto> controllerEndpoints) {
         this.controllerEndpoints = controllerEndpoints;
+    }
+
+    public boolean isEmbeddable() {
+        return embeddable;
+    }
+
+    public boolean getEmbeddable() {
+        return embeddable;
+    }
+
+    public void setEmbeddable(boolean embeddable) {
+        this.embeddable = embeddable;
     }
 }

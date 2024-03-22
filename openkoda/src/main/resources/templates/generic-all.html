@@ -31,7 +31,9 @@
             <tbody>
             <tr th:each="a,it : ${organizationRelatedEntityPage.content}">
               <td><span th:text="${a.id}">1</span></td>
-              <td th:each="tableValue: ${genericTableViewList.get(it.index)}" th:text="${tableValue}"></td>
+              <td th:each="tableValue: ${genericTableViewList.get(it.index)}"
+                  th:text="(${T(org.apache.commons.lang3.math.NumberUtils).isCreatable(tableValue)} and ${#strings.contains(tableValue,'.')}) ? ${#numbers.formatDecimal(tableValue,3,'COMMA',2,'POINT')} : ${tableValue}"
+                  th:class="${T(org.apache.commons.validator.GenericValidator).isDate(tableValue, 'MM/dd/yy', false)}? 'text-nowrap'"></td>
               <td>
                 <div class="table-row-btns">
                   <th:block th:replace="~{forms::single-icon-post-form-with-confirm(

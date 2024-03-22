@@ -107,6 +107,7 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
         frontendResource.setResourceType(dto.getResourceType());
         frontendResource.setOrganizationId(dto.getOrganizationId());
         frontendResource.setModuleName(dto.getModule());
+        frontendResource.setEmbeddable(dto.isEmbeddable());
         return frontendResource;
     }
 }

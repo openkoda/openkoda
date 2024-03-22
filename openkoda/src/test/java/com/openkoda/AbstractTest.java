@@ -34,7 +34,6 @@ import com.openkoda.model.User;
 import com.openkoda.repository.FrontendResourceRepository;
 import com.openkoda.repository.event.EventListenerRepository;
 import com.openkoda.repository.event.SchedulerRepository;
-import com.openkoda.repository.event.SecureSchedulerRepository;
 import com.openkoda.repository.organization.OrganizationRepository;
 import com.openkoda.repository.task.EmailRepository;
 import com.openkoda.repository.task.HttpRequestTaskRepository;

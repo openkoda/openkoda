@@ -270,6 +270,7 @@
 
 <!-- Custom scripts for all pages-->
 <script src="/vendor/sb-admin/js/sb-admin-2.min.js"></script>
+<script th:src="@{~/vendor/openkoda/finalCustomizations.js(v=${resourcesVersion})}"></script>
 
 <th:block th:replace="~{frontend-resource/global/bottom-customization::sbadmin}"></th:block>
 

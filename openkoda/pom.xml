@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.openkoda</groupId>
         <artifactId>openkoda-app</artifactId>
-        <version>1.5.0</version>
+        <version>1.5.1</version>
         <relativePath>../openkoda-app</relativePath>
     </parent>
 

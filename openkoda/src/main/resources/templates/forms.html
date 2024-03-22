@@ -252,7 +252,8 @@
 
     <tr th:fragment="show-tr-value(value, label)">
         <td class="font-weight-bold"  th:text="${label}"></td>
-        <td th:text="${value}"></td>
+        <td th:class="${T(org.apache.commons.validator.GenericValidator).isDate(value, 'MM/dd/yy', false)}? 'text-nowrap'"
+            th:text="(${T(org.apache.commons.lang3.math.NumberUtils).isCreatable(value)} and ${#strings.contains(value,'.')}) ? ${#numbers.formatDecimal(value,3,'COMMA',2,'POINT')} : ${value}"></td>
     </tr>
 
     <div th:fragment="select-simple-datalist(moduleName, fieldName, label, datalistId)" class="form-group ">
@@ -1190,6 +1191,15 @@
     <input type="checkbox" th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${isChecked}" th:checked="${isChecked}"
            th:onchange="app.submitCheckboxAndCallback(this, [[${'form-' + formId}]],[[${callback}]])" >
     <input type="hidden" name="singleFieldToUpdate" th:value="${name}">
+</form>
+
+<form th:fragment="single-post-toggle-like-checkbox-with-callback(url, name, isChecked, formId, callback, isMapDto)" th:id="${'form-' + formId}" method="post" th:action="${url}">
+    <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" th:name="${isMapDto ? 'dto[' + name + ']' : 'dto.' + name}" th:value="${isChecked}" th:checked="${isChecked}"
+               th:onchange="app.submitCheckboxAndCallback(this, [[${'form-' + formId}]],[[${callback}]])" th:id="customSwitch + ${formId}">
+        <label class="custom-control-label" th:for="customSwitch + ${formId}"></label>
+        <input type="hidden" name="singleFieldToUpdate" th:value="${name}">
+    </div>
 </form>
 
 <th:block th:fragment="color-picker-prerequisites">

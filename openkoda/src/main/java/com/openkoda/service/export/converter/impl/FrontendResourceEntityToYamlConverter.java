@@ -96,6 +96,7 @@ public class FrontendResourceEntityToYamlConverter extends AbstractEntityToYamlC
         dto.setResourceType(entity.getResourceType().name());
         dto.setModule(entity.getModuleName());
         dto.setOrganizationId(entity.getOrganizationId());
+        dto.setEmbeddable(entity.isEmbeddable());
         return dto;
     }
 }
