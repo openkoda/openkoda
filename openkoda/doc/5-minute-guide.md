@@ -38,18 +38,26 @@ java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar timelog-0.1.0.ja
 
 ## Insurance Policy Management
 
-### Unpack downloaded .zip package.
+Insurance Policy Management application .zip is available [here](https://github.com/openkoda/openkoda/tree/main/examples/timelog). 
 
-The unpacked folder contains all components developed for the Openkoda Insurance Policy Management. 
+The package contains all components developed for the Openkoda Insurance Policy Management.
 
-Following instructions below they all will be imported to one's Openkoda Core instance.
+There are two options of running the Insurance application locally:
 
-### Initialize Database
+### Option 1: Import .zip package to your clean Openkoda Core instance
 
-Create an empty database named `openkoda_components`. Alternatively adjust settings in `src/main/resources/application-components.properties`.
+1. Log in to Openkoda dashboard as an Admin.
+2. Go to Configuration -> Import/Export (`/html/components`).
+3. Choose the downloaded `.zip` file and Import it.
+4. After a successful import, the application will take a short time to restart.
+5. Log in to Dashboard again. All of the insurance components should be already visible there. 
 
-### Run Initialization of Insurance Policy Management App 
+### Option 2. Unpack the .zip and run the Insurance App from your IDE  
+
+1. Unpack the downloaded .zip.
+2. Create an empty database named `openkoda_components` in Postgres.\
+Alternatively adjust the settings in `src/main/resources/application-components.properties`.
+3. Enter the unpacked contents folder and open a command line to run Initialization of Insurance Policy Management App\
 `mvn spring-boot:run -Dspring-boot.run.profiles=openkoda,components,drop_and_init_database`
-
-### Run Insurance Policy Management App
+4. Run Insurance Policy Management App\
 `mvn spring-boot:run -Dspring-boot.run.profiles=openkoda,components`
