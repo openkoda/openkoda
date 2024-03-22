@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  openkoda:
+    image: openkoda/openkoda:${VERSION:-latest}
+    container_name: openkoda
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/openkoda}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+      BASE_URL: ${BASE_URL:-http://localhost:8080/}
+      APPLICATION_ADMIN_EMAIL: ${APPLICATION_ADMIN_EMAIL:-admin@yourdomain.org}
+      INIT_ADMIN_USERNAME: ${INIT_ADMIN_USERNAME:-admin}
+      INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD:-admin123}
+      INIT_ADMIN_FIRSTNAME: ${INIT_ADMIN_FIRSTNAME:-Mark}
+      INIT_ADMIN_LASTNAME: ${INIT_ADMIN_LASTNAME:-Administrator}
+      INIT_EXTERNAL_SCRIPT: ${INIT_EXTERNAL_SCRIPT}
+      FILE_STORAGE_FILESYSTEM_PATH: ${FILE_STORAGE_FILESYSTEM_PATH:-/data}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-development}
+      STORAGE_TYPE: ${STORAGE_TYPE:-database}
+      SPRING_CONFIG_LOCATION: ${SPRING_CONFIG_LOCATION:-classpath:/,/config/}
+  postgres:
+    image: 'postgres:14.2'
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: openkoda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
