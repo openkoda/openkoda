@@ -38,7 +38,7 @@ java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar timelog-0.1.0.ja
 
 ## Insurance Policy Management
 
-Insurance Policy Management application .zip is available [here](https://github.com/openkoda/openkoda/tree/main/examples/timelog). 
+Insurance Policy Management application .zip is available [here](https://github.com/openkoda/openkoda/tree/main/examples/insurance). 
 
 The package contains all components developed for the Openkoda Insurance Policy Management.
 
