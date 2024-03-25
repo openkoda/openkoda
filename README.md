@@ -30,6 +30,7 @@
 ✅ [Out-of-the-box features](#-out-of-the-box-features)\
 👨‍💻 [Tech stack](#-tech-stack)\
 💡 [Sample applications](#-sample-applications)\
+📷 [Application screenshots](#-application-screenshots)\
 💙 [Contribution](#-contribution)\
 📜 [Release notes](#️-release-notes)\
 🤝 [Partners](#-partners)
@@ -113,26 +114,6 @@ Please note that in that case Postgres needs to be already in place and `SPRING_
 
 A simpler option may be to use the Docker Compose scripts located in the: `./docker/docker-compose.yaml` and `./docker/docker-compose-no-db.yaml` - depending on your preference, with or without Postgres as a part of the docker service.
 
-CMS
-
-<img alt="openkoda-frontendresource-all" src="https://github.com/openkoda/.github/assets/14223954/3e4e5563-53d3-4e7b-9ccf-8a69ea346bc1"/>
-
-Organization Settings
-
-<img alt="openkoda-organization-settings" src="https://github.com/openkoda/.github/assets/14223954/275135d1-6c99-48fa-9224-008183d02085"/>
-
-Job Request
-
-<img alt="openkoda-job-request" src="https://github.com/openkoda/openkoda/assets/14223954/2d26ddfd-3bee-4cc3-a4e0-be08d522bc96"/>
-
-Event Litener
-
-<img alt="openkoda-event-listener" src="https://github.com/openkoda/openkoda/assets/14223954/ac5d52b5-5509-4f37-b5b2-b7a3d9aaa631"/>
-
-Forgot Password
-
-<img alt="openkoda-forgot-password" src="https://github.com/openkoda/openkoda/assets/14223954/f4c78aca-dc1d-4f42-8ba2-903d641a4229"/>
-
 ### ✅ Out-of-the-box features
 
 To significantly reduce development time and effort, Openkoda offers pre-built functionality and out-of-the-box features.
@@ -203,7 +184,6 @@ GitHub
 Trello
 Basecamp
 
-
 #### ✉️ Email Sender
 Customize email templates via CMS
 Schedule emails
@@ -241,6 +221,27 @@ Watch the short video to see the building process:
 
 [How to build a weather app in less than 20 minutes?](https://youtu.be/gob4j072Isg)
 
+### Application screenshots
+
+CMS
+
+<img alt="openkoda-frontendresource-all" src="https://github.com/openkoda/.github/assets/14223954/3e4e5563-53d3-4e7b-9ccf-8a69ea346bc1"/>
+
+Organization Settings
+
+<img alt="openkoda-organization-settings" src="https://github.com/openkoda/.github/assets/14223954/275135d1-6c99-48fa-9224-008183d02085"/>
+
+Job Request
+
+<img alt="openkoda-job-request" src="https://github.com/openkoda/openkoda/assets/14223954/2d26ddfd-3bee-4cc3-a4e0-be08d522bc96"/>
+
+Event Litener
+
+<img alt="openkoda-event-listener" src="https://github.com/openkoda/openkoda/assets/14223954/ac5d52b5-5509-4f37-b5b2-b7a3d9aaa631"/>
+
+Forgot Password
+
+<img alt="openkoda-forgot-password" src="https://github.com/openkoda/openkoda/assets/14223954/f4c78aca-dc1d-4f42-8ba2-903d641a4229"/>
 
 ### 💙 Contribution
 
