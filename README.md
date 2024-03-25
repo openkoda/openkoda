@@ -233,6 +233,14 @@ Widgets include: message senders, email schedulers, attachment and task lists, n
 ![insurance user](https://github.com/openkoda/openkoda/assets/14223954/cb2f4065-59a4-42da-915d-4fd3d810fc19)
 ![insurance admin](https://github.com/openkoda/openkoda/assets/14223954/ac47b4ba-246e-4772-b47c-69bbfe8512fe)
 
+**Weather App**
+
+A sample application that provides weather forecast for selected vacation spots.
+
+Watch the short video to see the building process:
+
+[How to build a weather app in less than 20 minutes?](https://youtu.be/gob4j072Isg)
+
 
 ### 💙 Contribution
 
