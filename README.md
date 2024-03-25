@@ -218,8 +218,7 @@ Widgets include: message senders, email schedulers, attachment and task lists, n
 A sample application that provides weather forecast for selected vacation spots.
 
 Watch the short video to see the building process:
-
-[How to build a weather app in less than 20 minutes?](https://youtu.be/gob4j072Isg)
+[![How to build a weather app in less than 20 minutes?](https://github.com/openkoda/openkoda/assets/10715247/19c670f1-281f-463c-b93c-0715ebef6402)](https://youtu.be/gob4j072Isg)
 
 ### 💡 Application screenshots
 
