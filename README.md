@@ -30,7 +30,7 @@
 ✅ [Out-of-the-box features](#-out-of-the-box-features)\
 👨‍💻 [Tech stack](#-tech-stack)\
 💡 [Sample applications](#-sample-applications)\
-📷 [Application screenshots](#-application-screenshots)\
+💡 [Application screenshots](#-application-screenshots)\
 💙 [Contribution](#-contribution)\
 📜 [Release notes](#️-release-notes)\
 🤝 [Partners](#-partners)
@@ -221,7 +221,7 @@ Watch the short video to see the building process:
 
 [How to build a weather app in less than 20 minutes?](https://youtu.be/gob4j072Isg)
 
-### Application screenshots
+### 💡 Application screenshots
 
 CMS
 
