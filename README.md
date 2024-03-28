@@ -112,7 +112,10 @@ Please note that in that case Postgres needs to be already in place and `SPRING_
 
 ##### Docker compose
 
-A simpler option may be to use the Docker Compose scripts located in the: `./docker/docker-compose.yaml` and `./docker/docker-compose-no-db.yaml` - depending on your preference, with or without Postgres as a part of the docker service.
+A simpler option may be to use the Docker Compose scripts located in the: `./docker/docker-compose.yaml` and `./docker/docker-compose-no-db.yaml` - depending on your preference, with or without Postgres as a part of the docker service. Here is a useful one-liner :
+```
+curl https://raw.githubusercontent.com/openkoda/openkoda/main/docker/docker-compose.yaml | docker compose -f - up
+```
 
 ### ✅ Out-of-the-box features
 
