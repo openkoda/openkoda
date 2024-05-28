@@ -237,7 +237,7 @@ Job Request
 
 <img alt="openkoda-job-request" src="https://github.com/openkoda/openkoda/assets/14223954/2d26ddfd-3bee-4cc3-a4e0-be08d522bc96"/>
 
-Event Litener
+Event Listener
 
 <img alt="openkoda-event-listener" src="https://github.com/openkoda/openkoda/assets/14223954/ac5d52b5-5509-4f37-b5b2-b7a3d9aaa631"/>
 
