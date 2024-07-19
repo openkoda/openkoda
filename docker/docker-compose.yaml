@@ -21,6 +21,12 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-openkoda}
       STORAGE_TYPE: ${STORAGE_TYPE:-database}
       SPRING_CONFIG_LOCATION: ${SPRING_CONFIG_LOCATION:-classpath:/,/config/}
+    links:
+        - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      
   postgres:
     image: 'postgres:14.2'
     container_name: postgres-db
@@ -28,3 +34,8 @@ services:
       POSTGRES_DB: openkoda
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
