@@ -60,6 +60,7 @@ public interface ModelConstants {
            "(LPAD(coalesce(" + ORGANIZATION_ID + ", 0)||'', 5, '0') || '/' || id)";
 
    int INITIAL_GLOBAL_VALUE = 10000;
+   int INITIAL_PRIVILEGE_VALUE = 100000;
    int INITIAL_ORGANIZATION_VALUE = 122;
    int INITIAL_ORGANIZATION_RELATED_VALUE = 120150;
 

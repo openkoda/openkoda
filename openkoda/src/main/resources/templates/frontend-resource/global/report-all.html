@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+    <div layout:fragment="content" th:attr="data-menu-item=${menuItem}">
+        <th:block th:if="${genericViewNavigationFragment != null}">
+            <nav th:replace="~{__${genericViewNavigationFragment}__}"></nav>
+        </th:block>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between ">
+                <h6 class="m-0 font-weight-bold text-nowrap">
+                    <th:block th:if="${genericViewNavigationFragment == null}" th:text="${@messages.getFieldLabel(frontendMappingDefinition.formLabel, frontendMappingDefinition.name)}"/>
+                </h6>
+                <div class="d-flex align-items-center ">
+                    <div class="ml-4 mr-4">
+                        <nav th:replace="~{tables::search('queryreport', ${organizationRelatedEntityPage})}"></nav>
+                    </div>
+                    <div class="dropdown no-arrow dropdown-lg dropdown-menu-md-right">
+                        <a class="dropdown-toggle" href="#" role="button" th:id="${frontendMappingDefinition.name} + '-menu'"
+                           data-toggle="dropdown"
+                           aria-haspopup="true" th:aria-expanded="${!objFilters.isEmpty()}">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                             th:aria-labelledby="${frontendMappingDefinition.name} + '-menu'">
+                            <th:block th:if="${#lists.size(genericTableFilters)}">
+                                <button class="dropdown-item btn-link btn-simple" th:text="#{template.filter}"
+                                        type="button" data-toggle="collapse"
+                                        data-target="#filter-form" th:aria-expanded="${!objFilters.isEmpty()}"
+                                        aria-controls="filter-form">Filter</button>
+                                <button class="dropdown-item btn-link btn-simple" th:text="#{template.clearFilter}"
+                                        type="button" th:onclick="app.refreshViewWithoutEntityKeyParams([[${frontendMappingDefinition.name}]])">Clear Filter</button>
+                            </th:block>
+                            <a class="dropdown-item" th:href="'report/csv?' + ${queryString}" th:text="#{template.download}">Download</a>
+                            <a class="dropdown-item"  th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId)}"
+                               th:href="${@url.form(organizationEntityId,'queryreport')}" th:text="#{template.new}">New</a>
+                        </div>
+                    </div>
+                    <div class="card-header-buttons">
+                        <th:block th:if="${#lists.size(genericTableFilters)}">
+                            <button class="btn btn-primary btn-sm btn-icon-split" type="button" data-toggle="collapse"
+                                    data-target="#filter-form" th:aria-expanded="${!objFilters.isEmpty()}"
+                                    aria-controls="filter-form">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-caret-down"></i>
+                          </span>
+                                <span class="text"><th:block th:text="#{template.filter}">Filter</th:block></span>
+                            </button>
+                            <button class="btn btn-primary btn-sm btn-icon-split" type="button"
+                                    th:onclick="app.refreshViewWithoutEntityKeyParams([[${frontendMappingDefinition.name}]])">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-xmark"></i>
+                          </span>
+                                <span class="text"><th:block th:text="#{template.clearFilter}">Clear Filter</th:block></span>
+                            </button>
+                        </th:block>
+                        <a class="btn-primary btn btn-sm btn-icon-split" th:href="'report/csv?' + ${queryString}">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-download"></i>
+                            </span>
+                            <span class="text"><th:block th:text="#{template.download}">Download</th:block></span>
+                        </a>
+                        <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId)}">
+                            <a class="btn-primary btn btn-sm btn-icon-split" th:href="${@url.form(organizationEntityId,'queryreport')}">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-plus"></i>
+                                </span>
+                                <span class="text"><th:block th:text="#{template.new}">New</th:block></span>
+                            </a>
+                        </th:block>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+                <div class="mb-4">
+                    <form method="get" th:class="'filter-form collapse ' + ${!objFilters.isEmpty() ? 'show' : ''}" id="filter-form"
+                          th:with="page=${organizationRelatedEntityPage}">
+                        <input type="hidden" th:name="${'queryreport_page'}"
+                               th:value="${page.number}"/>
+                        <input type="hidden" th:name="${'queryreport_size'}"
+                               th:value="${page.size}"/>
+                        <input type="hidden" th:name="${'queryreport_sort'}"
+                               th:value="${param.get('queryreport_sort')}"/>
+                        <input type="hidden" th:name="${'queryreport_search'}"
+                               th:value="${param.get('queryreport_search')}"/>
+                        <div class="row">
+                            <th:block th:each="field : ${genericTableFilters}">
+                                <th:block th:if="${field.datalistSupplier != null AND field.datalistId != null}">
+                                    <script th:inline="javascript">
+                                        commonDictionaries[ /*[[${ field.datalistId }]]*/] = [( ${ @json.to(field.datalistSupplier.apply(organizationRelatedForm, @secureEntityDictionaryRepository)) })];
+                                    </script>
+                                </th:block>
+                                <th:block
+                                        th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).date, T(com.openkoda.core.form.FieldType).datetime}, field.type)}">
+                                    <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3">
+                                        <label th:for="${'queryreport_filter_' + field.name + '_from'}"
+                                               th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName() + 'From')}"></label>
+                                        <input type="date"
+                                               class="form-control datepicker position-relative"
+                                               th:id="${'queryreport_filter_' + field.name + '_from'}"
+                                               th:name="${'queryreport_filter_' + field.name + '_from'}"
+                                               th:value="${param.get('queryreport_filter_' + field.name + '_from')}"/>
+                                    </div>
+                                    <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3">
+                                        <label th:for="${'queryreport_filter_' + field.name + '_to'}"
+                                               th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName() + 'To')}"></label>
+                                        <input type="date"
+                                               class="form-control datepicker position-relative"
+                                               th:id="${'queryreport_filter_' + field.name + '_to'}"
+                                               th:name="${'queryreport_filter_' + field.name + '_to'}"
+                                               th:value="${param.get('queryreport_filter_' + field.name + '_to')}"/>
+                                    </div>
+                                </th:block>
+                                <th:block
+                                        th:if="${!#lists.contains({T(com.openkoda.core.form.FieldType).date, T(com.openkoda.core.form.FieldType).datetime, T(com.openkoda.core.form.FieldType).datalist}, field.type)}">
+                                    <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3">
+                                        <label th:for="${'queryreport_filter_' + field.name}"
+                                               th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName())}"></label>
+                                        <input th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).text, T(com.openkoda.core.form.FieldType).textarea}, field.type)}"
+                                               type="text" class="form-control "
+                                               th:id="${'queryreport_filter_' + field.name}" th:name="${'queryreport_filter_' + field.name}"
+                                               th:value="${param.get('queryreport_filter_' + field.name)}"
+                                               th:placeholder="#{search.placeholder}"/>
+                                        <input th:if="${field.type == T(com.openkoda.core.form.FieldType).number}"
+                                               type="number"
+                                               class="form-control "
+                                               th:id="${'queryreport_filter_' + field.name}" th:name="${'queryreport_filter_' + field.name}"
+                                               th:value="${param.get('queryreport_filter_' + field.name)}"
+                                               th:placeholder="#{search.placeholder}"/>
+
+                                        <th:block th:if="${field.type == T(com.openkoda.core.form.FieldType).checkbox}">
+                                            <select th:id="${'queryreport_filter_' + field.name}"
+                                                    th:name="${'queryreport_filter_' + field.name}"
+                                                    class="selectpicker form-control">
+                                            </select>
+                                            <script th:inline="javascript">
+                                                (function () {
+                                                    let fieldId = /*[[${'queryreport_filter_' + field.name}]]*/ '_none_';
+                                                    let fieldValue = /*[[ ${param.get('queryreport_filter_' + field.name)}]]*/ '';
+                                                    fieldValue = fieldValue + "";
+                                                    app.populateSelect(fieldId, fieldId, fieldValue, '__datalist_booleanValues', true, 'Select', false);
+                                                })();
+                                            </script>
+                                        </th:block>
+                                        <th:block
+                                                th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).dropdown, T(com.openkoda.core.form.FieldType).many_to_one}, field.type)}">
+                                            <select th:id="${'queryreport_filter_' + field.name}"
+                                                    th:name="${'queryreport_filter_' + field.name}"
+                                                    class="selectpicker form-control">
+                                            </select>
+                                            <script th:inline="javascript">
+                                                (function () {
+                                                    let datalistId = /*[[${ field.datalistId }]]*/ '_none_';
+                                                    let fieldId = /*[[${'queryreport_filter_' + field.name}]]*/ '_none_';
+                                                    let fieldValue = /*[[ ${param.get('queryreport_filter_' + field.name)}]]*/ '';
+                                                    fieldValue = fieldValue + "";
+                                                    app.populateSelect(fieldId, fieldId, fieldValue, datalistId, true, 'Select', false);
+                                                })();
+                                            </script>
+                                        </th:block>
+                                    </div>
+                                </th:block>
+
+                            </th:block>
+                        </div>
+                        <div class="d-block">
+                            <button class="btn btn-primary btn-submit btn-sm" type="submit" th:text="#{template.search}">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th th:replace="~{tables::asort('id', #{template.id}, 'queryreport', ${organizationRelatedEntityPage})}"></th>
+                            <th:block th:each="field,iter: ${genericTableViewHeaders}">
+                                <th th:replace="~{tables::asort(${field.getPlainName()}, ${@messages.getFieldLabel(field.labelKey, field.getPlainName())}, 'queryreport', ${organizationRelatedEntityPage})}"></th>
+                            </th:block>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="a,it : ${organizationRelatedEntityPage.content}">
+                            <td><span th:text="${a.id}">1</span></td>
+                            <td th:each="tableValue: ${genericTableViewList.get(it.index)}"
+                                th:text="(${T(org.apache.commons.lang3.math.NumberUtils).isCreatable(tableValue)} and ${#strings.contains(tableValue,'.')}) ? ${#numbers.formatDecimal(tableValue,1,'COMMA',2,'POINT')} : ${tableValue}"
+                                th:class="${T(org.apache.commons.validator.GenericValidator).isDate(tableValue, 'MM/dd/yy', false)}? 'text-nowrap'"></td>
+                            <td>
+                                <div class="table-row-btns">
+                                    <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId)}">
+                                        <th:block th:replace="~{forms::single-icon-post-form-with-confirm(${'./' + a.id + '/remove'},'fas fa-trash text-danger',#{template.remove}, #{template.confirmationPrompt})}"/>
+                                    </th:block>
+                                    <a class="" th:href="${@url.queryReport(a.organizationId,  a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
+                                        <i class="fas fa-eye text-primary"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <nav th:replace="~{tables::tablenav('queryreport', ${organizationRelatedEntityPage})}"></nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

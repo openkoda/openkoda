@@ -62,6 +62,16 @@
     </div>
 </th:block>
 <div th:fragment="form-card-body(genericForm, genericFormName, action, message, formClass, actionButtonLabel, submitDisabled)">
+
+    <div id="rebootAlert" class="alert alert-warning alert-dismissible m-2" role="alert" style="display: none">
+        <strong th:text="#{form.rebootAlert.title}">missing message</strong>
+        &nbsp
+        <span th:text="#{form.rebootAlert.description}"> missing message</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
     <div class="card-body" th:with="generatedFormId=${genericFormName + '-' + genericForm.hashCode()}" th:attr="data-menu-item=${menuItem}">
         <form th:id="${generatedFormId}" th:class="${genericFormName}" method="post"
               th:object="${__${genericFormName}__}"
@@ -73,7 +83,7 @@
                     <div th:text="${message}"/>
                     <th:block th:if="${genericForm instanceof T(com.openkoda.core.form.AbstractEntityForm)}">
                         <ul th:if="${genericForm.bindingResult != null}">
-                           <li th:each="err : ${genericForm.bindingResult.fieldErrors}" th:text="${@messages.getFieldLabel(form.extractFieldName(err.field), form.extractFieldName(err.field)) + ': ' + #messages.msg(err.code)}"></li>
+                           <li th:each="err : ${genericForm.bindingResult.fieldErrors}" th:text="${@messages.getFieldLabel(form.extractFieldName(err.field), form.extractFieldName(err.field)) + ': ' + (#messages.msgOrNull(err.code)?:err.code)}"></li>
                         </ul>
                     </th:block>
                 </div>
@@ -85,36 +95,37 @@
                                        fieldName=${fieldNamePrefix + field.getName(genericForm.isMapDto())},
                                        plainFieldName=${field.getPlainName()},
                                        fieldLabel=${@messages.getFieldLabel(field.labelKey, field.getPlainName())},
+                                       fieldTooltip=${@messages.getFieldTooltip(field.tooltipKey, field.getPlainName())},
                                        fieldPlaceholder=${@messages.getFieldPlaceholder(field.placeholderKey, field.getPlainName())}">
                         <th:block th:with="providedValue=${field.valueSupplier == null ? null : field.valueSupplier.apply( genericForm )},
                             canChangeEntityOrganization=${@auth.hasGlobalPrivilege('canChangeEntityOrganization')},
                             fieldType=${fieldTypeEnum.name()},
                             canWrite=${genericForm.canWriteField(field)}">
                             <th:block th:if="${canWrite AND fieldType=='text'}">
-                                <input th:replace="~{forms::text-simple-with-value-with-class(${fieldName}, ${providedValue}, ${fieldLabel}, ${fieldPlaceholder}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::text-simple-with-value-with-class(${fieldName}, ${providedValue}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${!canWrite AND fieldType=='text'}">
-                                <input th:replace="~{forms::text-readonly-with-class(${fieldName}, ${fieldLabel}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::text-readonly-with-class(${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${canWrite AND fieldType=='number'}">
-                                <input th:replace="~{forms::number-simple-with-step(${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, '0.1', ${additionalClass})}"/>
+                                <input th:replace="~{forms::number-simple-with-step(${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, '0.1', ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${!canWrite AND fieldType=='number'}">
-                                <input th:replace="~{forms::text-readonly-with-class(${fieldName}, ${fieldLabel}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::text-readonly-with-class(${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${canWrite AND fieldType=='map'}">
-                                <input th:replace="~{forms::simple-map('', ${fieldName}, ${providedValue}, ${fieldLabel}, ${field.placeholderKey}, false, false, '')}"/>
+                                <input th:replace="~{forms::simple-map('', ${fieldName}, ${providedValue}, ${fieldLabel}, ${fieldTooltip}, ${field.placeholderKey}, false, false, '')}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='organization_select'}" th:with="fileId=*{__${fieldName}__}">
                                 <th:block  th:if="${canWrite AND canChangeEntityOrganization AND organizationId == null AND genericForm.entity == null }">
-                                    <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass})}"/>
+                                    <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass}, ${field.searchEnabled})}"/>
                                 </th:block>
                                 <th:block  th:with="filedId=*{__${organizationId}__}" th:if="${!canWrite OR !canChangeEntityOrganization OR organizationId != null OR  genericForm.entity != null}">
-                                    <input th:replace="~{forms::select-simple-organization-datalist('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, true, true, ${additionalClass})}"/>
+                                    <input th:replace="~{forms::select-simple-organization-datalist('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, true, true, ${additionalClass})}"/>
                                 </th:block>
                             </th:block>
                             <th:block th:if="${fieldType=='many_to_one'}">
-                                <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass}, ${field.searchEnabled})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='hidden'}">
                                 <input th:replace="~{forms::hidden-base('', ${fieldName}, ${providedValue})}"/>
@@ -126,23 +137,23 @@
                                 <input th:replace="~{forms::password-readonly-with-class(${fieldName}, ${fieldLabel}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='dropdown'}">
-                                <input th:replace="~{forms::select-simple-datalist-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::select-simple-datalist-with-disable-with-class-with-preselection('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${field.allowNull}, ${!canWrite}, ${additionalClass}, ${field.preselectedValue}, ${field.searchEnabled})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='dropdown_with_disable'}">
-                                <input th:replace="~{forms::select-datalist-options-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${field.datalistId}, ${!canWrite}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::select-datalist-options-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${!canWrite}, ${additionalClass}, ${field.searchEnabled})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='radio_list'}">
-                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, true)}"/>
+                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, true)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='radio_list_no_label'}">
-                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, false)}"/>
+                                <input th:replace="~{forms::radiobutton-table-with-disable-with-class('', ${fieldName}, ${fieldLabel}, '', ${fieldPlaceholder}, ${field.datalistId}, ${!canWrite}, 'table-compact', ${additionalClass}, false)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='checkbox'}">
                                 <th:block th:if="${genericForm.isMapDto()}">
-                                    <input th:replace="~{forms::checkbox-base-value-with-class('', ${fieldName}, ${genericForm.dto.get(plainFieldName)}, ${fieldLabel}, ${!canWrite}, ${additionalClass})}"/>
+                                    <input th:replace="~{forms::checkbox-base-value-with-class('', ${fieldName}, ${genericForm.dto.get(plainFieldName)}, ${fieldLabel}, ${fieldTooltip}, ${!canWrite}, ${additionalClass})}"/>
                                 </th:block>
                                 <th:block th:if="${!genericForm.isMapDto()}" >
-                                    <input th:replace="~{forms::checkbox-base-with-class('', ${fieldName}, ${fieldLabel}, ${!canWrite}, ${additionalClass})}"/>
+                                    <input th:replace="~{forms::checkbox-base-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${!canWrite}, ${additionalClass})}"/>
                                 </th:block>
                             </th:block>
                             <th:block th:if="${fieldType=='checkbox_with_warning'}">
@@ -155,54 +166,56 @@
                                 <input th:replace="~{forms::switch-values-with-warning-with-class('', ${fieldName}, #{${field.labelKey + '.1'}}, #{${field.labelKey + '.2'}}, ${!canWrite}, 'text-danger', #{${field.warningKey}}, #{${field.alertKey}}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='date'}">
-                                <input th:replace="~{forms::datepicker-readonly('', ${fieldName}, ${fieldLabel}, ${!canWrite})}"/>
+                                <input th:replace="~{forms::datepicker-readonly('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${!canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='datetime'}">
-                                <input th:replace="~{forms::datetimepicker-readonly('', ${fieldName}, ${fieldLabel}, ${!canWrite})}"/>
+                                <input th:replace="~{forms::datetimepicker-readonly('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${!canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='time'}">
-                                <input th:replace="~{forms::timepicker-readonly(${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${additionalClass}, ${!canWrite})}"/>
+                                <input th:replace="~{forms::timepicker-readonly(${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${additionalClass}, ${!canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='checkbox_list'}">
-                                <input th:replace="~{forms::checkbox-table('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${additionalClass}, ${!canWrite}, '', false)}"/>
+                                <input th:replace="~{forms::checkbox-table('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, ${additionalClass}, ${!canWrite}, false)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='checkbox_list_grouped'}">
-                                <input th:replace="~{forms::checkbox-table('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, ${additionalClass}, ${!canWrite}, '', true)}"/>
+                                <input th:replace="~{forms::checkbox-table('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, ${additionalClass}, ${!canWrite}, true)}"/>
+                            </th:block>
+                            <th:block th:if="${fieldType=='multiselect'}">
+                                <input th:replace="~{forms::multiselect('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${additionalClass}, ${!canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='textarea'}">
-                                <textarea
-                                        th:replace="~{forms::textarea-with-class('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${!canWrite}, ${additionalClass})}"/>
+                                <textarea th:replace="~{forms::textarea-with-class('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${!canWrite}, ${additionalClass})}"/>
                             </th:block>
-                            <th:block th:if="${fieldType=='one_to_many'}">
-                                <div th:replace="~{forms::one-to-many('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${!canWrite}, ${providedValue}, ${field.url}, ${field.htmlFragmentName})}"/>
-                            </th:block>
+<!--                            <th:block th:if="${fieldType=='one_to_many'}">-->
+<!--                                <div th:replace="~{forms::one-to-many('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${!canWrite}, ${providedValue}, ${field.url}, ${field.htmlFragmentName})}"/>-->
+<!--                            </th:block>-->
                             <th:block th:if="${fieldType=='code_html'}">
                                 <textarea
-                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'htmlmixed', ${additionalClass}, true)}"/>
+                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, 'htmlmixed', ${additionalClass}, true)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='code_css'}">
                                 <textarea
-                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'css', ${additionalClass}, ${canWrite})}"/>
+                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, 'css', ${additionalClass}, ${canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='code_js'}">
                                 <textarea
-                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})}"/>
+                                        th:replace="~{forms::textarea-code-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='code_with_webendpoint_autocomplete' OR fieldType=='code_with_form_autocomplete'}">
                                 <textarea
-                                        th:replace="forms::textarea-code-with-autocomplete-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})"/>
+                                        th:replace="forms::textarea-code-with-autocomplete-with-class(${generatedFormId}, '', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, 'javascript', ${additionalClass}, ${canWrite})"/>
                             </th:block>
                             <th:block th:if="${fieldType=='files_library'}">
-                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, true, false, ${field.contentType}, '')}"/>
+                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, true, false, ${field.contentType})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='file_library'}">
-                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, false, false, ${field.contentType}, '')}"/>
+                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, false, false, ${field.contentType})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='files'}">
-                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, true, true, ${field.contentType}, '')}"/>
+                                <input th:replace="~{forms::file-gallery('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${field.datalistId}, 'table-compact ' + ${additionalClass}, ${!canWrite}, true, true, ${field.contentType})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='image'}">
-                                <input th:replace="~{forms::single-image(${genericFormName}, ${fieldName}, ${fieldLabel}, ${additionalClass}, ${!canWrite})}"/>
+                                <input th:replace="~{forms::single-image(${genericFormName}, ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${additionalClass}, ${!canWrite})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='rule_then'}">
                                 <input th:replace="~{forms::rule-constructor(${genericFormName}, ${fieldName}, ${field.key}, ${field.datalistId}, ${!canWrite}, ${additionalClass}, false, ${field.url}, false, null, null, null, null)}"/>
@@ -212,7 +225,7 @@
                             </th:block>
                             <th:block th:if="${fieldType=='image_url'}">
                                 <th:block th:if="${canWrite}">
-                                    <input th:replace="~{forms::text-simple-with-value-with-class(${fieldName}, ${providedValue}, ${fieldLabel}, ${fieldPlaceholder}, ${additionalClass})}"/>
+                                    <input th:replace="~{forms::text-simple-with-value-with-class(${fieldName}, ${providedValue}, ${fieldLabel}, ${fieldTooltip}, ${fieldPlaceholder}, ${additionalClass})}"/>
                                 </th:block>
                                 <img th:src="${field.url}"/>
                             </th:block>
@@ -223,23 +236,23 @@
                                 <button th:replace="~{forms::button-submit-to-url-to-new-tab(${field.url}, ${fieldLabel}, 'btn-sm btn-info' )}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='divider'}">
-                                <div th:class="'text-sm font-weight-bold mb-1 ' + ${additionalClass}"
+                                <div th:id="${fieldName}" th:class="'text-sm font-weight-bold mb-1 ' + ${additionalClass}"
                                      th:classappend="${iter?.index > 0 ? 'mt-3' : ''}" th:text="${fieldLabel}"></div>
                             </th:block>
-                            <th:block th:if="${fieldType=='section_with_checkbox'}">
-                                <div class="text-sm font-weight-bold mb-1">
+                            <th:block th:if="${fieldType=='section_with_link'}">
                                     <!--            collapse div id must not contain dots -->
-                                    <input th:replace="~{forms::checkbox-with-collapse('', ${fieldName}, ${fieldLabel}, ${!canWrite}, '', ${#strings.replace(fieldName, 'dto.', '')}, ${additionalClass})}"/>
-                                </div>
+                                    <input th:replace="~{forms::link-with-collapse('', ${fieldName}, ${fieldLabel}, ${!canWrite}, '', ${#strings.replace(fieldName, 'dto.', '')}, ${additionalClass})}"/>
+                            </th:block>
+                            <th:block th:if="${fieldType=='section_with_checkbox'}">
+                                    <!--            collapse div id must not contain dots -->
+                                    <input th:replace="~{forms::checkbox-with-collapse('', ${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${!canWrite}, '', ${#strings.replace(fieldName, 'dto.', '')}, ${additionalClass})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='section_with_checkbox_with_warning'}">
-                                <div class="text-sm font-weight-bold mb-1">
                                     <!--            collapse div id must not contain dots -->
                                     <input th:replace="~{forms::checkbox-with-collapse-with-warning-with-class('', ${fieldName}, ${fieldLabel}, ${!canWrite}, '', ${#strings.replace(fieldName, 'dto.', '')}, ${#strings.replace(additionalClass, 'description', '')}, 'text-danger', #{${field.warningKey}}, #{${field.alertKey}})}"/>
-                                </div>
                             </th:block>
                             <th:block th:if="${fieldType=='section_with_dropdown'}">
-                                <input th:replace="~{forms::section-with-dropdown(${fieldName}, ${fieldLabel}, ${field.datalistId}, ${!canWrite}, ${additionalClass})}"/>
+                                <input th:replace="~{forms::section-with-dropdown(${fieldName}, ${fieldLabel}, ${fieldTooltip}, ${field.datalistId}, ${!canWrite}, ${additionalClass},false)}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='section_with_switch'}">
                                 <div class="text-sm font-weight-bold mb-1">
@@ -254,7 +267,7 @@
                                 </div>
                             </th:block>
                             <th:block th:if="${fieldType=='color_picker'}">
-                                <button th:replace="~{forms::color-picker(${fieldName}, ${fieldLabel})}"/>
+                                <button th:replace="~{forms::color-picker(${fieldName}, ${fieldLabel}, ${fieldTooltip})}"/>
                             </th:block>
                             <th:block th:if="${fieldType=='recaptcha'}">
                                 <button th:replace="~{forms::recaptcha(${fieldName}, ${fieldLabel}, ${genericForm.frontendMappingDefinition.siteKey})}"/>
@@ -276,6 +289,14 @@
         <script th:inline="javascript">
             var generatedFormId = /*[[${generatedFormId}]]*/;
             window.dirtyForm = $(`#${generatedFormId}`).dirty({preventLeaving:true});
+        </script>
+        <script th:inline="javascript">
+            // shows information that system restart is required after form update
+            var isError = /*[[${isError}]]*/;
+            var afterUpdate = /*[[${afterUpdate}]]*/;
+            if (isError === false && afterUpdate === true) {
+                $('#rebootAlert').show();
+            }
         </script>
     </div>
 </div>

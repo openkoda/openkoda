@@ -20,24 +20,37 @@
                                 <th th:replace="~{tables::asort('createdOn', 'Timestamp', 'audit', ${auditPage})}">Timestamp</th>
                                 <th>Support ID</th>
                                 <th th:replace="~{tables::asort('ipAddress', 'IP Address', 'audit', ${auditPage})}">IP Address</th>
+                                <th>User ID</th>
                                 <th>Change</th>
-                                <th>Content</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="a : ${auditPage.content}">
                                 <td class="text-sm" th:text="${a.id}">1</td>
                                 <td class="text-sm" th:text="${#temporals.format(a.createdOn, 'yyyy-MM-dd HH:mm:ss')}">Mark</td>
-                                <td class="text-sm" th:text="${#strings.substringAfter(a.requestId, '-')}"></td>
+                                <td class="text-sm" th:with="requestId=${#strings.substringAfter(a.requestId, '-')}"><a th:if="${requestId != null}" th:href="${@url.allAudit(requestId)}" th:text="${requestId}"></a> </td>
                                 <td class="text-sm" th:text="${a.ipAddress}">Otto</td>
+                                <td class="text-sm" th:text="${a.modifiedBy}">Otto</td>
                                 <td class="text-sm" th:utext="${a.change}">Aldo</td>
                                 <td>
                                     <div class="table-row-btns">
-                                        <a th:if="${a.content}"
-                                           th:href="${@url.downloadAuditContent(a.id)}" download="content.html"
-                                           data-toggle="tooltip" data-placement="top" th:title="#{template.exportToYaml}">
-                                            <i class="fas fa-download text-primary"></i>
-                                        </a>
+                                        <th:block th:if="${a.content != null}">
+                                            <a class="" th:href="${@url.downloadAuditContent(a.id)}" download="content.html" data-toggle="tooltip" data-placement="top" th:title="#{template.download}">
+                                                <i class="fas fa-download text-primary"></i>
+                                            </a>
+                                        </th:block>
+                                        <th:block th:unless="${a.content != null}">
+                                            <button class="bg-transparent p-0 border-0" disabled><i class="fas fa-download text-gray-500"></i></button>
+                                        </th:block>
+                                        <th:block th:if="${a.entityKey != null}">
+                                            <a class="" th:href="${@url.view(a.organizationId, #strings.toLowerCase(a.entityKey), a.entityId)}" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
+                                                <i class="fas fa-eye text-primary"></i>
+                                            </a>
+                                        </th:block>
+                                        <th:block th:unless="${a.entityKey != null}">
+                                            <button class="bg-transparent p-0 border-0" disabled><i class="fas fa-eye text-gray-500"></i></button>
+                                        </th:block>
                                     </div>
                                 </td>
                             </tr>

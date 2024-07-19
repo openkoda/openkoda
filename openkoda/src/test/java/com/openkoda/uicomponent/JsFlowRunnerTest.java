@@ -23,7 +23,6 @@ package com.openkoda.uicomponent;
 
 import com.openkoda.AbstractTest;
 import com.openkoda.core.flow.PageModelMap;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,7 @@ public class JsFlowRunnerTest  extends AbstractTest {
     @Test
     @EnabledIfSystemProperty(named = "spring.profiles.active", matches = "development")
     public void testRunPreviewFlow() {
-        PageModelMap result = jsFlowRunner.runPreviewFlow(flow, new HashMap<>(), null, -1, null );
+        PageModelMap result = jsFlowRunner.runPreviewFlow(flow, new HashMap<>(), null, -1, null, "testFileName.mjs");
         System.out.println(result);
     }
 
@@ -48,7 +47,7 @@ public class JsFlowRunnerTest  extends AbstractTest {
     public void testRunLiveFlow() {
         mockAndAuthenticateUser(1l, "test@openkoda.com", "TEST", "(canManageBackend)");
 
-        PageModelMap result = jsFlowRunner.runLiveFlow(flow, new HashMap<>(), null, -1, null);
+        PageModelMap result = jsFlowRunner.runLiveFlow(flow, new HashMap<>(), null, -1, null, "testFileName.mjs");
         System.out.println(result);
     }
 }

@@ -29,7 +29,6 @@ import com.openkoda.model.component.event.Consumer;
 import com.openkoda.model.component.event.EventListenerEntry;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Arrays;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -126,10 +125,10 @@ public class EventListenerService extends ComponentProvider implements HasSecuri
             for (Field field : ec.getFields()) {
                 String eventType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName();
                 events.put(
-                        StringUtils.join(Arrays.array(
+                        StringUtils.join(new Object[] {
                                 field.getType().getName(),
                                 field.getName(),
-                                eventType),
+                                eventType},
                                 ","),
                         field.getName() + " (" + NameHelper.getClassName(eventType) + ")");
             }

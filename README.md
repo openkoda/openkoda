@@ -8,7 +8,7 @@
 
 <div align="center">
     <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-18B2C6.svg"/></a>
-    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.5.1" src="https://img.shields.io/static/v1?label=Openkoda&message=1.5.1&color=18B2C6"/></a>
+    <a href="https://openkoda.com/product/"><img alt="Openkoda: 1.7.1" src="https://img.shields.io/static/v1?label=Openkoda&message=1.7.1&color=18B2C6"/></a>
     <img alt="Java: 17.0.2" src="https://img.shields.io/static/v1?label=Java&message=17.0.2&color=18B2C6"/>
     <img alt="Spring Boot: 3.0.5" src="https://img.shields.io/static/v1?label=Spring%20Boot&message=3.0.5&color=18B2C6"/>
 </div>
@@ -270,7 +270,18 @@ How to contribute:
 
 Openkoda is constantly evolving. Check out the changelog:
 
-#### Openkoda 1.5. 🚀
+#### Openkoda 1.7.1. 🚀
+
+* Support for dynamic privileges management
+* Optimize custom dashboard view
+* Manually create data reports with sql queries
+* Improve dashboard UI
+* Filter dynamic entities by their attributes
+* Refactor components .zip export
+* Update Insurance App components .zip
+* Fix issues and bugs
+
+#### Openkoda 1.5.
 
 * **Dynamic Entities**: Now create database tables, perform full CRUD operations and generate forms.
 * **New Dashboard UI**: Enhanced for better readability and smoother navigation flow.

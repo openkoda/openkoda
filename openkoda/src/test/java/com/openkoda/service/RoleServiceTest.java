@@ -23,10 +23,7 @@ package com.openkoda.service;
 
 import com.google.common.collect.Sets;
 import com.openkoda.AbstractTest;
-import com.openkoda.model.GlobalRole;
-import com.openkoda.model.OrganizationRole;
-import com.openkoda.model.Role;
-import com.openkoda.model.User;
+import com.openkoda.model.*;
 import com.openkoda.service.user.RoleService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -55,8 +52,8 @@ import static org.mockito.internal.verification.VerificationModeFactory.times;
 public class RoleServiceTest extends AbstractTest {
 
     private static final String ROLE_NAME = "New Role";
-    private static final HashSet<Enum> ROLE_PRIVILEGES = Sets.newHashSet(readOrgData, manageOrgData);
-    private static final Set<Enum> ROLE_PRIVILEGES_EMPTY = Sets.newHashSet();
+    private static final HashSet<PrivilegeBase> ROLE_PRIVILEGES = Sets.newHashSet(readOrgData, manageOrgData);
+    private static final Set<PrivilegeBase> ROLE_PRIVILEGES_EMPTY = Sets.newHashSet();
 
     @Autowired
     private RoleService roleService;

@@ -30,22 +30,24 @@ import com.openkoda.core.form.AbstractForm;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.helper.ClusterHelper;
-import com.openkoda.core.helper.NameHelper;
+import com.openkoda.core.multitenancy.MultitenancyService;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.service.event.ClusterEventSenderService;
+import com.openkoda.model.common.SearchableRepositoryMetadata;
 import com.openkoda.model.component.Form;
 import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.component.ServerJs;
 import com.openkoda.repository.SecureRepositoryWrapper;
-import com.openkoda.service.dynamicentity.DynamicEntityRegistrationService;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.openkoda.core.helper.NameHelper.toEntityKey;
 import static com.openkoda.core.service.FrontendResourceService.frontendResourceTemplateNamePrefix;
@@ -59,6 +61,9 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
 
     @Inject
     private ClusterEventSenderService clusterEventSenderService;
+
+    @Inject
+    private MultitenancyService multitenancyService;
     /**
      * Unregister and register the updated form again
      * @param formId
@@ -114,6 +119,9 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
         }
         List<Form> all = repositories.unsecure.form.findAll();
         all.forEach(this::registerForm);
+        if(MultitenancyService.isMultitenancy()) {
+            multitenancyService.addTenantedTables(all.stream().map(Form::getTableName).collect(Collectors.toList()));
+        }
     }
 
     /**
@@ -171,9 +179,7 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
     private boolean registerForm(Form form) {
         debug("[registerForm]");
 
-        DynamicEntityRegistrationService.generateDynamicEntityDescriptor(form, System.currentTimeMillis());
-
-        ScopedSecureRepository<?> repository = services.data.getRepository(toEntityKey(form.getTableName()), SecurityScope.USER);
+        ScopedSecureRepository<?> repository = services.data.getRepository(toEntityKey(form.getName()), SecurityScope.USER);
 
         if(((SecureRepositoryWrapper) repository).isSet()) {
             FrontendMappingDefinition formFieldDefinitionBuilder = getFrontendMappingDefinition(
@@ -184,9 +190,17 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
 
             services.customisation.registerFrontendMapping(formFieldDefinitionBuilder, repository);
             AbstractForm.markDirty(form.getName());
+            SearchableRepositoryMetadata repositoryMetadata = repository.getSearchableRepositoryMetadata();
+            if(form.isRegisterAsAuditable()) {
+                services.customisation.registerAuditableClass((Class) repositoryMetadata.entityClass(), repositoryMetadata.entityKey());
+            } else {
+                services.customisation.unregisterAuditableClass(repositoryMetadata.entityClass());
+            }
 
             if (form.isRegisterHtmlCrudController()) {
-                CRUDControllerConfiguration crudControllerConfiguration = services.customisation.registerHtmlCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege()).setGenericTableFields(form.getTableColumnsList());
+                CRUDControllerConfiguration crudControllerConfiguration = services.customisation.registerHtmlCrudController(formFieldDefinitionBuilder, repository, form.getReadPrivilege(), form.getWritePrivilege())
+                        .setGenericTableFields(form.getTableColumnsList())
+                        .setFilterFields(form.getFilterColumnsList());
                 if(StringUtils.isNotEmpty(form.getTableView())) {
                     crudControllerConfiguration.setTableViewWebEndpoint(frontendResourceTemplateNamePrefix + FrontendResource.AccessLevel.GLOBAL.getPath() + form.getTableView());
                 }
@@ -201,6 +215,7 @@ public class FormService extends ComponentProvider implements HasSecurityRules {
 
     private boolean unregisterForm(Form form) {
         debug("[unregisterForm]");
+        multitenancyService.removeTenantedTables(Collections.singletonList(form.getTableName()));
         services.customisation.unregisterFrontendMapping(form.getName());
         services.customisation.unregisterHtmlCrudController(form.getName().toLowerCase());
         services.customisation.unregisterApiCrudController(form.getName().toLowerCase());

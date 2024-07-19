@@ -24,17 +24,24 @@ package com.openkoda.core.helper;
 import com.google.gson.internal.LinkedTreeMap;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.security.UserProvider;
+import com.openkoda.model.DynamicPrivilege;
 import com.openkoda.model.Privilege;
 import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.PrivilegeGroup;
+import com.openkoda.service.user.BasicPrivilegeService;
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.persistence.AttributeConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,7 +57,8 @@ import static java.util.stream.Collectors.toList;
  *
  */
 @Component("auth")
-public class PrivilegeHelper implements HasSecurityRules {
+@Scope("singleton")
+public class PrivilegeHelper implements HasSecurityRules, AttributeConverter<PrivilegeBase, String> {
 
     @Value("${authentication.loginAndPassword:true}")
     public boolean loginAndPasswordAuthentication;
@@ -59,17 +67,35 @@ public class PrivilegeHelper implements HasSecurityRules {
     @Value("${application.classes.privileges-enum:}")
     private String[] privilegesEnumClasses;
 
-    private static final Map<String, Enum> nameToEnum = new LinkedTreeMap<>();
-    private static final Set<Enum> adminPrivileges = new HashSet<>(Arrays.asList(Privilege.values()));
-    private static final Set<Enum> userPrivileges = new HashSet<>();
-    private static final Set<Enum> orgAdminPrivileges = new HashSet<>();
-    private static final Set<Enum> orgUserPrivileges = new HashSet<>();
-    private static PrivilegeHelper instance;
+    private static List<PrivilegeBase> allEnumPrivileges;
+    private static List<PrivilegeBase> allNonHiddenEnumPrivileges;
+    private static final Map<String, PrivilegeBase> nameToEnum = new LinkedTreeMap<>();
+    private static JSONArray enumJsonArray;
+    private static JSONArray enumJsonArrayWithLabel;
+    
+    private static final Set<PrivilegeBase> adminPrivileges = new HashSet<>(Arrays.asList(Privilege.values()));
+    private static final Set<PrivilegeBase> userPrivileges = new HashSet<>();
+    private static final Set<PrivilegeBase> orgAdminPrivileges = new HashSet<>();
+    private static final Set<PrivilegeBase> orgUserPrivileges = new HashSet<>();
+    
+    private static AtomicReference<PrivilegeHelper> instance;
+    
+    /**
+     * Refer to any repository-like method via service to make use of Cacheable mechanism
+     */
+    @Inject private BasicPrivilegeService privilegeService;
 
-    public final static PrivilegeHelper getInstance() {
-        return instance;
+    private PrivilegeHelper() {
+        PrivilegeHelper.instance = new AtomicReference<>(this);
     }
-
+    
+    public static final PrivilegeHelper getInstance() {
+        if(instance == null) {
+            instance =  new AtomicReference<>(new PrivilegeHelper());
+        }
+        
+        return instance.get();
+    }
 
     public Long getCurrentUserId() {
         return UserProvider.getFromContext().map( a-> a.getUser() ).map( a -> a.getId() ).orElse(null );
@@ -83,7 +109,7 @@ public class PrivilegeHelper implements HasSecurityRules {
         return Arrays.stream(joinedPrivileges.split(",")).map(PrivilegeHelper::valueOfString).toArray(Enum[]::new);
     }
 
-    public static Set<Enum> fromJoinedStringToSet(String joinedPrivileges) {
+    public static Set<PrivilegeBase> fromJoinedStringToSet(String joinedPrivileges) {
         return Arrays.stream(joinedPrivileges.split(",")).map(PrivilegeHelper::valueOfString).collect(Collectors.toUnmodifiableSet());
     }
 
@@ -100,7 +126,7 @@ public class PrivilegeHelper implements HasSecurityRules {
         return Arrays.stream(p).map(a -> a.name()).collect(Collectors.toUnmodifiableSet());
     }
 
-    public static Set<Enum> fromJoinedStringInParenthesisToPrivilegeEnumSet(String joinedValuesInParenthesis) {
+    public static Set<PrivilegeBase> fromJoinedStringInParenthesisToPrivilegeEnumSet(String joinedValuesInParenthesis) {
         Stream<String> k = streamSplitAndRemoveParenthesis(joinedValuesInParenthesis);
         return k.map(PrivilegeHelper::valueOfString).collect(Collectors.toUnmodifiableSet());
     }
@@ -110,8 +136,17 @@ public class PrivilegeHelper implements HasSecurityRules {
         return streamSplitAndRemoveParenthesis(joinedValuesInParenthesis).map(Long::valueOf).collect(Collectors.toUnmodifiableSet());
     }
 
-    public static Enum valueOfString(String s) {
-        return nameToEnum.get(s);
+    public static PrivilegeBase valueOfString(String s) {
+        if(StringUtils.isBlank(s)) {
+            return null;
+        }
+        
+        PrivilegeBase privelege = nameToEnum.get(s);
+        if(privelege == null && getInstance().privilegeService != null) {
+            privelege = getInstance().privilegeService.findByName(s);
+        }
+        
+        return privelege;
     }
 
 
@@ -129,7 +164,7 @@ public class PrivilegeHelper implements HasSecurityRules {
      * @param e
      * @return String in parentheses
      */
-    public static String inParenthesis(Enum e) {
+    public static String inParenthesis(PrivilegeBase e) {
         return "(" + e.name() + ")";
     }
 
@@ -138,7 +173,7 @@ public class PrivilegeHelper implements HasSecurityRules {
      * @param privilegesSet
      * @return joined string in parentheses
      */
-    public static String toJoinedStringInParenthesis(Set<Enum> privilegesSet) {
+    public static String toJoinedStringInParenthesis(Set<PrivilegeBase> privilegesSet) {
         return StringUtils.join(privilegesSet.stream().map(PrivilegeHelper::inParenthesis).collect(toList()), ',');
     }
 
@@ -146,28 +181,52 @@ public class PrivilegeHelper implements HasSecurityRules {
      * @param privileges
      * @return joined string in parentheses
      */
-    public static String toJoinedStringInParenthesis(Enum ... privileges) {
+    public static String toJoinedStringInParenthesis(PrivilegeBase ... privileges) {
         return StringUtils.join(Stream.of(privileges).map(PrivilegeHelper::inParenthesis).collect(toList()), ',');
     }
 
-    public static List<Enum> allEnumsToList() {
-        return new ArrayList<>(nameToEnum.values());
+    public static List<PrivilegeBase> allEnumsToList() {
+        List<DynamicPrivilege> dymamicPrivileges = 
+                getInstance().privilegeService != null 
+                ? getInstance().privilegeService.findAll() 
+                : Collections.emptyList();
+        if(dymamicPrivileges.isEmpty()) {
+            return allEnumPrivileges;
+        }
+        
+        List<PrivilegeBase> privileges = new ArrayList<>(allEnumPrivileges);
+        privileges.addAll(dymamicPrivileges);
+        return privileges;
     }
 
-    public static Map<String, Enum> getNameToEnum() {
+    // TODO : can be removed?
+    public static Map<String, PrivilegeBase> getNameToEnum() {
         return nameToEnum;
     }
 
+    public static List<PrivilegeBase> getAllNonHiddenEnumPrivileges() {
+        if (allNonHiddenEnumPrivileges == null) {
+            allNonHiddenEnumPrivileges = nameToEnum.values().stream().filter( p -> !p.isHidden()).sorted( (p1, p2) -> p1.getId().compareTo(p2.getId()) ).toList();
+        }
+        
+        return allNonHiddenEnumPrivileges;
+    }
+    
     /**
      * @return map of all enums as privilege base list
      */
     public static List<PrivilegeBase> allEnumsAsPrivilegeBaseList() {
-        List<PrivilegeBase> result = new ArrayList<>();
-        for (Map.Entry e: nameToEnum.entrySet()) {
-            PrivilegeBase pb = (PrivilegeBase) e.getValue();
-            if (pb.isHidden()) { continue; }
-            result.add(pb);
+        List<DynamicPrivilege> dynamicPrivileges = getInstance().privilegeService != null 
+                ? getInstance().privilegeService.findAll() 
+                : Collections.emptyList();
+        if(dynamicPrivileges.isEmpty()) {
+            // just return already pre-populated list
+            return getAllNonHiddenEnumPrivileges();
         }
+        
+        List<PrivilegeBase> result = new ArrayList<>(getAllNonHiddenEnumPrivileges());
+        result.sort((p1, p2) -> p1.getId().compareTo(p2.getId()));
+        result.addAll(0, dynamicPrivileges);
         return result;
     }
 
@@ -175,24 +234,62 @@ public class PrivilegeHelper implements HasSecurityRules {
         return allEnumsAsPrivilegeBaseList().toArray(PrivilegeBase[]::new);
     }
 
+    // TODO : is that used at all? can be removed?
     /**
      * @return map of all enums as privilege base linked map
      */
     public static Map<PrivilegeBase, String> allEnumsAsPrivilegeBaseLinkedMap() {
-        TreeMap<PrivilegeBase, String> result = new TreeMap<>(Comparator.comparing(PrivilegeBase::getLabel));
-        for (Map.Entry e: nameToEnum.entrySet()) {
-            PrivilegeBase pb = (PrivilegeBase) e.getValue();
+        TreeMap<PrivilegeBase, String> result = new TreeMap<>(Comparator.comparing(PrivilegeBase::name));
+        for (Map.Entry<String, PrivilegeBase> e: nameToEnum.entrySet()) {
+            PrivilegeBase pb = e.getValue();
             if (pb.isHidden()) { continue; }
             result.put(pb, pb.getLabel());
         }
+        
+        if(getInstance().privilegeService != null) {
+            getInstance().privilegeService.findAll().forEach( pb -> result.put(pb, pb.name()));
+        }
+        
         return result;
     }
 
     public static String allEnumsAsPrivilegeBaseJsonString(boolean concatLabel) throws JSONException {
+        return getInstance().allEnumsAsPrivilegeBaseJsonStringInstance(concatLabel);
+    }
+    
+    public static List<? extends PrivilegeBase> getAllEnumPrivileges() {
+        if (allEnumPrivileges == null) {
+            allEnumPrivileges = new ArrayList<>(nameToEnum.values());
+        }
+        
+        return allEnumPrivileges;
+    }
+    
+    public String allEnumsAsPrivilegeBaseJsonStringInstance(boolean concatLabel) throws JSONException {
+        if(!concatLabel && enumJsonArray == null) {
+            enumJsonArray = privilegeListToJson(new JSONArray(), getAllEnumPrivileges(), concatLabel);
+        } else if(concatLabel && enumJsonArrayWithLabel == null) {
+            enumJsonArrayWithLabel = privilegeListToJson(new JSONArray(), getAllEnumPrivileges(), concatLabel);
+        }
+        
+        List<DynamicPrivilege> dynamicPrivileges = privilegeService.findAll();
+        if (dynamicPrivileges.isEmpty()) {
+            if(concatLabel) {
+                return enumJsonArrayWithLabel.toString();
+            }
+            
+            return enumJsonArray.toString();
+        }
+
         JSONArray results = new JSONArray();
+        privilegeListToJson(results, getAllEnumPrivileges(), concatLabel);
+        privilegeListToJson(results, dynamicPrivileges, concatLabel);
+        return results.toString();
+    }
+    
+    private JSONArray privilegeListToJson(JSONArray results, List<? extends PrivilegeBase> privileges, boolean concatLabel) throws JSONException {
         JSONObject result;
-        for (var e : nameToEnum.entrySet()) {
-            PrivilegeBase pb = (PrivilegeBase) e.getValue();
+        for (PrivilegeBase pb : privileges) {
             result = new JSONObject();
             result.put("k", pb.name());
             if(!concatLabel) {
@@ -207,7 +304,8 @@ public class PrivilegeHelper implements HasSecurityRules {
             result.put("hidden", String.valueOf(pb.isHidden()));
             results.put(result);
         }
-        return results.toString();
+        
+        return results;
     }
 
     /**
@@ -219,25 +317,25 @@ public class PrivilegeHelper implements HasSecurityRules {
         for (Class<Enum> ec : enumClasses) {
             List<Enum> enums = Arrays.stream(ec.getEnumConstants()).sorted(Comparator.comparing(o -> ((PrivilegeBase) o).getLabel())).collect(toList());
             for (Enum e : enums) {
-                nameToEnum.put(e.name(), e);
+                nameToEnum.put(e.name(), (PrivilegeBase)e);
             }
         }
     }
 
-    public static Set<Enum> getAdminPrivilegeSet() {
-        return adminPrivileges;
+    public static Set<PrivilegeBase> getAdminPrivilegeSet() {
+        return adminPrivileges.stream().map( p -> (PrivilegeBase)p).collect(Collectors.toSet());
     }
 
-    public static Set<Enum> getOrgAdminPrivilegeSet() {
-        return orgAdminPrivileges;
+    public static Set<PrivilegeBase> getOrgAdminPrivilegeSet() {
+        return orgAdminPrivileges.stream().map( p -> (PrivilegeBase)p).collect(Collectors.toSet());
     }
 
-    public static Set<Enum> getUserPrivilegeSet() {
-        return userPrivileges;
+    public static Set<PrivilegeBase> getUserPrivilegeSet() {
+        return userPrivileges.stream().map( p -> (PrivilegeBase)p).collect(Collectors.toSet());
     }
 
-    public static Set<Enum> getOrgUserPrivilegeSet() {
-        return orgUserPrivileges;
+    public static Set<PrivilegeBase> getOrgUserPrivilegeSet() {
+        return orgUserPrivileges.stream().map( p -> (PrivilegeBase)p).collect(Collectors.toSet());
     }
 
     public static Set<String> getAdminPrivilegeStrings() {
@@ -247,6 +345,14 @@ public class PrivilegeHelper implements HasSecurityRules {
     public static Privilege[] getAdminPrivileges() {
         return Privilege.values();
     }
+    
+    public static List<PrivilegeGroup> allPrivilegeGroups() {
+        return Arrays.asList(PrivilegeGroup.values());
+    }
+    
+    public static List<String> allCategories() {
+        return Stream.of(Privilege.values()).map(p -> p.getCategory()).sorted().toList();
+    }
 
     /**
      * a post constructor that initializes the attributes of the class
@@ -254,12 +360,19 @@ public class PrivilegeHelper implements HasSecurityRules {
     @PostConstruct
     void init() {
         registerEnumClasses((Class<Enum>[]) getClasses(privilegesEnumClasses));
-        instance = this;
         orgAdminPrivileges.addAll(adminPrivileges);
         orgAdminPrivileges.removeAll(Arrays.asList(canAccessGlobalSettings,canImpersonate,canSeeUserEmail,canResetPassword,canChangeEntityOrganization));
         orgUserPrivileges.addAll(Arrays.asList(readUserData, readOrgData));
         userPrivileges.addAll(Arrays.asList(isUser));
     }
 
+    @Override
+    public String convertToDatabaseColumn(PrivilegeBase attribute) {
+        return attribute != null ? attribute.name() : null;
+    }
 
+    @Override
+    public PrivilegeBase convertToEntityAttribute(String dbData) {
+        return PrivilegeHelper.valueOfString(dbData);
+    }
 }

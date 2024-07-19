@@ -28,11 +28,15 @@ public interface PrivilegeNames {
     //ORGANIZATION DATA
     public static final String _readOrgData = "readOrgData";
     public static final String _manageOrgData = "manageOrgData";
+    public static final String _useReportingAI = "canUseReportingAI";
+    public static final String _createReports = "canCreateReports";
+    public static final String _readReports = "canReadReports";
 
     //   ADMIN
     public static final String _canAccessGlobalSettings = "canAccessGlobalSettings";
     public static final String _canImpersonate = "canImpersonate";
     public static final String _canChangeEntityOrganization = "canChangeEntityOrganization";
+    public static final String _canImportData = "canImportData";
     public static final String _canSeeUserEmail = "canSeeUserEmail";
     public static final String _canResetPassword = "canResetPassword";
 

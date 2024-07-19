@@ -23,6 +23,7 @@ package com.openkoda.controller.frontendresource;
 
 import com.openkoda.core.controller.frontendresource.AbstractFrontendResourceController;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
+import com.openkoda.model.component.ControllerEndpoint;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -76,6 +77,6 @@ public class PublicFrontendResourceController extends AbstractFrontendResourceCo
         if(subPath == null) {
             subPath = "";
         }
-        return invokeFrontendResourceEntry(null, finalPath, null, subPath, request, response, draft, requestParams, form);
+        return invokeFrontendResourceEntry(null, finalPath, null, subPath, ControllerEndpoint.HttpMethod.valueOf(request.getMethod()), draft, requestParams, form);
     }
 }

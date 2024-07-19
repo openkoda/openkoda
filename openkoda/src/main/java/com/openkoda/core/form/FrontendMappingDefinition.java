@@ -23,9 +23,11 @@ package com.openkoda.core.form;
 
 import com.openkoda.model.PrivilegeBase;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import reactor.util.function.Tuple2;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -83,6 +85,14 @@ public class FrontendMappingDefinition {
         return fields;
     }
 
+    public List<FrontendMappingFieldDefinition> getFieldsByType(List<FieldType> types) {
+        return Arrays.stream(fields).filter(field -> types.contains(field.getType())).collect(Collectors.toList());
+    }
+
+    public List<Object> getFieldsNamesByType(List<FieldType> types) {
+        return Arrays.stream(fields).filter(field -> types.contains(field.getType())).map(FrontendMappingFieldDefinition::getPlainName).collect(Collectors.toList());
+    }
+
     public FrontendMappingFieldDefinition[] getDbTypeFields(){
         return Arrays.stream(getFields())
                 .filter(s -> s.getType() != null && s.getType().getDbType() != null)
@@ -107,6 +117,8 @@ public class FrontendMappingDefinition {
         for (FrontendMappingFieldDefinition f : fields) {
             if (f.getPlainName().equals(fieldName)) {
                 return f;
+            } else if (f.getType().equals(FieldType.many_to_one) && fieldName.contains(".") && (StringUtils.substringBefore(fieldName, ".") + "Id").equals(f.getPlainName())) {
+                return FrontendMappingFieldDefinition.createFormFieldDefinition(name, fieldName, FieldType.text, f.readPrivilege, f.writePrivilege);
             }
         }
         return null;

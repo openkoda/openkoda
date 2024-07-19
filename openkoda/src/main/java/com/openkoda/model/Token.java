@@ -46,13 +46,13 @@ public class Token extends TimestampedEntity implements AuditableEntity {
     private static final int DEFAULT_EXPIRATION_TIME_IN_SECONDS = 2 * 24 * 3600; //2 days
     final static List<String> ignoredProperties = Arrays.asList("token");
     
-    public Token(User u, boolean singleRequest, boolean singleUse, int expirationTimeInSeconds, Enum ... privileges) {
+    public Token(User u, boolean singleRequest, boolean singleUse, int expirationTimeInSeconds, PrivilegeBase ... privileges) {
         this(u, expirationTimeInSeconds, privileges);
         this.singleUse = singleUse;
         this.singleRequest = singleRequest;
     }
 
-    public Token(User u, boolean singleUse, Enum ... privileges) {
+    public Token(User u, boolean singleUse, PrivilegeBase ... privileges) {
         this(u, privileges);
         this.singleUse = singleUse;
     }
@@ -69,12 +69,12 @@ public class Token extends TimestampedEntity implements AuditableEntity {
         userId = user.getId();
     }
 
-    public Token(User u, int expirationTimeInSeconds, Enum ... privileges) {
+    public Token(User u, int expirationTimeInSeconds, PrivilegeBase ... privileges) {
         this(u, expirationTimeInSeconds);
         this.privileges = PrivilegeHelper.toJoinedStringInParenthesis(privileges);
     }
 
-    public Token(User u, Enum ... privileges) {
+    public Token(User u, PrivilegeBase ... privileges) {
         this(u);
         this.privileges = PrivilegeHelper.toJoinedStringInParenthesis(privileges);
     }
@@ -130,7 +130,7 @@ public class Token extends TimestampedEntity implements AuditableEntity {
     private boolean isValid;
 
     @Transient
-    private Set<Enum> privilegesSet;
+    private Set<PrivilegeBase> privilegesSet;
 
     /**
      * Token authentication can limit (but not extend) the privileges given to the user.
@@ -140,7 +140,7 @@ public class Token extends TimestampedEntity implements AuditableEntity {
     @Column(length = 65535)
     private String privileges;
 
-    public Set<Enum> getPrivilegesSet() {
+    public Set<PrivilegeBase> getPrivilegesSet() {
         if ( privilegesSet == null ) {
             privilegesSet = PrivilegeHelper.fromJoinedStringInParenthesisToPrivilegeEnumSet( privileges );
         }

@@ -53,6 +53,9 @@ public interface RoleRepository extends UnsecuredFunctionalRepositoryWithLongId<
     @Query("SELECT gor FROM GlobalOrganizationRole gor")
     List<GlobalOrganizationRole> findAllGlobalRoles();
 
-
+    @Modifying
+    @Query(value = "UPDATE roles SET privileges = replace(\"privileges\", '(:oldName)', '(:newName)')"
+            , nativeQuery = true)
+    void renamePrivilege(@Param("oldName") String oldName, @Param("newName") String newName);
 
 }

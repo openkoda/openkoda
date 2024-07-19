@@ -29,6 +29,7 @@ import com.openkoda.model.component.FrontendResource;
 import com.openkoda.repository.SecureFormRepository;
 import com.openkoda.repository.SecureFrontendResourceRepository;
 import com.openkoda.repository.SecureServerJsRepository;
+import com.openkoda.repository.ai.SecureQueryReportRepository;
 import com.openkoda.repository.organization.SecureOrganizationRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -37,6 +38,8 @@ import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 
 import static com.openkoda.form.FrontendMappingDefinitions.*;
+import static com.openkoda.model.Privilege.canCreateReports;
+import static com.openkoda.model.Privilege.canReadReports;
 
 /**
  * Used for registration of generic controllers configurations {@link com.openkoda.core.form.CRUDControllerConfiguration} on application start.
@@ -58,6 +61,8 @@ public class CRUDControllers {
     SecureOrganizationRepository secureOrganizationRepository;
     @Inject
     SecureFormRepository formRepository;
+    @Inject
+    SecureQueryReportRepository queryReportRepository;
 
     /**
      * Registers generic controllers using {@link CustomisationService#registerOnApplicationStartListener(Consumer)}
@@ -84,6 +89,14 @@ public class CRUDControllers {
                         .setMenuItem("resources")
                         .setTableView("frontend-resource-all")
                         .setAdditionalPredicate((root, query, cb) -> cb.and(cb.equal(root.get("resourceType"), FrontendResource.ResourceType.RESOURCE))));
+        customisationService.registerOnApplicationStartListener(
+                a -> htmlCrudControllerConfigurationMap.registerCRUDController(
+                                queryReportForm, queryReportRepository, ReflectionBasedEntityForm.class,  canReadReports, canCreateReports)
+                        .setGenericTableFields("name","organizationId")
+                        .setTableView("frontend-resource/global/report-all")
+                        .setSettingsView("report-data-table")
+                        .setNavigationFragment("navigation-fragments::reporting-nav-tabs('reports')")
+                        .setMenuItem("reports"));
 
     }
 

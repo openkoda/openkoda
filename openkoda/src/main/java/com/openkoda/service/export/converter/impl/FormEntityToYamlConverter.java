@@ -48,10 +48,13 @@ public class FormEntityToYamlConverter extends AbstractEntityToYamlConverter<For
         dto.setName(entity.getName());
         dto.setReadPrivilege(entity.getReadPrivilegeAsString());
         dto.setTableColumns(entity.getTableColumns());
+        dto.setFilterColumns(entity.getFilterColumns());
         dto.setTableName(entity.getTableName());
+        dto.setTableView(entity.getTableView());
         dto.setWritePrivilege(entity.getWritePrivilegeAsString());
         dto.setRegisterApiCrudController(entity.isRegisterApiCrudController());
         dto.setRegisterHtmlCrudController(entity.isRegisterHtmlCrudController());
+        dto.setShowOnOrganizationDashboard(entity.isShowOnOrganizationDashboard());
         dto.setCode(getResourcePathToContentFile(entity));
         dto.setModule(entity.getModuleName());
         dto.setOrganizationId(entity.getOrganizationId());

@@ -115,7 +115,8 @@ public class AbstractUserController extends AbstractController {
                     }
                     return a.result;
                 })
-                .thenSet(organizationEntityId, a -> a.model.get(userEntity).getOrganizationIds().length > 0 ? a.model.get(userEntity).getOrganizationIds()[0] : null)
+                .thenSet(organizationEntityId, a -> a.model.get(userEntity).getOrganizationIds() != null && a.model.get(userEntity).getOrganizationIds().length > 0 ?
+                        a.model.get(userEntity).getOrganizationIds()[0] : null)
                 .execute();
     }
     protected PageModelMap stopSpoofingUser(HttpSession session, HttpServletRequest request, HttpServletResponse response){

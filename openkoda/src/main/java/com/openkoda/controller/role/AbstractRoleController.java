@@ -21,13 +21,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.controller.role;
 
+import com.openkoda.core.cache.RequestSessionCacheService;
 import com.openkoda.core.controller.generic.AbstractController;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.form.RoleForm;
-import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.Role;
+import jakarta.inject.Inject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,8 @@ import java.util.stream.Collectors;
  */
 public class AbstractRoleController extends AbstractController {
 
+    @Inject private RequestSessionCacheService cacheService;
+    
     protected PageModelMap findRolesFlow(
             String aSearchTerm,
             Specification<Role> aSpecification,
@@ -73,7 +77,7 @@ public class AbstractRoleController extends AbstractController {
                 .then(a -> services.validation.validate(roleFormData, br))
                 .then(a -> roleFormData.dto.privileges != null ?
                         roleFormData.dto.privileges.stream().map(PrivilegeHelper::valueOfString).collect(Collectors.toSet())
-                        : new HashSet<Enum>()
+                        : new HashSet<PrivilegeBase>()
                 )
                 .then(a -> services.role.createRole(roleFormData.dto.name, roleFormData.dto.type, a.result))
                 .thenSet(roleForm, a -> new RoleForm())
@@ -96,6 +100,7 @@ public class AbstractRoleController extends AbstractController {
                 .then(a -> repositories.unsecure.role.findOne(roleId))
                 .then(a -> services.validation.validateAndPopulateToEntity(roleFormData, br,a.result))
                 .thenSet(roleEntity, a -> repositories.unsecure.role.save(a.result))
+                .then(a -> services.privilege.notifyOnPrivilagesChange())
                 .execute();
     }
 }

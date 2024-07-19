@@ -35,6 +35,7 @@ public class FolderPathConstants {
     public static final String FORM_ = "form/";
     public static final String SCHEDULER_ = "scheduler/";
     public static final String EVENT_ = "event/";
+    public static final String CUSTOM_EVENT_ = "custom/";
     public static final String FRONTEND_RESOURCE_ = "frontend-resource/";
     public static final String UI_COMPONENT_ = "ui-component/";
 
@@ -42,6 +43,7 @@ public class FolderPathConstants {
     public static final String EXPORT_CODE_PATH_ = EXPORT_PATH + "code/";
     public static final String EXPORT_RESOURCES_PATH_ = EXPORT_PATH + "templates/";
     public static final String EXPORT_CONFIG_PATH_ = EXPORT_PATH + "components/";
+    public static final String EXPORT_PRIVILEGE_PATH_ = EXPORT_PATH + "privileges/";
     public static final String EXPORT_MIGRATION_PATH_ = EXPORT_PATH + "migration/";
 
     public static final String SUBDIR_ORGANIZATION_PREFIX = "org_";

@@ -23,9 +23,11 @@ package com.openkoda.form;
 
 public interface TemplateFormFieldNames {
     String NAME_= "name";
+    String LABEL_= "label";
     String TYPE_ = "type";
     String ROLE_TYPES_ = "roleTypes";
     String PRIVILEGES_ = "privileges";
+    String PRIVILEGE_GROUPS_ = "privilegeGroups";
     String EMAIL_ = "email";
     String FIRST_NAME_ = "firstName";
     String LAST_NAME_ = "lastName";
@@ -48,6 +50,7 @@ public interface TemplateFormFieldNames {
     String ALL_LOGGERS_ = "allLoggers";
     String EVENT_ = "event";
     String EVENTS_ = "events";
+    String EVENTS_CLASSES_ = "eventClasses";
     String CONSUMER_ = "consumer";
     String CONSUMERS_ = "consumers";
 
@@ -165,9 +168,13 @@ public interface TemplateFormFieldNames {
     String MODEL_ATTRIBUTES = "modelAttributes";
     String RESPONSE_TYPE = "responseType";
     String FRONTEND_RESOURCE_ID = "frontendResourceId";
+    String REGISTER_AS_AUDITABLE = "registerAsAuditable";
     String REGISTER_API_CRUD_CONTROLLER = "registerApiCrudController";
     String REGISTER_HTML_CRUD_CONTROLLER = "registerHtmlCrudController";
+    String SHOW_ON_ORGANIZATION_DASHBOARD = "showOnOrganizationDashboard";
     String TABLE_COLUMNS = "tableColumns";
+    String FILTER_COLUMNS = "filterColumns";
+    String FILTER_AVAILABLE_COLUMNS = "filterAvailableColumns";
 
     String EMAIL_HOST = "host";
     String EMAIL_PORT = "port";
@@ -180,4 +187,10 @@ public interface TemplateFormFieldNames {
     String EMAIL_STARTTLS = "starttls";
     String EMAIL_REPLY_TO = "replyTo";
     String EMAIL_MAILGUN_API_KEY = "mailgunApiKey";
+
+    String QUERY = "query";
+    String LOGO_ID = "logoId";
+    String PERSONALIZE_DASHBOARD = "personalizeDashboard";
+    String MAIN_BRAND_COLOR = "mainBrandColor";
+    String SECOND_BRAND_COLOR = "secondBrandColor";
 }

@@ -37,7 +37,7 @@ public interface ControllerEndpointRepository extends UnsecuredFunctionalReposit
     List<ControllerEndpoint> findByFrontendResourceId(long frontendResourceId);
 
     ControllerEndpoint findByFrontendResourceIdAndSubPathAndHttpMethod(long frontendResourceId, String subPath, ControllerEndpoint.HttpMethod httpMethod);
-//    ControllerEndpoint findByFrontendResourceIdAndSubPathAndHttpMethodAndOrganizationId(long frontendResourceId, String subPath, ControllerEndpoint.HttpMethod httpMethod, long organizationId);
+    ControllerEndpoint findByFrontendResourceIdAndSubPathAndHttpMethodAndOrganizationId(long frontendResourceId, String subPath, ControllerEndpoint.HttpMethod httpMethod, Long organizationId);
 
     @Modifying
     @Query("delete from ControllerEndpoint where module = :module")

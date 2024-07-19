@@ -23,10 +23,20 @@ package com.openkoda.uicomponent;
 
 import com.openkoda.uicomponent.annotation.Autocomplete;
 
+import java.util.Map;
+
 public interface IntegrationServices {
     @Autocomplete(doc="Send a message to Slack webhook")
     boolean sendMessageToSlack(String message, String webHook);
+    
+    @Autocomplete(doc="Send a message to Slack webhook to specific channel using specific username")
+    boolean sendMessageToSlack(String message, String webHook, String channel, String username);
+    
     @Autocomplete(doc="Send a JSON-formatted message to Slack webhook")
     boolean sendJsonMessageToSlack(String JSONMessage, String webHook);
 
+    @Autocomplete(doc="Rest client POST")
+    Map restPost(String url, Map<String, String> body, Map<String, String> headers);
+    @Autocomplete(doc="Rest client GET")
+    Map restGet(String url, Map<String, String> headers);
 }

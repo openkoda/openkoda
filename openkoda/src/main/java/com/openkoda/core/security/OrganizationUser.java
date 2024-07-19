@@ -25,6 +25,7 @@ import com.openkoda.core.helper.collections.UnmodifiableMapWithRemove;
 import com.openkoda.core.helper.collections.UnmodifiableSetWithRemove;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.authentication.LoggedUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -35,11 +36,11 @@ import java.util.stream.Collectors;
 
 public class OrganizationUser extends User implements OAuth2User, HasSecurityRules, LoggingComponentWithRequestId {
 
-    private Set<Enum> retainedPrivileges;
-    private final Set<String> globalPrivileges;
-    private final Set<String> globalRoles;
-    private final Map<Long, Set<String>> organizationPrivileges;
-    private final Map<Long, Set<String>> organizationRoles;
+    private Set<PrivilegeBase> retainedPrivileges;
+    private Set<String> globalPrivileges;
+    private Set<String> globalRoles;
+    private Map<Long, Set<String>> organizationPrivileges;
+    private Map<Long, Set<String>> organizationRoles;
     private final Map<Long, String> organizationNames;
     private final com.openkoda.model.User user;
     private final Long defaultOrganizationId;
@@ -176,7 +177,7 @@ public class OrganizationUser extends User implements OAuth2User, HasSecurityRul
         isSpoofed = spoofed;
     }
 
-    public Set<Enum> getRetainedPrivileges() {
+    public Set<PrivilegeBase> getRetainedPrivileges() {
         return retainedPrivileges;
     }
 
@@ -195,6 +196,36 @@ public class OrganizationUser extends User implements OAuth2User, HasSecurityRul
     public void setAuthMethod(LoggedUser.AuthenticationMethods authMethod) {
         this.authMethod = authMethod;
     }
+    
+    
+
+    public Set<String> getGlobalRoles() {
+        return globalRoles;
+    }
+
+    public void setGlobalRoles(Set<String> globalRoles) {
+        this.globalRoles = globalRoles;
+    }
+
+    public Map<Long, Set<String>> getOrganizationPrivileges() {
+        return organizationPrivileges;
+    }
+
+    public void setOrganizationPrivileges(Map<Long, Set<String>> organizationPrivileges) {
+        this.organizationPrivileges = organizationPrivileges;
+    }
+
+    public Map<Long, Set<String>> getOrganizationRoles() {
+        return organizationRoles;
+    }
+
+    public void setOrganizationRoles(Map<Long, Set<String>> organizationRoles) {
+        this.organizationRoles = organizationRoles;
+    }
+
+    public void setGlobalPrivileges(Set<String> globalPrivileges) {
+        this.globalPrivileges = globalPrivileges;
+    }
 
     /**
      * Privileges should be immutable, but for certain authentication scenarios we want to narrow down the privileges.
@@ -202,7 +233,7 @@ public class OrganizationUser extends User implements OAuth2User, HasSecurityRul
      * To serve this purpose we use collections that allow removal of elements, but block adding new ones.
      * @param privilegesToLeave
      */
-    void retainPrivileges(Set<Enum> privilegesToLeave) {
+    void retainPrivileges(Set<PrivilegeBase> privilegesToLeave) {
         debug("[retainPrivileges]");
         if (privilegesToLeave == null) {
             return;
@@ -237,5 +268,13 @@ public class OrganizationUser extends User implements OAuth2User, HasSecurityRul
 
     public void setOauth2User(OAuth2User oauth2User) {
         this.oauth2User = oauth2User;
+    }
+    
+    public boolean resetPrivileges(Set<String> globalPrivileges, Set<String> globalRoles, Map<Long, Set<String>> organizationPrivileges, Map<Long, Set<String>> organizationRoles) {
+        this.globalPrivileges = globalPrivileges;
+        this.globalRoles = globalRoles;
+        this.organizationPrivileges = organizationPrivileges;
+        this.organizationRoles = organizationRoles;
+        return true;
     }
 }

@@ -23,7 +23,10 @@ package com.openkoda.service.export;
 
 import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.core.service.system.DatabaseValidationService;
+import com.openkoda.model.DynamicPrivilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.common.ComponentEntity;
+import com.openkoda.model.component.Form;
 import com.openkoda.service.export.converter.EntityToYamlConverterFactory;
 import com.openkoda.service.export.util.ZipUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,9 +43,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
@@ -68,13 +69,27 @@ public class ComponentExportService implements LoggingComponent {
         debug("[exportEntityList]");
 
         ByteArrayOutputStream zipByteArrayOutputStream = new ByteArrayOutputStream();
-
+        List dependencies = new ArrayList<>();
+        Set<String> zipEntries = new HashSet<>();
         try (ZipOutputStream zipOut = new ZipOutputStream(zipByteArrayOutputStream)) {
             for (Object entity : entities) {
                 debug("[exportToZip] Adding {}", entity.toString());
-                entityToYamlConverterFactory.exportToZip(entity, zipOut);
+                entityToYamlConverterFactory.exportToZip(entity, zipOut, zipEntries);
+                if(entity instanceof Form) {
+                    Form entityForm = (Form)entity;
+                    PrivilegeBase priv = entityForm.getReadPrivilege();
+                    if(priv instanceof DynamicPrivilege) {
+                        dependencies.add(priv);
+                    }
+                }
             }
-            additionalExportFiles(zipOut);
+            
+            List<String> dbScriptLines = null;
+            if (dependencies != null) {
+                addEntityDependencies(zipOut, dependencies, dbScriptLines = new ArrayList<>(), zipEntries);
+            }
+            
+            additionalExportFiles(zipOut, dbScriptLines);
             debug("All YAML files added to ZIP successfully.");
         } catch (IOException e) {
             error("[exportEntityList]", e);
@@ -84,6 +99,13 @@ public class ComponentExportService implements LoggingComponent {
         }
 
         return zipByteArrayOutputStream;
+    }
+    private void addEntityDependencies(ZipOutputStream zipOut, List dependencies, List<String> dbUpgradeEntries, Set<String> zipEntries) {
+        // TODO Auto-generated method stub
+        debug("[addEntityDependencies] Adding entity dependencies {}", dependencies);
+        dependencies.stream().distinct().forEach( d -> {
+            entityToYamlConverterFactory.exportToZip(d, zipOut, dbUpgradeEntries, zipEntries);
+        }); 
     }
     public List<ComponentEntity> exportToFileIfRequired(List<ComponentEntity> entities){
         if(syncWithFilesystem && entities != null){
@@ -109,7 +131,7 @@ public class ComponentExportService implements LoggingComponent {
         }
         return entity;
     }
-    private void additionalExportFiles(ZipOutputStream zos) {
+    private void additionalExportFiles(ZipOutputStream zos, List<String> dbScriptLines) {
         debug("[additionalExportFiles]");
         try {
             URL additionalFilesFolder = getClass().getClassLoader().getResource(COMPONENTS_ADDITIONAL_FILES_);
@@ -127,7 +149,6 @@ public class ComponentExportService implements LoggingComponent {
             } else {
                 List<String> nestedResources = jarResources(additionalFilesFolder);
                 for (String string : nestedResources) {
-                    // getClass().getClassLoader().getResources(string)
                     URL nestedUrl = getClass().getClassLoader().getResource(string);
                     String fileName = new File(string).getName();
                     zipUtils.addURLFileToZip(nestedUrl,
@@ -135,10 +156,13 @@ public class ComponentExportService implements LoggingComponent {
                 }
             }
 //          add migration script if exists
-            String dbUpdateScriptContent = databaseValidationService.getUpdateScript(false);
+            StringBuilder dbUpdateScriptContent = new StringBuilder(databaseValidationService.getUpdateScript(false));
             if(StringUtils.isNotEmpty(dbUpdateScriptContent)) {
 //                TODO: update sql script name generation so it contains version info
-                zipUtils.addToZipFile(dbUpdateScriptContent, EXPORT_MIGRATION_PATH_ + "upgrade.sql", zos);
+                if(dbScriptLines != null) {
+                    dbScriptLines.forEach( l -> dbUpdateScriptContent.append(System.getProperty("line.separator")).append(l));
+                }
+                zipUtils.addToZipFile(dbUpdateScriptContent.toString(), EXPORT_MIGRATION_PATH_ + "upgrade.sql", zos);
             }
         } catch (IOException | URISyntaxException e) {
             error("[additionalExportFiles]", e);

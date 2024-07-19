@@ -51,8 +51,11 @@ public class ServerJsYamlToEntityConverter extends ComponentProvider implements 
     }
 
     private ServerJs getServerJs(ServerJsConversionDto dto){
-        ServerJs serverJs = new ServerJs();
-        serverJs.setName(dto.getName());
+        ServerJs serverJs = repositories.unsecure.serverJs.findByName(dto.getName());
+        if(serverJs == null) {
+            serverJs = new ServerJs();
+            serverJs.setName(dto.getName());
+        }
         serverJs.setArguments(dto.getArguments());
         serverJs.setModel(dto.getModel());
         serverJs.setModuleName(dto.getModule());

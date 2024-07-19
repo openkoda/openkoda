@@ -60,15 +60,19 @@ public class ControllerEndpointYamlToEntityConverter extends ComponentProvider i
 
     @NotNull
     private ControllerEndpoint getControllerEndpoint(ControllerEndpointConversionDto dto) {
-        ControllerEndpoint controllerEndpoint = new ControllerEndpoint();
-        controllerEndpoint.setFrontendResourceId(dto.getFrontendResourceId());
-        controllerEndpoint.setSubPath(dto.getSubpath() != null ? dto.getSubpath() : "");
+        ControllerEndpoint controllerEndpoint = repositories.unsecure.controllerEndpoint.findByFrontendResourceIdAndSubPathAndHttpMethodAndOrganizationId(
+                dto.getFrontendResourceId(), dto.getSubpath(), StringUtils.isNotEmpty(dto.getHttpMethod()) ? ControllerEndpoint.HttpMethod.valueOf(dto.getHttpMethod()) : null, dto.getOrganizationId());
+        if(controllerEndpoint == null) {
+            controllerEndpoint = new ControllerEndpoint();
+            controllerEndpoint.setFrontendResourceId(dto.getFrontendResourceId());
+            controllerEndpoint.setSubPath(dto.getSubpath() != null ? dto.getSubpath() : "");
+            controllerEndpoint.setHttpMethod(dto.getHttpMethod());
+            controllerEndpoint.setOrganizationId(dto.getOrganizationId());
+        }
         controllerEndpoint.setHttpHeaders(dto.getHttpHeaders());
-        controllerEndpoint.setHttpMethod(dto.getHttpMethod());
         controllerEndpoint.setModelAttributes(dto.getModelAttributes());
         controllerEndpoint.setResponseType(dto.getResponseType());
         controllerEndpoint.setModuleName(dto.getModule());
-        controllerEndpoint.setOrganizationId(dto.getOrganizationId());
         return controllerEndpoint;
     }
 

@@ -21,13 +21,18 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.service.export.converter;
 
+import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 public interface EntityToYamlConverter<T, D> {
 
 
-    D addToZip(T entity, ZipOutputStream zipOut);
+    D addToZip(T entity, ZipOutputStream zipOut, Set<String> zipEntries);
     T saveToFile(T entity);
     T removeExportedFiles(T entity);
+    default void getUpgradeScript(T entity, List<String> dbUpgradeEntries) {
+        return;
+    }
 
 }

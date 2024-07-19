@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
@@ -45,18 +46,27 @@ public class EntityToYamlConverterFactory implements LoggingComponent {
     }
 
     @SuppressWarnings("unchecked")
-    public ZipOutputStream exportToZip(Object entity, ZipOutputStream zipOut) {
-        debug("[processEntityToYaml]");
+    public ZipOutputStream exportToZip(Object entity, ZipOutputStream zipOut, List<String> dbUpgradeEntries, Set<String> zipEntries) {
+        debug("[exportToZip]");
 
         EntityToYamlConverter<Object, Object> converter = (EntityToYamlConverter<Object, Object>) converterMap.get(entity.getClass());
 
         if(converter == null){
             throw new IllegalArgumentException("No parent converter found for entity " + entity.getClass().getName());
         }
-        converter.addToZip(entity, zipOut);
-
+        
+        converter.addToZip(entity, zipOut, zipEntries);
+        if(dbUpgradeEntries != null) {
+            converter.getUpgradeScript(entity, dbUpgradeEntries);
+        }
+        
         return zipOut;
     }
+    
+    public ZipOutputStream exportToZip(Object entity, ZipOutputStream zipOut, Set<String> zipEntries) {
+        return exportToZip(entity, zipOut, null, zipEntries);
+    }
+    
     public ComponentEntity exportToFile(ComponentEntity entity) {
         debug("[processEntityToYaml]");
 

@@ -79,6 +79,7 @@ public class PropertyChangeListener implements LoggingComponentWithRequestId {
         audit.setOperation(aos.getOperation());
         String changeDescription = getAuditChangeFactory().createChange(p, aos, entityClassLabel);
         audit.setEntityName(entityClass);
+        audit.setEntityKey(entityClassLabel);
         audit.setSeverity(Audit.Severity.INFO);
         audit.setUserRoleIds(userRoleIds);
         audit.setEntityId(getEntityId(p));

@@ -26,6 +26,7 @@ package com.openkoda.controller.frontendresource;
 
 import com.openkoda.core.controller.frontendresource.AbstractFrontendResourceController;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
+import com.openkoda.model.component.ControllerEndpoint;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -86,7 +87,7 @@ public class RestrictedFrontendResourceController extends AbstractFrontendResour
         if(organizationId == null && NumberUtils.isCreatable(requestParams.get(ORGANIZATIONID))) {
             organizationId = Long.parseLong(requestParams.get(ORGANIZATIONID));
         }
-        return invokeFrontendResourceEntry(organizationId, finalPath, null, subPath, request, response, draft, requestParams, form);
+        return invokeFrontendResourceEntry(organizationId, finalPath, null, subPath, ControllerEndpoint.HttpMethod.valueOf(request.getMethod()), draft, requestParams, form);
     }
 
     @RequestMapping(
@@ -115,6 +116,6 @@ public class RestrictedFrontendResourceController extends AbstractFrontendResour
         if(organizationId == null && NumberUtils.isCreatable(requestParams.get(ORGANIZATIONID))) {
             organizationId = Long.parseLong(requestParams.get(ORGANIZATIONID));
         }
-        return invokeFrontendResourceEntry(organizationId, null, frontendResourceId, subPath, request, response, draft, requestParams, form);
+        return invokeFrontendResourceEntry(organizationId, null, frontendResourceId, subPath, ControllerEndpoint.HttpMethod.valueOf(request.getMethod()), draft, requestParams, form);
     }
 }

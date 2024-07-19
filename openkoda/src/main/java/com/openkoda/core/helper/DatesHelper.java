@@ -55,6 +55,11 @@ public class DatesHelper {
         return date.format(dateFormat);
     }
 
+    public static String formatDateTimeEN(LocalDateTime date) {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH);
+        return date.format(dateFormat);
+    }
+
     public static String formatDateWithFullMonthNameLocaleEN(LocalDateTime date) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH);
         return date.format(dateFormat);

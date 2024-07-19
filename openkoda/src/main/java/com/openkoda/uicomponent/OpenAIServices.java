@@ -21,8 +21,20 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.uicomponent;
 
+import com.openkoda.uicomponent.annotation.Autocomplete;
+
 public interface OpenAIServices {
+
+    @Autocomplete
+    String sendMessageToGPTWithPrompt(String promptFileName, String message, String model, String temperature,
+            String... repositoryNames);
+
     String sendMessageToGPT(String message, String model, String temperature, String... repositoryNames);
 
+    @Autocomplete
     String sendMessageToGPT(String message, String conversationId);
+
+    @Autocomplete
+    String getCompleteDataSchemaPrompt();
+
 }

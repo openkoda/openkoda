@@ -28,6 +28,7 @@ import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.service.event.EventConsumerCategory;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.component.FrontendResource;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
 
@@ -42,16 +43,20 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     String USER_FORM = "userForm";
     String SCHEDULER_FORM = "schedulerForm";
     String ROLE_FORM = "roleForm";
+    String PRIVILEGE_FORM = "privilegeForm";
     String ORGANIZATION_FORM = "organizationForm";
     String LOGGER_FORM = "loggerForm";
     String FRONTEND_RESOURCE_FORM = "frontendResource";
     String PAGE_BUILDER_FORM = "pageBuilder";
     String MODULE_FORM = "moduleForm";
     String FRONTEND_RESOURCE_PAGE_FORM = "frontendResourcePageForm";
+    String QUERY_REPORT_FORM = "queryReport";
     String UI_COMPONENT_FRONTEND_RESOURCE_FORM = "uiComponentFrontendResource";
     String CONTROLLER_ENDPOINT_FORM = "controllerEndpointForm";
     String EVENT_LISTENER_FORM = "eventListenerForm";
     String SEND_EVENT_FORM = "sendEventForm";
+    String SEND_CUSTOM_EVENT_FORM = "sendCustomEventForm";
+    String CREATE_EVENT_FORM = "createEventForm";
     String ATTRIBUTE_DEFINITION_FORM = "attributeDefinitionForm";
     String EDIT_USER_FORM = "editUserForm";
     String GLOBAL_ORG_ROLE_FORM = "globalOrgRoleForm";
@@ -62,7 +67,19 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
     FrontendMappingDefinition roleForm = createFrontendMappingDefinition(ROLE_FORM, canReadBackend, canManageBackend,
         a -> a  .text(NAME_)
                 .dropdown(TYPE_, ROLE_TYPES_)
-                .checkboxListGrouped(PRIVILEGES_, "privilegesGrouped").additionalCss(TABLE_COMPACT_CSS));
+                .checkboxListGrouped(PRIVILEGES_, "privilegesGrouped").additionalCss(TABLE_COMPACT_CSS)
+                );
+    
+    FrontendMappingDefinition privilegeForm = createFrontendMappingDefinition(PRIVILEGE_FORM, canReadBackend, canManageBackend,
+            a -> a  .text(ID_)
+                        .enabled((c, entityId) -> false)
+                        .visible((c, entityId) -> !(entityId == null || entityId.getId() == null || entityId.getId() == 0))
+                    .text(NAME_)
+                        .enabled((c, entityId) -> entityId == null || entityId.getId() == null || entityId.getId() == 0)
+                    .text(LABEL_)
+                    .text("category")
+                    .dropdown("privilegeGroup", PRIVILEGE_GROUPS_)
+                    .additionalCss(TABLE_COMPACT_CSS));
 
     FrontendMappingDefinition userForm = createFrontendMappingDefinition(USER_FORM, null, (PrivilegeBase) null,
         a -> a  .text(EMAIL_).additionalPrivileges(CHECK_IS_NEW_USER_OR_OWNER, CHECK_IF_CAN_WRITE_USER)
@@ -100,6 +117,10 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 // Replace with this lines to disable datasource selection in Organization creation form
 //                            (u, e) -> e != null && HybridMultiTenantConnectionProvider.isMultitenancy() && u.hasGlobalPrivilege(canAccessGlobalSettings),
 //                            (u, e) -> e != null && HybridMultiTenantConnectionProvider.isMultitenancy() && u.hasGlobalPrivilege(canAccessGlobalSettings))
+                    .image(LOGO_ID)
+                    .checkbox(PERSONALIZE_DASHBOARD)
+                    .colorPicker(MAIN_BRAND_COLOR)
+                    .colorPicker(SECOND_BRAND_COLOR)
     );
 
     FrontendMappingDefinition emailConfigForm = createFrontendMappingDefinition(EMAIL_CONFIG_FORM, canReadBackend, canManageBackend,
@@ -159,6 +180,12 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
                                 Map.of(TYPE_, "incompatible.frontend-resource.types", NAME_, "incompatible.frontend-resource.types") : null)
     );
 
+    FrontendMappingDefinition queryReportForm = createFrontendMappingDefinition(QUERY_REPORT_FORM, canUseReportingAI, canUseReportingAI,
+            a -> a
+                    .text(NAME_).validate(v -> StringUtils.isNotEmpty(v) ? null : "not.empty")
+                    .hidden(QUERY)
+    );
+
     FrontendMappingDefinition frontendResourcePageForm = createFrontendMappingDefinition(FRONTEND_RESOURCE_PAGE_FORM, readFrontendResource, manageFrontendResource,
             a -> a
                     .text(URL_PATH_)
@@ -167,6 +194,20 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 
     FrontendMappingDefinition sendEventForm = createFrontendMappingDefinition(SEND_EVENT_FORM, canReadBackend, canManageBackend,
             a -> a  .dropdownNonDto(EVENT_, EVENTS_)
+    );
+    
+    FrontendMappingDefinition createEventForm = createFrontendMappingDefinition(CREATE_EVENT_FORM, canReadBackend, canManageBackend,
+            a -> a  .text(NAME_)
+                    .dropdown("className", EVENTS_CLASSES_)   
+                    .hidden("eventName")
+                    
+    );
+
+    FrontendMappingDefinition sendCustomEventForm = createFrontendMappingDefinition(SEND_CUSTOM_EVENT_FORM, canReadBackend, canManageBackend,
+            a -> a  .text(NAME_)
+                    .text("eventData")
+                    .hidden("eventName")
+                    .hidden("className")
     );
 
     FrontendMappingDefinition sendEventInvoiceDto = createFrontendMappingDefinition(SEND_EVENT_FORM, canReadBackend, canManageBackend,
@@ -280,6 +321,6 @@ public interface FrontendMappingDefinitions extends HasSecurityRules, TemplateFo
 
     FrontendMappingDefinition organizationsApi = createFrontendMappingDefinition(ORGANIZATION, readOrgData, manageOrgData,
             a -> a.hidden(ID_)
-                  .text(NAME_)
+                    .text(NAME_)
     );
 }

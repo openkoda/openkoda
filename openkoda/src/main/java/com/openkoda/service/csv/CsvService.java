@@ -23,6 +23,7 @@ package com.openkoda.service.csv;
 
 import com.openkoda.core.service.FileService;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -30,26 +31,29 @@ import javax.sql.rowset.serial.SerialBlob;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class CsvService implements LoggingComponentWithRequestId {
 
-    public com.openkoda.model.file.File createCSV(String filename, List<Object[]> data, String... headers) throws IOException, SQLException {
+    public com.openkoda.model.file.File createCSV(String filename, List<List<Object>> data, String... headers) throws IOException, SQLException {
         debug("[createCSV]");
         com.openkoda.model.file.File csvFile = new com.openkoda.model.file.File(
                 StringUtils.endsWith(filename, ".csv") ? filename : filename + ".csv",
                 "text/csv",
                 FileService.StorageType.database
         );
-        csvFile.setContent(new SerialBlob(createCSVByte(data, headers)));
+        byte[] csvByte = createCSVByte(data, headers);
+        csvFile.setContent(new SerialBlob(csvByte));
+        csvFile.setSize(csvByte.length);
         return csvFile;
     }
 
-    private byte[] createCSVByte(List<Object[]> data, String... headers) {
+    private byte[] createCSVByte(List<List<Object>> data, String... headers) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            data.add(0, headers);
+            data.add(0, Arrays.asList(headers));
             String csvContent = data.stream()
                     .map(this::convertToCSVRow)
                     .collect(Collectors.joining("\n"));
@@ -58,18 +62,20 @@ public class CsvService implements LoggingComponentWithRequestId {
             return outputStream.toByteArray();
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            error("[createCSVByte]", e);
+            return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
     }
 
-    private String convertToCSVRow(Object[] rowData) {
+    private String convertToCSVRow(List<Object> rowData) {
         StringBuilder csvRow = new StringBuilder();
-        for (int i = 0; i < rowData.length; i++) {
+        for (int i = 0; i < rowData.size(); i++) {
             if (i > 0) {
                 csvRow.append(",");
             }
-            csvRow.append(rowData[i]);
+            if(rowData.get(i) != null) {
+                csvRow.append(rowData.get(i));
+            }
         }
         return csvRow.toString();
     }

@@ -21,10 +21,13 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.uicomponent.live;
 
+import com.openkoda.core.service.RestClientService;
 import com.openkoda.core.service.SlackService;
 import com.openkoda.uicomponent.IntegrationServices;
 import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class LiveIntegrationServices implements IntegrationServices {
@@ -32,8 +35,15 @@ public class LiveIntegrationServices implements IntegrationServices {
     @Inject
     SlackService slackService;
 
+    @Inject
+    RestClientService restClientService;
+
     public boolean sendMessageToSlack(String message, String webHook) {
         return slackService.sendMessageToSlack(message, webHook);
+    }
+    
+    public boolean sendMessageToSlack(String message, String webHook, String channel, String username) {
+        return slackService.sendMessageToSlack(message, webHook, channel, username);
     }
 
     @Override
@@ -41,4 +51,13 @@ public class LiveIntegrationServices implements IntegrationServices {
         return slackService.sendJSONMessageToSlack(JSONMessage, webHook);
     }
 
+    @Override
+    public Map restPost(String url, Map<String, String> body, Map<String, String> headers) {
+        return restClientService.post(url, body, headers);
+    }
+
+    @Override
+    public Map restGet(String url, Map<String, String> headers) {
+        return restClientService.get(url, headers);
+    }
 }

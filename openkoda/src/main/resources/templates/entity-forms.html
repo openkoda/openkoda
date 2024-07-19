@@ -43,6 +43,12 @@
       th:replace="~{generic-forms::generic-form(${roleForm}, 'roleForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Role Data', #{template.save}, false)}" />
 <form th:fragment="role-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allRoles()} )}"/>
 
+<form th:fragment="privilege-settings-form-new"
+      th:replace="~{generic-forms::generic-form(${privilegeForm}, 'privilegeForm', '', '', '', 'Privilege Data', #{template.save}, true)}" />
+<form th:fragment="privilege-settings-form-error"
+      th:replace="~{generic-forms::generic-form(${privilegeForm}, 'privilegeForm', '', #{template.forms.containsErrors}, 'alert-danger', 'Privilege Data', #{template.save}, false)}" />
+<form th:fragment="privilege-settings-form-success" th:replace="~{generic-forms::go-back( ${@url.allPrivileges()} )}"/>
+
 <form th:fragment="frontend-resource-settings-form-new"
       th:replace="~{generic-forms::generic-form(${frontendResourceForm}, 'frontendResourceForm', '', '', '', '', #{template.save}, true)}" />
 <form th:fragment="frontend-resource-settings-form-error"

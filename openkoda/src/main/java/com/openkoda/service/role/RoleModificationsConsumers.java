@@ -30,7 +30,6 @@ import com.openkoda.model.Role;
 import com.openkoda.model.UserRole;
 import jakarta.inject.Inject;
 import org.apache.commons.collections.CollectionUtils;
-import org.assertj.core.util.Maps;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -111,7 +110,7 @@ public class RoleModificationsConsumers extends ComponentProvider {
 
     private Map<String, Boolean> runModifyRolesScript(OrganizationRelatedObject organizationRelatedObject, String scriptName) {
         debug("[runModifyRolesScript]");
-        Map<String, Object> model = new HashMap<>(Maps.newHashMap(PageAttributes.organizationRelatedObject.name, organizationRelatedObject));
+        Map<String, Object> model = new HashMap<>(Map.of(PageAttributes.organizationRelatedObject.name, organizationRelatedObject));
         Map scriptResult = serverJSRunner.evaluateServerJsScript(scriptName, model, null, Map.class);
 
         if (scriptResult == null) {

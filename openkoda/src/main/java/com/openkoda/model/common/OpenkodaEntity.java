@@ -140,6 +140,10 @@ public abstract class OpenkodaEntity implements ModelConstants, Serializable, Se
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public String getIndexString() {
         return indexString;

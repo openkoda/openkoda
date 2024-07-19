@@ -33,6 +33,7 @@ import com.openkoda.dto.file.FileDto;
 import com.openkoda.form.rule.LogicalOperator;
 import com.openkoda.form.rule.Operator;
 import com.openkoda.model.OptionWithLabel;
+import com.openkoda.model.PrivilegeGroup;
 import com.openkoda.model.common.ModelConstants;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
@@ -50,6 +51,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +63,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.openkoda.core.form.FormFieldDefinitionBuilderStart.DATALIST_PREFIX;
 import static com.openkoda.model.file.File.toFileDto;
 
 @Repository("secureEntityDictionaryRepository")
@@ -107,11 +110,19 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         SearchableRepositoryMetadata gsa = SearchableRepositories.getSearchableRepositoryMetadata(entityKey);
         return dictionary(gsa);//, ID, null, null);
     }
+    public Map dictionary(String entityKey, String customDescriptionFormula) {
+        SearchableRepositoryMetadata gsa = SearchableRepositories.getSearchableRepositoryMetadata(entityKey);
+        return dictionary(gsa, customDescriptionFormula);//, ID, null, null);
+    }
     public Map dictionary(Class entityClass) {
         SearchableRepositoryMetadata gsa = SearchableRepositories.getSearchableRepositoryMetadata(entityClass);
         return dictionary(gsa);//, ID, null, null);
     }
     public <T extends SearchableEntity> Map dictionary(SearchableRepositoryMetadata gsa) {
+        String customDescriptionFormula = null;
+        return dictionary(gsa, customDescriptionFormula);
+    }
+    public <T extends SearchableEntity> Map dictionary(SearchableRepositoryMetadata gsa, @Nullable String customDescriptionFormula) {
         if (gsa == null) {
             warn("SearchableRepository for entity key not found");
             return Collections.emptyMap();
@@ -125,7 +136,8 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
         q.where(toSecurePredicate((r, query, c) -> organizationId == null || !isOrganizationRelated(r.getModel().getJavaType())? c.conjunction() : c.equal(r.get("organizationId"), organizationId),null, root, q, cb, SecurityScope.USER));
         List<Long> result = em.createQuery(q).getResultList();
         String tableName = SearchableRepositories.discoverTableName(gsa.entityClass());
-        Query query = em.createNativeQuery("select id, " + gsa.descriptionFormula() + " from " +  tableName + " where id in (:ids) order by " + gsa.descriptionFormula());
+        String descriptionFormula = customDescriptionFormula != null ? "(''||COALESCE(" + customDescriptionFormula + ",''))" : "id";
+        Query query = em.createNativeQuery("select id, " + descriptionFormula + " from " +  tableName + " where id in (:ids) order by " + descriptionFormula);
         query.setParameter("ids", result);
         List<Object[]> r = query.getResultList();
 
@@ -212,22 +224,25 @@ public class SecureEntityDictionaryRepository extends ComponentProvider implemen
     public void setupCommonDictionaries() throws JSONException {
         Map<String, Object> newCommonDictionaries = new HashMap<>();
         newCommonDictionaries.clear();
-        newCommonDictionaries.put("booleanValues", toJsonString(Map.of("true", "YES", "false", "NO")));
-        newCommonDictionaries.put("privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(true));
-        newCommonDictionaries.put("privilegesGrouped", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(false));
-        newCommonDictionaries.put("frontendResourceType", enumsToJsonString(FrontendResource.Type.values()));
-        newCommonDictionaries.put("consumers", mapToJsonString(services.eventListener.getConsumersArray()));
-        newCommonDictionaries.put("organizationRoles", listTupleToJsonString(repositories.unsecure.organizationRole.findAllAsTupleWithLabelName()));
-        newCommonDictionaries.put("globalRoles", listTupleToJsonString(repositories.unsecure.globalRole.findAllAsTupleWithLabelName()));
-        newCommonDictionaries.put("languages", toJsonString(languages));
-        newCommonDictionaries.put("events", mapObjectToJsonString(services.eventListener.getEvents()));
-        newCommonDictionaries.put("roleTypes", listStringToJsonString(roleTypes));
-        newCommonDictionaries.put("httpMethod", enumsToJsonString(ControllerEndpoint.HttpMethod.values()));
-        newCommonDictionaries.put("responseType", enumsToJsonString(ControllerEndpoint.ResponseType.values()));
-        newCommonDictionaries.put("countries", toJsonString(countries));
-        newCommonDictionaries.put("operators", enumsLabelToJsonString(Operator.values()));
-        newCommonDictionaries.put("logicalOperators", enumsLabelToJsonString(LogicalOperator.values()));
-        newCommonDictionaries.put("globalOrganizationRoles", listTupleToJsonString(repositories.unsecure.globalOrganizationRole.findAllAsTuple()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "booleanValues", toJsonString(Map.of("true", "YES", "false", "NO")));
+        newCommonDictionaries.put(DATALIST_PREFIX + "privileges", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(true));
+        newCommonDictionaries.put(DATALIST_PREFIX + "privilegeGroups", enumsLabelToJsonString(PrivilegeGroup.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "privilegesGrouped", PrivilegeHelper.allEnumsAsPrivilegeBaseJsonString(false));
+        newCommonDictionaries.put(DATALIST_PREFIX + "frontendResourceType", enumsToJsonString(FrontendResource.Type.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "consumers", mapToJsonString(services.eventListener.getConsumersArray()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "organizationRoles", listTupleToJsonString(repositories.unsecure.organizationRole.findAllAsTupleWithLabelName()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "globalRoles", listTupleToJsonString(repositories.unsecure.globalRole.findAllAsTupleWithLabelName()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "languages", toJsonString(languages));
+        newCommonDictionaries.put(DATALIST_PREFIX + "events", mapObjectToJsonString(services.eventListener.getEvents()));
+        //newCommonDictionaries.put(DATALIST_PREFIX + "eventClasses", mapObjectToJsonString(services.eventListener.getEvents()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "eventClasses", mapObjectToJsonString(services.dynamicEntity.getAll()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "roleTypes", listStringToJsonString(roleTypes));
+        newCommonDictionaries.put(DATALIST_PREFIX + "httpMethod", enumsToJsonString(ControllerEndpoint.HttpMethod.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "responseType", enumsToJsonString(ControllerEndpoint.ResponseType.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "countries", toJsonString(countries));
+        newCommonDictionaries.put(DATALIST_PREFIX + "operators", enumsLabelToJsonString(Operator.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "logicalOperators", enumsLabelToJsonString(LogicalOperator.values()));
+        newCommonDictionaries.put(DATALIST_PREFIX + "globalOrganizationRoles", listTupleToJsonString(repositories.unsecure.globalOrganizationRole.findAllAsTuple()));
         newCommonDictionaries.putAll(moduleDictionaries);
         commonDictionaries = newCommonDictionaries;
     }

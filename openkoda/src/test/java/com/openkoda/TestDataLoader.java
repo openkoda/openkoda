@@ -31,7 +31,7 @@ import com.openkoda.model.common.Audit;
 import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.component.Scheduler;
 import com.openkoda.model.component.event.EventListenerEntry;
-import com.openkoda.service.export.ComponentImportService;
+import com.openkoda.service.export.ClasspathComponentImportService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,8 +59,8 @@ public class TestDataLoader extends BaseDatabaseInitializer {
     public TestDataLoader(
             @Autowired QueryExecutor queryExecutor,
             @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
-            @Autowired ComponentImportService componentImportService) {
-        super(queryExecutor, initializationScripts, null, componentImportService);
+            @Autowired ClasspathComponentImportService classpathComponentImportService) {
+        super(queryExecutor, initializationScripts, null, classpathComponentImportService);
     }
 
     @Transactional
@@ -141,7 +141,7 @@ public class TestDataLoader extends BaseDatabaseInitializer {
         return services.user.registerUserOrReturnExisting(registerUserForm);
     }
 
-    public Role createGlobalRole(String name, Set<Enum> privileges, boolean removable) {
+    public Role createGlobalRole(String name, Set<PrivilegeBase> privileges, boolean removable) {
         GlobalRole role = new GlobalRole(name);
         role.setPrivilegesSet(privileges);
         role.setRemovable(removable);
@@ -153,7 +153,7 @@ public class TestDataLoader extends BaseDatabaseInitializer {
         return repositories.unsecure.organization.findByName(name);
     }
 
-    public Role createOrganizationRole(String name, Set<Enum> privileges, boolean removable) {
+    public Role createOrganizationRole(String name, Set<PrivilegeBase> privileges, boolean removable) {
         OrganizationRole role = new OrganizationRole(name);
         role.setPrivilegesSet(privileges);
         role.setRemovable(removable);
@@ -247,7 +247,7 @@ public class TestDataLoader extends BaseDatabaseInitializer {
             } else if ("organization".equals(column)) {
                 createOrganization("test_" + i);
             } else if ("role".equals(column)) {
-                Set<Enum> privileges = new HashSet<>();
+                Set<PrivilegeBase> privileges = new HashSet<>();
                 privileges.addAll(Arrays.asList(Privilege.values()));
                 createGlobalRole("test_role_" + i, privileges, true);
             } else if ("module".equals(column)) {

@@ -8,22 +8,194 @@
       <nav th:replace="~{__${genericViewNavigationFragment}__}"></nav>
     </th:block>
     <div class="card shadow mb-4">
-      <div class="card-header py-3 d-flex flex-row align-items-center ">
-        <h6 class="m-0 font-weight-bold" th:if="${navigationFragment == null}" th:text="${@messages.getFieldLabel(frontendMappingDefinition.formLabel, frontendMappingDefinition.name)}"></h6>
-        <div class="card-header-buttons">
-          <a class="btn-primary btn btn-sm ml-4" href="new/settings" th:text="#{template.new}">New</a>
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between ">
+            <h6 class="m-0 font-weight-bold text-nowrap">
+                <th:block th:if="${genericViewNavigationFragment == null}"
+                          th:text="${@messages.getFieldLabel(frontendMappingDefinition.formLabel, frontendMappingDefinition.name)}"/>
+            </h6>
+            <div class="d-flex align-items-center ">
+                <div class="ml-4 mr-4">
+                    <nav th:replace="~{tables::search(${frontendMappingDefinition.name}, ${organizationRelatedEntityPage})}"></nav>
+                </div>
+                <div class="dropdown no-arrow dropdown-lg dropdown-menu-md-right">
+                    <a class="dropdown-toggle" href="#" role="button" th:id="${frontendMappingDefinition.name} + '-menu'"
+                       data-toggle="dropdown"
+                       aria-haspopup="true" th:aria-expanded="${!objFilters.isEmpty()}">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                         th:aria-labelledby="${frontendMappingDefinition.name} + '-menu'">
+                        <th:block th:if="${#lists.size(genericTableFilters)}">
+                            <button class="dropdown-item btn-link btn-simple" th:text="#{template.filter}"
+                                    type="button" data-toggle="collapse"
+                                    data-target="#filter-form" th:aria-expanded="${!objFilters.isEmpty()}"
+                                    aria-controls="filter-form">Filter</button>
+                            <button class="dropdown-item btn-link btn-simple" th:text="#{template.clearFilter}"
+                                    type="button" th:onclick="app.refreshViewWithoutEntityKeyParams([[${frontendMappingDefinition.name}]])">Clear Filter</button>
+                        </th:block>
+                        <a class="dropdown-item" th:href="'report/csv' + ${(queryString != null ? '?' + queryString : '')}" th:text="#{template.download}">Download</a>
+                        <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canImportData',organizationEntityId) && #arrays.contains(@environment.getActiveProfiles(),'development')}">
+                            <button type="button" class="dropdown-item btn-link btn-simple"
+                                    data-toggle="modal" data-target="#importModal" th:text="#{template.import}">Import
+                            </button>
+                        </th:block>
+                        <a class="dropdown-item" href="new/settings" th:text="#{template.new}">New</a>
+                    </div>
+                </div>
+                <div class="card-header-buttons">
+                    <th:block th:fragment="filter-buttons" th:if="${#lists.size(genericTableFilters)}">
+                        <button class="btn btn-primary btn-sm btn-icon-split" type="button" data-toggle="collapse"
+                                data-target="#filter-form" th:aria-expanded="${!objFilters.isEmpty()}"
+                                aria-controls="filter-form">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-caret-down"></i>
+                          </span>
+                            <span class="text"><th:block th:text="#{template.filter}">Filter</th:block></span>
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-icon-split" type="button"
+                                th:onclick="app.refreshViewWithoutEntityKeyParams([[${frontendMappingDefinition.name}]])">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-xmark"></i>
+                          </span>
+                            <span class="text"><th:block th:text="#{template.clearFilter}">Clear Filter</th:block></span>
+                        </button>
+                    </th:block>
+                    <a class="btn-primary btn btn-sm btn-icon-split" th:href="${@url.reportCsv(organizationEntityId, frontendMappingDefinition.name)} + ${(queryString != null ? '?' + queryString : '')}">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-download"></i>
+                        </span>
+                        <span class="text"><th:block th:text="#{template.download}">Download</th:block></span>
+                    </a>
+                    <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canImportData',organizationEntityId) && #arrays.contains(@environment.getActiveProfiles(),'development')}">
+                        <button type="button" class="btn-primary btn btn-sm btn-icon-split"
+                                data-toggle="modal" data-target="#importModal">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-import"></i>
+                        </span>
+                            <span class="text"><th:block th:text="#{template.import}">Import</th:block></span>
+                        </button>
+                    </th:block>
+                    <a class="btn-primary btn btn-sm btn-icon-split" th:href="${@url.form(organizationEntityId, frontendMappingDefinition.name)}">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span class="text"><th:block th:text="#{template.new}">New</th:block></span>
+                    </a>
+                </div>
+            </div>
+
         </div>
-      </div>
 
       <div class="card-body">
-        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
+          <div th:fragment="filters" class="mb-4">
+              <form method="get" th:class="'filter-form collapse ' + ${!objFilters.isEmpty() ? 'show' : ''}" id="filter-form"
+                    th:with="page=${organizationRelatedEntityPage}">
+                    
+	                  <input type="hidden" th:name="${frontendMappingDefinition.name + '_page'}"
+	                         th:value="${page.number}"/>
+	                  <input type="hidden" th:name="${frontendMappingDefinition.name + '_size'}"
+	                         th:value="${page.size}"/>
+	                  <input type="hidden" th:name="${frontendMappingDefinition.name + '_sort'}"
+	                         th:value="${param.get(frontendMappingDefinition.name + '_sort')}"/>
+	                  <input type="hidden" th:name="${frontendMappingDefinition.name + '_search'}"
+	                         th:value="${param.get(frontendMappingDefinition.name + '_search')}"/>
+                    <th:block th:replace="~{forms::remainingParametersHiddenInputs}"/>
+                  <div class="row">
+                      <th:block th:each="field : ${genericTableFilters}">
+                          <th:block th:if="${field.datalistSupplier != null AND field.datalistId != null}">
+                              <script th:inline="javascript">
+                                  commonDictionaries[ /*[[${ field.datalistId }]]*/] = [( ${ @json.to(field.datalistSupplier.apply(organizationRelatedForm, @secureEntityDictionaryRepository)) })];
+                              </script>
+                          </th:block>
+                          <th:block
+                                  th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).date, T(com.openkoda.core.form.FieldType).datetime}, field.type)}">
+                              <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3"
+                                th:with="filterValue=${#arrays.toArray(param.get(frontendMappingDefinition.name + '_filter_' + field.name + '_from') ?: {''})}">
+                                  <label th:for="${frontendMappingDefinition.name + '_filter_' + field.name + '_from'}"
+                                         th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName() + 'From')}"></label>
+                                  <input type="date"
+                                         class="form-control datepicker position-relative"
+                                         th:id="${frontendMappingDefinition.name + '_filter_' + field.name + '_from'}"
+                                         th:name="${frontendMappingDefinition.name + '_filter_' + field.name + '_from'}"
+                                         th:value="${filterValue[filterValue.length -1]}"/>
+                              </div>
+                              <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3">
+                                  <label th:for="${frontendMappingDefinition.name + '_filter_' + field.name + '_to'}"
+                                         th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName() + 'To')}"></label>
+                                  <input type="date"
+                                         class="form-control datepicker position-relative"
+                                         th:id="${frontendMappingDefinition.name + '_filter_' + field.name + '_to'}"
+                                         th:name="${frontendMappingDefinition.name + '_filter_' + field.name + '_to'}"
+                                         th:value="${filterValue[filterValue.length -1]}"/>
+                              </div>
+                          </th:block>
+                          <th:block
+                                  th:if="${!#lists.contains({T(com.openkoda.core.form.FieldType).date, T(com.openkoda.core.form.FieldType).datetime, T(com.openkoda.core.form.FieldType).datalist}, field.type)}">
+                              <div class="form-group col-12 col-sm-6 col-md-4 col-lg-3"
+                                th:with="filterValue=${#arrays.toArray(param.get(frontendMappingDefinition.name + '_filter_' + field.name) ?: {''})}">
+                                  <label th:for="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                         th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName())}"></label>
+                                  <input th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).text, T(com.openkoda.core.form.FieldType).textarea}, field.type)}"
+                                         type="text" class="form-control "
+                                         th:id="${frontendMappingDefinition.name + '_filter_' + field.name}" th:name="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                         th:value="${filterValue[filterValue.length -1]}"
+                                         th:placeholder="#{search.placeholder}"/>
+                                  <input th:if="${field.type == T(com.openkoda.core.form.FieldType).number}"
+                                         type="number"
+                                         class="form-control "
+                                         th:id="${frontendMappingDefinition.name + '_filter_' + field.name}" th:name="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                         th:value="${filterValue[filterValue.length -1]}"
+                                         th:placeholder="#{search.placeholder}"/>
+
+                                  <th:block th:if="${field.type == T(com.openkoda.core.form.FieldType).checkbox}">
+                                      <select th:id="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                              th:name="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                              class="selectpicker form-control">
+                                      </select>
+                                      <script th:inline="javascript">
+                                          (function () {
+                                              let fieldId = /*[[${frontendMappingDefinition.name + '_filter_' + field.name}]]*/ '_none_';
+                                              let fieldValue = /*[[ ${param.get(frontendMappingDefinition.name + '_filter_' + field.name)}]]*/ '';
+                                              fieldValue = fieldValue + "";
+                                              app.populateSelect(fieldId, fieldId, fieldValue, '__datalist_booleanValues', true, 'Select', false);
+                                          })();
+                                      </script>
+                                  </th:block>
+                                  <th:block
+                                          th:if="${#lists.contains({T(com.openkoda.core.form.FieldType).dropdown, T(com.openkoda.core.form.FieldType).many_to_one}, field.type)}">
+                                      <select th:id="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                              th:name="${frontendMappingDefinition.name + '_filter_' + field.name}"
+                                              class="selectpicker form-control">
+                                      </select>
+                                      <script th:inline="javascript">
+                                          (function () {
+                                              let datalistId = /*[[${ field.datalistId }]]*/ '_none_';
+                                              let fieldId = /*[[${frontendMappingDefinition.name + '_filter_' + field.name}]]*/ '_none_';
+                                              let fieldValue = /*[[ ${param.get(frontendMappingDefinition.name + '_filter_' + field.name)}]]*/ '';
+                                              fieldValue = fieldValue + "";
+                                              app.populateSelect(fieldId, fieldId, fieldValue, datalistId, true, 'Select', false);
+                                          })();
+                                      </script>
+                                  </th:block>
+                              </div>
+                          </th:block>
+
+                      </th:block>
+                  </div>
+                  <div class="d-block">
+                      <button class="btn btn-primary btn-submit btn-sm" type="submit" th:text="#{template.search}">
+                          Submit
+                      </button>
+                  </div>
+              </form>
+          </div>
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
             <tr>
-              <th th:replace="~{tables::asort('id', #{template.id}, 'obj', ${organizationRelatedEntityPage})}"></th>
+              <th th:replace="~{tables::asort('id', #{template.id}, ${frontendMappingDefinition.name}, ${organizationRelatedEntityPage})}"></th>
                 <th:block th:each="field,iter: ${genericTableViewHeaders}">
-                  <th th:text="${@messages.getFieldLabel(field.labelKey, field.getPlainName())}"></th>
+                  <th th:replace="~{tables::asort(${field.getPlainName()}, ${@messages.getFieldLabel(field.labelKey, field.getPlainName())}, ${frontendMappingDefinition.name}, ${organizationRelatedEntityPage})}"></th>
                 </th:block>
               <th></th>
             </tr>
@@ -31,9 +203,11 @@
             <tbody>
             <tr th:each="a,it : ${organizationRelatedEntityPage.content}">
               <td><span th:text="${a.id}">1</span></td>
-              <td th:each="tableValue: ${genericTableViewList.get(it.index)}"
-                  th:text="(${T(org.apache.commons.lang3.math.NumberUtils).isCreatable(tableValue)} and ${#strings.contains(tableValue,'.')}) ? ${#numbers.formatDecimal(tableValue,3,'COMMA',2,'POINT')} : ${tableValue}"
-                  th:class="${T(org.apache.commons.validator.GenericValidator).isDate(tableValue, 'MM/dd/yy', false)}? 'text-nowrap'"></td>
+              <td th:each="tableValue: ${genericTableViewList.get(it.index)}" >
+                  <th:block th:if="${tableValue == true}"><i class="fas fa-check fa-sm fa-fw text-primary"></i></th:block>
+                  <th:block th:if="${tableValue == false}"></th:block>
+                  <th:block th:if="${tableValue != true and tableValue != false}" th:text="${tableValue}"></th:block>
+              </td>
               <td>
                 <div class="table-row-btns">
                   <th:block th:replace="~{forms::single-icon-post-form-with-confirm(
@@ -41,7 +215,7 @@
                   <a class="" th:href="${'./' + a.id + '/settings'}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
                     <i class="fas fa-pen-to-square text-primary"></i>
                   </a>
-                  <a class="" th:href="${'./' + a.id + '/view'}" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
+                  <a class="" th:href="${@url.view(organizationEntityId, frontendMappingDefinition.name, a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
                     <i class="fas fa-eye text-primary"></i>
                   </a>
                 </div>
@@ -51,8 +225,121 @@
           </table>
         </div>
       </div>
-      <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+      <nav th:replace="~{tables::tablenav(${frontendMappingDefinition.name}, ${organizationRelatedEntityPage})}"></nav>
     </div>
+
+      <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'development')}">
+
+          <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+          <!-- Modal -->
+          <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel"
+               aria-hidden="true">
+              <div class="modal-dialog modal-lg " role="document">
+                  <div class="modal-content">
+                      <form method="POST" id="data-import" th:action="${'import/csv'}"
+                            enctype="multipart/form-data">
+                          <div class="modal-header">
+                              <h5 class="modal-title" id="importModalLabel" th:text="#{template.import}">Import</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
+                          <div class="modal-body">
+                              <div class="mb-3">
+                                  <input type="hidden" id="channelId" name="channelId">
+
+                                  <label for="entitiesImportFile" class="form-label"
+                                         th:text="#{template.csv.data.import}"></label>
+                                  <input class="form-control" type="file" id="entitiesImportFile" name="file"
+                                         accept=".csv">
+
+                                  <div class="mt-2 mb-2">
+                                      <input id="overwrite-data" type="checkbox" name="overwrite"
+                                             th:onclick="app.showCheckboxAlert('overwrite-data', [[#{template.csv.data.import.overwrite.alert}]])"/>
+                                      <label class="checkbox-label" for="overwrite-data">
+                                          <span th:text="#{template.csv.data.import.overwrite}">Label</span>
+                                          <i class="fa-solid fa-triangle-exclamation text-danger" data-toggle="tooltip"
+                                             data-placement="top"
+                                             th:title="#{template.csv.data.import.overwrite.alert}"></i>
+                                      </label>
+                                  </div>
+                              </div>
+                              <div id="import-results" class=""></div>
+                              <div id="import-success" class="d-none">
+                                  <div><pre class="mb-0"><i class="fa-regular fa-circle-check text-primary-light mr-2"></i><th:block th:text="#{template.csv.data.import.success}"/></pre></div>
+                                  <div class="mt-2"><a class="" href=""><i class="fa-solid fa-refresh mr-2"></i><th:block th:text="#{template.csv.data.import.refresh.view}"/></a></div>
+                              </div>
+
+                          </div>
+                          <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                              <button type="submit" class="btn btn-primary">
+                                  <span class="btn-text" th:text="#{template.import}"></span>
+                                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                              </button>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+              <script type="text/javascript" th:inline="javascript">
+
+                  let entityKey = /*[[${ organizationRelatedObjectKey }]]*/ 'entity';
+                  let importSuccess = false;
+
+                  function showImportResult(resultMessage) {
+                      let bodyJson = JSON.parse(resultMessage.body);
+                      const newResult = document.createElement('div');
+					  if(bodyJson.error) {
+                        newResult.innerHTML = `<div class="d-flex"><div><pre class="mb-0"></pre><i class="fa-solid fa-circle-exclamation text-danger mr-2"></i></pre></div><pre class="text-danger text-pre-wrap mb-0">${bodyJson.error}</pre></div>`;
+                      } else {
+                        newResult.innerHTML = `<div class="d-flex"><div><pre class="mb-0"><i class="fa-regular fa-circle-dot text-primary-light mr-2"></i></pre></div><pre class="text-pre-wrap mb-0">${bodyJson.result}</pre></div>`;
+                      }
+                      document.querySelector('#import-results').appendChild(newResult);
+                  }
+
+                  $(document).ready(function () {
+                      $('#importModal button[data-dismiss="modal"]').on("click", () => {
+                          if(importSuccess) {
+                              app.refreshView();
+                          } else {
+                              $('#overwrite-data').prop("checked", false);
+                              document.querySelector('#import-results').innerHTML = '';
+                              $('#import-success').addClass('d-none');
+                              app.stompClient.unsubscribe();
+                          }
+                      });
+                      $('#importModal').on('shown.bs.modal', function (e) {
+                          let channelId = new Date().valueOf() + Math.floor(Math.random() * 10000);
+                          document.querySelector('#channelId').value = channelId;
+                          app.subscribeToChannel(`/queue/${entityKey}/${channelId}`, showImportResult);
+                      })
+
+                      $('form#data-import').submit(function(e){
+                          e.preventDefault();
+	                      document.querySelector('#import-results').innerHTML = '';
+	                      $('#import-success').addClass('d-none');
+						  $('form#data-import button[type="submit"]').addClass('loading');
+                          $.ajax({
+                              url: $(this).attr('action'),
+                              type: 'post',
+                              processData: false,
+                              contentType: false,
+                              data:new FormData($(this)[0]),
+                              success:function(){
+                                  $('form#data-import #import-success').removeClass('d-none');
+                                  $('form#data-import button[type="submit"]').removeClass('loading');
+                              },
+                              error: function (){
+                                  $('form#data-import button[type="submit"]').removeClass('loading');
+                              }
+                          });
+                      });
+                  });
+              </script>
+          </div>
+          <!--      Modal-->
+      </th:block>
   </div>
 </div>
 </body>

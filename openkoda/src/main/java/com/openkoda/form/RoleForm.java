@@ -25,6 +25,7 @@ import com.openkoda.core.form.AbstractEntityForm;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.dto.user.RoleDto;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.Role;
 import org.springframework.validation.BindingResult;
 
@@ -62,13 +63,13 @@ public class RoleForm extends AbstractEntityForm<RoleDto, Role> implements Templ
     public RoleForm populateFrom(Role entity) {
         dto.name = entity.getName();
         dto.type = entity.getType();
-        dto.privileges = entity.getPrivilegesSet().stream().map(Enum::name).collect(Collectors.toList());
+        dto.privileges =  entity.getPrivilegesSet().stream().map(PrivilegeBase::name).collect(Collectors.toList());
         return this;
     }
 
     @Override
     protected Role populateTo(Role entity) {
-
+        
         entity.setName(getSafeValue(entity.getName(), NAME_));
         entity.setPrivilegesSet(getSafeValue(entity.getPrivilegesSet(), PRIVILEGES_,
                 ((List<String> p) -> (p != null ?

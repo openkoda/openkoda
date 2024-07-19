@@ -66,16 +66,18 @@ public enum FieldType {
     //One value from dictionary:
     dropdown(FieldDbType.VARCHAR_255),
     dropdown_with_disable,
-    radio_list,
+    radio_list(FieldDbType.VARCHAR_255),
     radio_list_no_label,
     dropdown_with_entities,
 
     //Many values from dictionary:
     checkbox_list,
     checkbox_list_grouped,
+    multiselect(FieldDbType.VARCHAR_1000),
 
     //Visual divider:
     divider,
+    section_with_link,
     section_with_checkbox,
     section_with_checkbox_with_warning,
     section_with_switch,
@@ -87,7 +89,7 @@ public enum FieldType {
     //
 
     number(FieldDbType.NUMERIC),
-    map,
+    map(FieldDbType.VARCHAR_255),
 
     document,
     rule_then, rule_then_else,
@@ -105,7 +107,7 @@ public enum FieldType {
     //
     color_picker(FieldDbType.VARCHAR_255),
 
-    section_with_dropdown,
+    section_with_dropdown(FieldDbType.VARCHAR_255),
 
     recaptcha,
     div

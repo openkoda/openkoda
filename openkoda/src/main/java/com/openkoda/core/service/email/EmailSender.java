@@ -21,22 +21,20 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.service.email;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
+import com.openkoda.core.tracker.LoggingComponentWithRequestId;
+import com.openkoda.model.file.File;
+import com.openkoda.model.task.Email;
+import com.openkoda.repository.EmailConfigRepository;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.openkoda.core.tracker.LoggingComponentWithRequestId;
-import com.openkoda.model.file.File;
-import com.openkoda.model.task.Email;
-import com.openkoda.repository.EmailConfigRepository;
-
-import jakarta.inject.Inject;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 /**
  * <p>Abstract EmailSender class.</p>
@@ -64,8 +62,11 @@ public abstract class EmailSender implements LoggingComponentWithRequestId {
         try {
             debug("[sendMail] {}", email);
             email.start();
-            sendEmail(email.getFullFrom(mailFrom), email.getFullTo(), email.getSubject(), email.getContent(), email.getAttachmentURL(), email.getFiles());
-            email.complete();
+            email.setSender(getClass().getSimpleName());
+            if (sendEmail(email.getFullFrom(mailFrom), email.getFullTo(), email.getSubject(), email.getContent(),
+                    email.getAttachmentURL(), email.getFiles())) {
+                email.complete();
+            }
         } catch (Exception e) {
             error(e, "[sendMail] {}", email);
             email.fail();
@@ -109,5 +110,4 @@ public abstract class EmailSender implements LoggingComponentWithRequestId {
         }
         return tmpFile;
     }
-
 }

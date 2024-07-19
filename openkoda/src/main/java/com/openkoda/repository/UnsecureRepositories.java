@@ -56,6 +56,7 @@ public class UnsecureRepositories {
 
 //    ROLES
     @Inject public RoleRepository role;
+    @Inject public DynamicPrivilegeRepository privilege;
     @Inject public GlobalRoleRepository globalRole;
     @Inject public OrganizationRoleRepository organizationRole;
     @Inject public GlobalOrganizationRoleRepository globalOrganizationRole;
@@ -86,8 +87,9 @@ public class UnsecureRepositories {
     @Inject public FileRepository file;
     @Inject public IntegrationRepository integration;
     @Inject public FormRepository form;
-    @Inject public EntityUnrelatedQueries entityUnrelatedQueries;
+    @Inject public NativeQueries nativeQueries;
 
     @Inject public OpenkodaModuleRepository openkodaModule;
     @Inject public EmailConfigRepository emailConfig;
+    @Inject public DynamicEntityRepository dynamicEntity;
 }

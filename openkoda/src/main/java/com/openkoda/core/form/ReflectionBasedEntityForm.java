@@ -21,8 +21,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.form;
 
+import com.openkoda.controller.HtmlCRUDControllerConfigurationMap;
 import com.openkoda.core.flow.LoggingComponent;
 import com.openkoda.core.helper.PrivilegeHelper;
+import com.openkoda.core.security.OrganizationUser;
+import com.openkoda.core.security.UserProvider;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.model.component.FrontendResource;
 import org.apache.commons.beanutils.BeanUtils;
@@ -31,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.BindingResult;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -41,6 +46,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.openkoda.model.Privilege.readOrgData;
 /**
  *
  *
@@ -49,7 +55,8 @@ import java.util.stream.Collectors;
  */
 public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntityForm<OrganizationRelatedMap, SearchableOrganizationRelatedEntity> {
 
-    private static final Map<Class, Function> converters = new HashMap<>();
+    private static final String NO_ACCESS = "[no access]";
+    public static final Map<Class, Function> converters = new HashMap<>();
 
     static {
         converters.put(BigDecimal.class, a -> (a == null || StringUtils.isBlank(a+"")) ? null : new BigDecimal(a + ""));
@@ -159,6 +166,12 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
                     }
                     return a;
                 };
+            } else if ("java.lang.String".equals(field.getGenericType().getTypeName())) {
+                converter = a -> {
+//                for multiselect which sends data as String[]
+                    if (a instanceof String []) { return String.join(",", (String[]) a); }
+                    return a;
+                };
             } else {
                 converter = converters.getOrDefault(field.getType(), Function.identity());
             }
@@ -171,17 +184,30 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
         return true;
     }
 
-    public static List<FrontendMappingFieldDefinition> getFieldsHeaders(FrontendMappingDefinition fd, String[] fieldNames) {
+    public static List<FrontendMappingFieldDefinition> getFieldsHeaders(FrontendMappingDefinition fd, String[] fieldNames, Map<String, Boolean> fieldColumnVisibility, Long organizationId) {
         if (fieldNames == null) {return Collections.emptyList();}
         List<FrontendMappingFieldDefinition> result = new ArrayList<>(fieldNames.length);
         for (int k = 0; k < fieldNames.length; k++) {
-            result.add(fd.findField(fieldNames[k]));
+            if(organizationId != null && Boolean.FALSE.equals(fieldColumnVisibility.get(fieldNames[k]))) {
+                continue;
+            }
+
+            FrontendMappingFieldDefinition field = fd.findField(fieldNames[k]);
+            if(field == null) {
+                field = FrontendMappingFieldDefinition.createFormFieldDefinition(fd.name, fieldNames[k], FieldType.text);
+            }
+            
+            boolean canRead = organizationId == null || field.readPrivilege == null || PrivilegeHelper.getInstance().canReadGlobalOrOrgField(field, organizationId);
+            if(canRead || fieldColumnVisibility.get(fieldNames[k])) {
+                result.add(field);
+            }
         }
         return result;
     }
 
-    public static List<Object[]> calculateFieldsValuesWithReadPrivileges(FrontendMappingDefinition fd, Page<? extends SearchableOrganizationRelatedEntity> entities, String[] fieldNames) {
-        List<Object[]> result = new ArrayList<>(entities.getNumberOfElements());
+    public static List<List<Object>> calculateFieldsValuesWithReadPrivileges(FrontendMappingDefinition fd, List<? extends SearchableOrganizationRelatedEntity> entities, String[] fieldNames
+            , Map<String, Boolean> fieldColumnVisibility, Long organizationId) {
+        List<List<Object>> result = new ArrayList<>(entities.size());
         Map<String, Map> dictionaries = new HashMap<>();
         for (FrontendMappingFieldDefinition field : fd.fields) {
             if (field.datalistSupplier != null && !field.formBasedDatalistSupplier) {
@@ -189,23 +215,76 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
             }
         }
 
-        for (SearchableOrganizationRelatedEntity se: entities) {
-            result.add(calculateFieldValuesWithReadPrivileges(fd, se, fieldNames, dictionaries));
+        OrganizationUser user = UserProvider.getFromContext().get();
+        for(String fieldName : fieldNames) {
+            fieldColumnVisibility.put(fieldName, ((organizationId == null && user.isSuperUser()) || entities.size() == 0) ? Boolean.TRUE : Boolean.FALSE);
         }
+
+        for (SearchableOrganizationRelatedEntity se: entities) {
+            List<Object> accessibleFields = calculateFieldValuesWithReadPrivileges(fd, se, fieldNames, dictionaries, fieldColumnVisibility, (organizationId == null && user.isSuperUser()));
+            if(accessibleFields != null && accessibleFields.size() > 0) {
+                result.add(accessibleFields);
+            }
+        }
+
+        // hide columns with all denied/hidden fields
+        if(organizationId != null) {
+            for (int k = fieldNames.length - 1; k >= 0; k--) {
+                if(!fieldColumnVisibility.get(fieldNames[k])) {
+                    for (List<Object> row : result) {
+                        if(row.size() >= k + 1) {
+                            row.remove(k);
+                        }
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
-    public static Object[] calculateFieldValuesWithReadPrivileges(FrontendMappingDefinition fd, SearchableOrganizationRelatedEntity entity, String[] fieldNames, Map<String, Map> dictionaries) {
-        if (fieldNames == null) {return new String[0];}
-        Object[] result = new Object[fieldNames.length];
+    public static List<Object> calculateFieldValuesWithReadPrivileges(FrontendMappingDefinition fd, SearchableOrganizationRelatedEntity entity, String[] fieldNames, Map<String, Map> dictionaries,
+            Map<String, Boolean> fieldColumnVisibility, boolean canReadAll) {
+        if (fieldNames == null) {
+            return Collections.emptyList();
+        }
+
+        List<Object> result = new ArrayList<>(fieldNames.length);
         try {
+            int i = 0;
             for (int k = 0; k < fieldNames.length; k++) {
-                FrontendMappingFieldDefinition f = fd.findField(fieldNames[k]);
-                boolean canRead = PrivilegeHelper.getInstance().canReadField(f, entity);
-                result[k] = canRead ? PropertyUtils.getProperty(entity, fieldNames[k]) : "";
-                if (f.datalistId != null && dictionaries.containsKey(f.datalistId)) {
-                    result[k] = dictionaries.get(f.datalistId).get(result[k]);
+                try {
+                    boolean isReferenceFieldProperty = fieldNames[k].contains(".");
+                    String referencedEntityKey = isReferenceFieldProperty ? StringUtils.substringBefore(fieldNames[k], ".") : fieldNames[k];
+                    FrontendMappingFieldDefinition f = isReferenceFieldProperty ?
+                            Arrays.stream(fd.fields)
+                                    .filter(def -> def.referencedEntityKey != null && def.referencedEntityKey.equals(referencedEntityKey)).findFirst().orElse(null)
+                            : fd.findField(fieldNames[k]);
+                    if(f == null) {
+    //                    allow display of data which have no column representation for users with readOrgData privilege,
+//                    most likely these are columns like createdOn, updatedOn, organizationId, etc.
+//                    all entity specific columns should have their field representation with access limitation
+                        f = FrontendMappingFieldDefinition.createFormFieldDefinition(fd.name, fieldNames[k], FieldType.text, readOrgData, readOrgData);
+                    }
+
+                    boolean canRead = f.readPrivilege == null || canReadAll || PrivilegeHelper.getInstance().canReadField(f, entity);
+                    fieldColumnVisibility.put(fieldNames[k], fieldColumnVisibility.get(fieldNames[k]) || canRead);
+
+                    if(isReferenceFieldProperty) {
+                        result.add(canRead && PropertyUtils.getProperty(entity, referencedEntityKey) != null ? PropertyUtils.getProperty(entity, fieldNames[k]) : NO_ACCESS);
+                    } else {
+                        result.add(canRead ? PropertyUtils.getProperty(entity, fieldNames[k]) : NO_ACCESS);
+                    }
+                    if (!isReferenceFieldProperty && f.datalistId != null && dictionaries.containsKey(f.datalistId)) {
+                        result.set(i, canRead ? dictionaries.get(f.datalistId).get(result.get(i)) : NO_ACCESS);
+                    }
+
+                } catch (NoSuchMethodException exc) {
+                    LoggingComponent.debugLogger.warn("Could not read entity property", exc);
+                    result.add("");
                 }
+
+                i++;
             }
         } catch (Exception e) {
             LoggingComponent.debugLogger.warn("Could not read entity property", e);
@@ -241,6 +320,48 @@ public class ReflectionBasedEntityForm extends AbstractOrganizationRelatedEntity
         castToString();
         setParamsToDto(params);
         return true;
+    }
+
+    public static List<FrontendMappingFieldDefinition> getFilterFields(FrontendMappingDefinition fd, String[] fieldNames) {
+        if (fieldNames == null) {
+            return Collections.emptyList();
+        }
+        List<FrontendMappingFieldDefinition> result = new ArrayList<>(fieldNames.length);
+        for (int k = 0; k < fieldNames.length; k++) {
+            FrontendMappingFieldDefinition field = fd.findField(fieldNames[k]);
+            if(field.getType().equals(FieldType.dropdown) || field.getType().equals(FieldType.many_to_one)) {
+                FrontendMappingFieldDefinition dictionaryField = fd.findField(field.datalistId);
+                if(dictionaryField != null) {
+                    result.add(dictionaryField);
+                }
+            }
+            result.add(field);
+        }
+        return result;
+    }
+
+    public static Collection<Object> getFilterFieldsNames(FrontendMappingDefinition fd) {
+        return fd.getFieldsNamesByType(List.of(FieldType.text, FieldType.checkbox, FieldType.dropdown, FieldType.number, FieldType.date, FieldType.datetime, FieldType.many_to_one));
+    }
+
+    public static Collection<Object> getTableColumnsNames(FrontendMappingDefinition fd) {
+        List<Object> result = new ArrayList<>();
+        List<FrontendMappingFieldDefinition> manyToOneFields = fd.getFieldsByType(List.of(FieldType.many_to_one));
+        for(FrontendMappingFieldDefinition field : manyToOneFields) {
+            CRUDControllerConfiguration controllerConfig = HtmlCRUDControllerConfigurationMap.getControllers().get(field.referencedEntityKey);
+            if(controllerConfig != null) {
+                result.addAll(Arrays.stream(controllerConfig.getFrontendMappingDefinition().getNamesOfValuedTypeFields())
+                        .map(atr -> field.getName().replace("Id", "") + "." + atr).toList());
+            }
+        }
+        result.addAll(Arrays.asList(fd.getNamesOfValuedTypeFields()));
+        return result;
+    }
+
+    public static List<Tuple3<String, FrontendMappingFieldDefinition, String>> getFilterTypesAndValues(FrontendMappingDefinition fd, Map<String,String> filters) {
+        return filters.entrySet().stream()
+                .map(entry -> Tuples.of(entry.getKey(), fd.findField(StringUtils.substringBefore(entry.getKey(), "_")), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     /**Fields for which a user has no write permission must be null in the dto (otherwise {@link AbstractForm#getSafeValue} throws exception in {@link this#setEntityValue} method)

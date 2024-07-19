@@ -81,6 +81,9 @@ public class Email extends Task implements AuditableEntityOrganizationRelated {
     @Column(name="file_id")
     @OrderColumn(name="sequence")
     protected List<Long> filesId = new ArrayList<>();
+    
+    @Column(name = "sender", nullable = true)
+    protected String sender = null;
 
     /**
      * <p>Constructor for Email.</p>
@@ -276,5 +279,13 @@ public class Email extends Task implements AuditableEntityOrganizationRelated {
 
     public void setFilesId(List<Long> filesId) {
         this.filesId = filesId;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }

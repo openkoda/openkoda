@@ -1,6 +1,6 @@
 package com.openkoda.model;
 
-public enum PrivilegeGroup {
+public enum PrivilegeGroup implements OptionWithLabel {
     GLOBAL_SETTINGS("Global Settings"),
     ORGANIZATION("Organization"),
     USER("User"),

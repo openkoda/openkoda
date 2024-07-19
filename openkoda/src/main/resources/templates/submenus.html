@@ -4,13 +4,15 @@
 </head>
 <body>
 <th:block th:fragment="admin-menu" th:if="${@auth.canSeeAdminPanel()
-        and (!#strings.contains(#ctx.springRequestContext.requestUri,'organization')
-        or #strings.contains(#ctx.springRequestContext.requestUri,'organization/all'))}" >
+        and (!#strings.contains(currentUri,'organization') or #strings.contains(currentUri,'organization/all') or #strings.contains(currentUri,'organization/new/settings'))}" >
     <li class="nav-item">
         <a class="nav-link" th:attr="data-sidebar-menu-item='admin-dashboard'" th:if="${@auth.hasGlobalPrivilege('canReadBackend')}" th:href="${@url.adminDashboard()}">
             <span th:text="#{template.dashboard}">Dashboard</span>
         </a>
-        <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'development')}">
+        <a class="nav-link" th:attr="data-sidebar-menu-item='reports'" th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntityId)}" th:href="${@url.allQueryReports(null)}">
+            <span th:text="#{template.reports}">Reports</span>
+        </a>
+        <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canUseReportingAI',organizationEntityId) and #arrays.contains(@environment.getActiveProfiles(),'development')}">
             <a class="nav-link" th:attr="data-sidebar-menu-item='development'" th:href="${@url.allForm()}">
                 <span th:text="#{template.development}">Development Kit</span>
             </a>

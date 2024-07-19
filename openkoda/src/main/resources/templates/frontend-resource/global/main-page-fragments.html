@@ -5,7 +5,13 @@
 </th:block>
 
 <th:block th:fragment="logo">
-    <img class="logo" th:src="${@environment.getProperty('application.logo')}"/>
+    <th:block th:if="${@environment.getProperty('dashboard.personalization.enabled') and organizationEntity != null and organizationEntity.logoId != null}">
+        <img class="logo" th:src="${@url.fileContent(organizationEntity.id, organizationEntity.logoId)}"/>
+
+    </th:block>
+    <th:block th:if="${!@environment.getProperty('dashboard.personalization.enabled') or organizationEntity == null or organizationEntity.logoId == null}">
+        <img class="logo" th:src="${@environment.getProperty('application.logo')}"/>
+    </th:block>
 </th:block>
 
 <th:block th:fragment="system-health-custom">

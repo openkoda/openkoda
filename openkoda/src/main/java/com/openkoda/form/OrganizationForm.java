@@ -66,6 +66,10 @@ public class OrganizationForm extends AbstractOrganizationRelatedEntityForm<Orga
         dto.name = entity.getName();
         dto.id = entity.getId();
         dto.assignedDatasource = entity.getAssignedDatasource();
+        dto.personalizeDashboard = entity.getPersonalizeDashboard();
+        dto.mainBrandColor = entity.getMainBrandColor();
+        dto.secondBrandColor = entity.getSecondBrandColor();
+        dto.logoId = entity.getLogoId();
         return this;
     }
 
@@ -73,6 +77,10 @@ public class OrganizationForm extends AbstractOrganizationRelatedEntityForm<Orga
     @Override
     protected Organization populateTo(Organization entity) {
         entity.setName(getSafeValue(entity.getName(), NAME_));
+        entity.setPersonalizeDashboard(getSafeValue(entity.getPersonalizeDashboard(), PERSONALIZE_DASHBOARD));
+        entity.setMainBrandColor(getSafeValue(entity.getMainBrandColor(), MAIN_BRAND_COLOR));
+        entity.setSecondBrandColor(getSafeValue(entity.getSecondBrandColor(), SECOND_BRAND_COLOR));
+        entity.setLogoId(getSafeValue(entity.getLogoId(), LOGO_ID));
         if(MultitenancyService.isMultitenancy()) {
             entity.setAssignedDatasource(getSafeValue(entity.getAssignedDatasource(), ASSIGNED_DATASOURCE_));
         }

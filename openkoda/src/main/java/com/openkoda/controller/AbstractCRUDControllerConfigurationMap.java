@@ -27,6 +27,7 @@ import com.openkoda.model.Privilege;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.repository.SecureMapEntityRepository;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.function.Function;
@@ -132,8 +133,8 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             FrontendMappingDefinition frontendMappingDefinition,
             ScopedSecureRepository secureRepository,
             Class formClass,
-            Privilege defaultReadPrivilege,
-            Privilege defaultWritePrivilege) {
+            PrivilegeBase defaultReadPrivilege,
+            PrivilegeBase defaultWritePrivilege) {
 
         String key = frontendMappingDefinition.getMappingKey();
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
@@ -147,8 +148,8 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
             FrontendMappingDefinition frontendMappingDefinition,
             ScopedSecureRepository secureRepository,
             Class formClass,
-            Privilege defaultReadPrivilege,
-            Privilege defaultWritePrivilege) {
+            PrivilegeBase defaultReadPrivilege,
+            PrivilegeBase defaultWritePrivilege) {
 
         CRUDControllerConfiguration controllerConfiguration = CRUDControllerConfiguration.getBuilder(key,
                 frontendMappingDefinition, secureRepository, formClass, defaultReadPrivilege, defaultWritePrivilege);
@@ -191,4 +192,7 @@ public abstract class AbstractCRUDControllerConfigurationMap extends HashMap<Str
         return controllerConfiguration;
     }
 
+    public CRUDControllerConfiguration getIgnoreCase(String key) {
+        return super.getOrDefault(StringUtils.lowerCase(key), super.get(key));
+    }
 }

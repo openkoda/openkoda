@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.openkoda.core.form.FrontendMappingFieldDefinition.createFormFieldDefinition;
+import static com.openkoda.core.form.FrontendMappingFieldDefinition.*;
 import static com.openkoda.core.helper.PrivilegeHelper.valueOfString;
 
 public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderStart {
@@ -60,6 +60,19 @@ public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderSta
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, additionalCss));
         return this;
     }
+
+    @Autocomplete
+    public FormFieldDefinitionBuilder<V> searchable() {
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinitionWithSearchEnabled(formName, lastField));
+        return this;
+    }
+
+    @Autocomplete
+    public FormFieldDefinitionBuilder<V> sqlFormula(String sqlFormula) {
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinitionWithSqlFormula(formName, lastField, sqlFormula));
+        return this;
+    }
+
     @Autocomplete
     public FormFieldDefinitionBuilder<V> additionalPrivileges(PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, readPrivilege, writePrivilege));
@@ -75,6 +88,25 @@ public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderSta
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, canReadCheck, canWriteCheck));
         return this;
     }
+
+    @Autocomplete
+    public FormFieldDefinitionBuilder<V> visible(BiFunction<OrganizationUser, LongIdEntity, Boolean> canReadCheck) {
+        boolean strictWrite = lastField.isStrictWriteAccess();
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, canReadCheck, lastField.canWriteCheck));
+        lastField.setStrictReadAccess(true);
+        lastField.setStrictWriteAccess(strictWrite);
+        return this;
+    }
+    
+    @Autocomplete
+    public FormFieldDefinitionBuilder<V> enabled(BiFunction<OrganizationUser, LongIdEntity, Boolean> canWriteCheck) {
+        boolean strictRead = lastField.isStrictReadAccess();
+        fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, lastField.canReadCheck, canWriteCheck));
+        lastField.setStrictWriteAccess(true);
+        lastField.setStrictReadAccess(strictRead);
+        return this;
+    }
+    
     @Autocomplete
     public FormFieldDefinitionBuilder<V> additionalAction(String actionLabelKey, String actionUrl, PrivilegeBase additionalActionPrivilege) {
         fields.set(fields.size() - 1, lastField = createFormFieldDefinition(formName, lastField, actionLabelKey, actionUrl, additionalActionPrivilege));
@@ -96,8 +128,20 @@ public class FormFieldDefinitionBuilder<V> extends FormFieldDefinitionBuilderSta
         return (FormFieldDefinitionBuilder<V2>) this;
     }
     @Autocomplete
+    public FormFieldDefinitionBuilder<V> referenceDescriptionSource(String source) {
+        FrontendMappingFieldDefinition datalistField = fields.get(fields.size() - 2);
+        FrontendMappingFieldDefinition dropdownField = fields.get(fields.size() - 1);
+        fields.set(fields.size() - 2, createFormFieldDefinition(formName, datalistField, (f, d) -> d.dictionary(dropdownField.referencedEntityKey, source)));
+        return this;
+    }
+    @Autocomplete
     public FormFieldDefinitionBuilder<V> validate(Function<V, String> validatorReturningErrorCode) {
         fieldValidators.add(Tuples.of(lastField, validatorReturningErrorCode));
+        return this;
+    }
+    @Autocomplete
+    public FormFieldDefinitionBuilder<V> withPreselectedValue(String preselectedValue) {
+        lastField.preselectedValue = preselectedValue;
         return this;
     }
     @Autocomplete

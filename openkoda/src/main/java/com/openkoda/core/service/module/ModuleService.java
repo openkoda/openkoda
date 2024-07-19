@@ -29,6 +29,7 @@ import com.openkoda.dto.OrganizationDto;
 import com.openkoda.dto.user.BasicUser;
 import com.openkoda.dto.user.UserRoleDto;
 import com.openkoda.integration.model.configuration.IntegrationModuleOrganizationConfiguration;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.module.Module;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -152,7 +153,7 @@ public class ModuleService extends ComponentProvider implements PageAttributes {
 
     }
 
-    public boolean addModulePrivilegesToRole(String roleName, Set<Enum> privileges) {
+    public boolean addModulePrivilegesToRole(String roleName, Set<PrivilegeBase> privileges) {
         debug("[addModulePrivilegesToRole] role: {} privilages: {}", roleName, privileges);
         services.role.addPrivilegesToRole(roleName, privileges);
         return true;

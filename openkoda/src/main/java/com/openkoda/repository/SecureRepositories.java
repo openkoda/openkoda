@@ -22,11 +22,13 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository;
 
 import com.openkoda.repository.admin.SecureAuditRepository;
+import com.openkoda.repository.ai.SecureQueryReportRepository;
 import com.openkoda.repository.event.SecureEventListenerRepository;
 import com.openkoda.repository.event.SecureSchedulerRepository;
 import com.openkoda.repository.file.SecureFileRepository;
 import com.openkoda.repository.notifications.SecureNotificationRepository;
 import com.openkoda.repository.organization.SecureOrganizationRepository;
+import com.openkoda.repository.user.SecureDynamicPrivilegeRepository;
 import com.openkoda.repository.user.SecureRoleRepository;
 import com.openkoda.repository.user.SecureUserRepository;
 import com.openkoda.repository.user.SecureUserRoleRepository;
@@ -44,6 +46,7 @@ public class SecureRepositories {
 
     @Inject public SecureFrontendResourceRepository frontendResource;
     @Inject public SecureRoleRepository role;
+    @Inject public SecureDynamicPrivilegeRepository privilege;
     @Inject public SecureEventListenerRepository eventListener;
     @Inject public SecureSchedulerRepository scheduler;
     @Inject public SecureUserRoleRepository userRole;
@@ -54,5 +57,6 @@ public class SecureRepositories {
     @Inject public SecureFileRepository file;
     @Inject public SecureServerJsRepository serverJs;
     @Inject public SecureFormRepository form;
+    @Inject public SecureQueryReportRepository queryReport;
 
 }

@@ -24,7 +24,12 @@
                     <form method="POST" th:action="${@url.importComponentsZip()}" enctype="multipart/form-data">
                         <label for="componentsImportFile" class="form-label" th:text="#{template.components.import}"></label>
                         <input class="form-control" type="file" id="componentsImportFile" name="file" accept=".zip">
-                        <input type="submit" class="btn-primary btn btn-sm mt-3" th:value="#{template.import}">
+                        <div class="mt-2 mb-2">
+                          <input id="delete" type="checkbox" name="delete">
+                          <label class="checkbox-label" for="delete" th:text="#{template.components.import.delete}"></label>
+                        </div>
+                        <input type="submit" class="btn-primary btn btn-sm" th:value="#{template.import}">
+
                     </form>
                 </div>
                 <pre class="mb-3"><th:block th:text="${importLog}"></th:block></pre>

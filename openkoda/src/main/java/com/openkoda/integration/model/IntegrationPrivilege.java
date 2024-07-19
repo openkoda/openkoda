@@ -30,17 +30,19 @@ import com.openkoda.model.PrivilegeGroup;
  */
 public enum IntegrationPrivilege implements PrivilegeBase, IntegrationPrivilegeName {
 
-    canIntegrateWithSlack("Slack", _canIntegrateWithSlack),
-    canIntegrateWithMsTeams("Ms Teams", _canIntegrateWithMsTeams),
-    canIntegrateWithGitHub("GitHub", _canIntegrateWithGitHub),
-    canIntegrateWithJira("Jira", _canIntegrateWithJira),
-    canIntegrateWithBasecamp("Basecamp", _canIntegrateWithBasecamp),
-    canIntegrateWithTrello("Trello", _canIntegrateWithTrello);
+    canIntegrateWithSlack(1, "Slack", _canIntegrateWithSlack),
+    canIntegrateWithMsTeams(2, "Ms Teams", _canIntegrateWithMsTeams),
+    canIntegrateWithGitHub(3, "GitHub", _canIntegrateWithGitHub),
+    canIntegrateWithJira(4, "Jira", _canIntegrateWithJira),
+    canIntegrateWithBasecamp(5, "Basecamp", _canIntegrateWithBasecamp),
+    canIntegrateWithTrello(6, "Trello", _canIntegrateWithTrello);
 
+    private Long id;
     private String label;
     private String category = "Integration";
 
-    IntegrationPrivilege(String label, String nameCheck) {
+    IntegrationPrivilege(long id, String label, String nameCheck) {
+        this.id = id * this.idOffset();
         this.label = label;
         checkName(nameCheck);
     }
@@ -60,4 +62,11 @@ public enum IntegrationPrivilege implements PrivilegeBase, IntegrationPrivilegeN
         return category;
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
+    
+    @Override
+    public int idOffset() { return 1000; }
 }

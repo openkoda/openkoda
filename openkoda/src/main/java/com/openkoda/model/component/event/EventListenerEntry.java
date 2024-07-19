@@ -21,7 +21,6 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.model.component.event;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.openkoda.core.helper.NameHelper;
 import com.openkoda.model.Organization;
 import com.openkoda.model.PrivilegeNames;
@@ -29,7 +28,6 @@ import com.openkoda.model.common.ComponentEntity;
 import com.openkoda.model.common.ModelConstants;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Arrays;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Formula;
 
@@ -255,7 +253,7 @@ public class EventListenerEntry extends ComponentEntity {
     }
 
     public String getEventString() {
-        return StringUtils.join(Arrays.array(eventClassName, eventName, eventObjectType), ",");
+        return StringUtils.join(new String[] {eventClassName, eventName, eventObjectType}, ",");
     }
 
     public String getConsumerString() {

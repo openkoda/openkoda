@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository;
 
 import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.core.security.HasSecurityRules;
@@ -30,8 +31,10 @@ import com.openkoda.model.common.SearchableRepositoryMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import reactor.util.function.Tuple3;
 
 import java.util.List;
+import java.util.Set;
 
 public class SecureRepositoryWrapper<T extends SearchableEntity> implements ScopedSecureRepository<T> {
     private final SearchableFunctionalRepositoryWithLongId<T> wrapped;
@@ -93,7 +96,21 @@ public class SecureRepositoryWrapper<T extends SearchableEntity> implements Scop
         return wrapped.search(scope, searchTerm, organizationId, specification, pageable);
     }
 
+    @Override
+    public Page<T> search(String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return wrapped.search(scope, searchTerm, organizationId, specification, pageable, filters);
+    }
     
+    @Override
+    public Page<T> search(String searchTerm, Set<Long> organizationIds, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return wrapped.search(scope, searchTerm, organizationIds, specification, pageable, filters);
+    }
+
+    @Override
+    public List<T> search(String searchTerm, Long organizationId, Specification<T> specification, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return wrapped.search(scope, searchTerm, organizationId, specification, filters);
+    }
+
     public T findOne(Object idOrEntityOrSpecification) {
         return wrapped.findOne(scope, idOrEntityOrSpecification);
     }

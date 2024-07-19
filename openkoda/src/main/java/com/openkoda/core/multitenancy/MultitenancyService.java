@@ -54,6 +54,7 @@ public class MultitenancyService implements LoggingComponentWithRequestId, Reada
     @Inject
     OrganizationRepository organizationRepository;
     List<String> tenantedTables = Collections.emptyList();
+    Set<String> dynamicTenantedTables = new HashSet<>();
     List<String> tenantInitializationScripts = Collections.emptyList();
     QueryExecutor queryExecutor;
     @Inject
@@ -102,6 +103,13 @@ public class MultitenancyService implements LoggingComponentWithRequestId, Reada
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    public void addTenantedTables(List<String> tableNames) {
+        this.dynamicTenantedTables.addAll(tableNames);
+    }
+    public void removeTenantedTables(List<String> tableNames) {
+        this.dynamicTenantedTables.removeAll(tableNames);
     }
 
     public <T> List<Future<T>> runForAllTenants(long timeoutInMilliseconds, Function<Long, T> operation)  {
@@ -229,7 +237,8 @@ public class MultitenancyService implements LoggingComponentWithRequestId, Reada
         queryExecutor.runQueriesInTransaction(String.format("create schema %s", schemaName));
         debug("[createTenant] org {} created schema {}", organizationId, schemaName);
 
-        String[] tenantTablesDDLs = tenantedTables.stream().map(a -> String.format("create table %s.%s (like public.%s including all excluding constraints excluding indexes)", schemaName, a, a)).toArray(String[]::new);
+        String[] tenantTablesDDLs = Stream.concat(tenantedTables.stream(), dynamicTenantedTables.stream())
+                .map(a -> String.format("create table %s.%s (like public.%s including all excluding constraints excluding indexes)", schemaName, a, a)).toArray(String[]::new);
 
         for(String tt : tenantTablesDDLs) {
             debug("[createTenant] org {} running {}", organizationId, tt);

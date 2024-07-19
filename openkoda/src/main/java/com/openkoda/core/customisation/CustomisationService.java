@@ -25,11 +25,12 @@ import com.openkoda.core.audit.PropertyChangeListener;
 import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.form.CRUDControllerConfiguration;
 import com.openkoda.core.form.FrontendMappingDefinition;
+import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.core.repository.common.ProfileSettingsRepository;
 import com.openkoda.core.repository.common.ScopedSecureRepository;
 import com.openkoda.core.service.event.AbstractApplicationEvent;
 import com.openkoda.core.service.event.EventConsumer;
-import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.common.AuditableEntity;
 import com.openkoda.model.common.SearchableEntity;
 import com.openkoda.model.module.Module;
@@ -48,6 +49,8 @@ public interface CustomisationService {
 
 
     <T extends AuditableEntity> PropertyChangeListener registerAuditableClass(Class<T> c, String classLabel);
+    void unregisterAuditableClass(Class c);
+    boolean isAuditableClass(Class c);
 
     <T> boolean registerEventListener(AbstractApplicationEvent event, Consumer<T> eventListener);
 
@@ -74,15 +77,15 @@ public interface CustomisationService {
 
     void unregisterFrontendMapping(String key);
     CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository);
-    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege);
+    CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege);
     default CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, String readPrivilege, String writePrivilege) {
-        return registerHtmlCrudController(definition, repository, Privilege.valueOf(readPrivilege), Privilege.valueOf(writePrivilege));
+        return registerHtmlCrudController(definition, repository, PrivilegeHelper.valueOfString(readPrivilege), PrivilegeHelper.valueOfString(writePrivilege));
     }
     void unregisterHtmlCrudController(String key);
     CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository);
-    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege);
+    CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege);
     default CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, String readPrivilege, String writePrivilege) {
-        return registerApiCrudController(definition, repository, Privilege.valueOf(readPrivilege), Privilege.valueOf(writePrivilege));
+        return registerApiCrudController(definition, repository, PrivilegeHelper.valueOfString(readPrivilege), PrivilegeHelper.valueOfString(writePrivilege));
     }
     void unregisterApiCrudController(String key);
 

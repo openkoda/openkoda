@@ -29,7 +29,7 @@ import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
 import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.component.FrontendResource.Type;
-import com.openkoda.service.export.ComponentImportService;
+import com.openkoda.service.export.ClasspathComponentImportService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
      * Frontend resource service
      */
     FrontendResourceService frontendResourceService;
-    ComponentImportService componentImportService;
+    ClasspathComponentImportService classpathComponentImportService;
 
     /**
      * Query executor for database operations
@@ -84,13 +84,13 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
 
     public FrontendResourceOrClassLoaderTemplateResolver(QueryExecutor queryExecutor,
                                                          FrontendResourceService frontendResourceService,
-                                                         ComponentImportService componentImportService,
+                                                         ClasspathComponentImportService classpathComponentImportService,
                                                          boolean frontendResourceLoadAlwaysFromResources,
                                                          boolean frontendResourceCreateIfNotExist,
                                                          TemplatePathFilteringProcessor pathFilteringProcessor) {
         this.queryExecutor = queryExecutor;
         this.frontendResourceService = frontendResourceService;
-        this.componentImportService = componentImportService;
+        this.classpathComponentImportService = classpathComponentImportService;
         this.frontendResourceLoadAlwaysFromResources = frontendResourceLoadAlwaysFromResources;
         this.frontendResourceCreateIfNotExist = frontendResourceCreateIfNotExist;
         this.pathFilteringProcessor = pathFilteringProcessor;
@@ -119,32 +119,58 @@ public class FrontendResourceOrClassLoaderTemplateResolver extends ClassLoaderTe
 
             //...else, try to find template in database
             FrontendResource.AccessLevel finalAccessLevel = filteredTemplatePath.getAccessLevel();
-            List<FrontendResource> entries = queryExecutor.runEntityManagerOperationInTransaction(em ->
-                    em.createQuery("select c from FrontendResource c where name = ?1 and accessLevel = ?2 and (organizationId = ?3 OR organizationId is NULL) order by organizationId limit 1", FrontendResource.class)
-                            .setParameter(1, filteredTemplatePath.getFrontendResourceEntryName())
-                            .setParameter(2, finalAccessLevel)
-                            .setParameter(3, tenantedResource.organizationId)
+            List<Object[]> entries = queryExecutor.runEntityManagerOperationInTransaction(em ->
+                    em.createQuery("select c, case  " +
+                                            "when c.accessLevel = 'PUBLIC' and c.organizationId is not null then 1 " +
+                                            "when c.accessLevel = 'PUBLIC' and c.organizationId is null then 2 " +
+                                            "when c.accessLevel = 'GLOBAL' and c.organizationId is not null then 1 " +
+                                            "when c.accessLevel = 'GLOBAL' and c.organizationId is null then 2 " +
+                                            "when c.accessLevel = 'ORGANIZATION' and c.organizationId is not null then 1 " +
+                                            "when c.accessLevel = 'ORGANIZATION' and c.organizationId is null then 2 " +
+                                            "when c.accessLevel = 'GLOBAL' and 'ORGANIZATION' = :p3 and c.organizationId is not null then 3 " +
+                                            "when c.accessLevel = 'GLOBAL' and 'ORGANIZATION' = :p3 and c.organizationId is null then 4 " +
+                                            "else 10 end as priority " +
+                                            "from FrontendResource c " +
+                                            "where " +
+                                            "c.name = :p1 and " +
+                                            "(cast (c.accessLevel as text) = :p3 or (cast (c.accessLevel as text) = 'GLOBAL' and 'ORGANIZATION' = :p3)) and " +
+                                            "(c.organizationId = :p2 OR c.organizationId is NULL) order by priority limit 1"
+                                    , Object[].class)
+                            .setParameter("p1", filteredTemplatePath.getFrontendResourceEntryName())
+                            .setParameter("p2", tenantedResource.organizationId)
+                            .setParameter("p3", finalAccessLevel.toString())
                             .getResultList());
-            FrontendResource entry = entries == null || entries.isEmpty() ? null : entries.get(0);
+            FrontendResource entry = entries == null || entries.isEmpty() ? null : (FrontendResource) entries.get(0)[0];
 
             //if entry not found in the database...
             if (entry == null) {
 
-                entry = (FrontendResource) componentImportService.loadResourceFromFile(FRONTEND_RESOURCE_,
+                entry = (FrontendResource) classpathComponentImportService.loadResourceFromFile(FRONTEND_RESOURCE_,
                         filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId,
                         filteredTemplatePath.getFrontendResourceEntryName());
 
                 if (entry == null) {
 //                    try ui component
-                    entry = (FrontendResource) componentImportService.loadResourceFromFile(UI_COMPONENT_,
+                    entry = (FrontendResource) classpathComponentImportService.loadResourceFromFile(UI_COMPONENT_,
                             filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId,
                             filteredTemplatePath.getFrontendResourceEntryName());
+                    if(entry == null && filteredTemplatePath.getAccessLevel().equals(FrontendResource.AccessLevel.ORGANIZATION)) {
+                        // try to find global level ui component
+                        entry = (FrontendResource) classpathComponentImportService.loadResourceFromFile(UI_COMPONENT_,
+                                FrontendResource.AccessLevel.GLOBAL, tenantedResource.organizationId,
+                                filteredTemplatePath.getFrontendResourceEntryName());
+                    }
                 }
 
                 if (entry == null) {
                     //...try to create if from filesystem
                     entry = createEntry(filteredTemplatePath.getFrontendResourceEntryName(),
                             filteredTemplatePath.getAccessLevel(), tenantedResource.organizationId);
+                    if(entry == null && filteredTemplatePath.getAccessLevel().equals(FrontendResource.AccessLevel.ORGANIZATION)) {
+                        // try to find global level ui component
+                        entry =createEntry(filteredTemplatePath.getFrontendResourceEntryName(),
+                                FrontendResource.AccessLevel.GLOBAL, tenantedResource.organizationId);
+                    }
                 }
 
                 //if the entry was not created (eg. not found in filesystem), return error template

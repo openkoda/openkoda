@@ -22,14 +22,17 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.repository;
 
 import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.core.repository.common.SearchableFunctionalRepositoryWithLongId;
 import com.openkoda.model.common.SearchableEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.NoRepositoryBean;
+import reactor.util.function.Tuple3;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.openkoda.core.security.HasSecurityRules.SecurityScope.USER;
 
@@ -89,7 +92,21 @@ public interface SecureRepository<T extends SearchableEntity> extends Searchable
         return SearchableFunctionalRepositoryWithLongId.super.search(DEFAULT_SCOPE, searchTerm, organizationId, specification, pageable);
     }
 
+    @Override
+    default Page<T> search(String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return SearchableFunctionalRepositoryWithLongId.super.search(DEFAULT_SCOPE, searchTerm, organizationId, specification, pageable, filters);
+    }
     
+    @Override
+    default Page<T> search(String searchTerm, Set<Long> organizationIds, Specification<T> specification,
+            Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return SearchableFunctionalRepositoryWithLongId.super.search(DEFAULT_SCOPE, searchTerm, organizationIds, specification, pageable, filters);
+    }
+
+    default List<T> search(String searchTerm, Long organizationId, Specification<T> specification, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return SearchableFunctionalRepositoryWithLongId.super.search(DEFAULT_SCOPE, searchTerm, organizationId, specification, filters);
+    }
+
     default T findOne(Object idOrEntityOrSpecification) {
         return SearchableFunctionalRepositoryWithLongId.super.findOne(DEFAULT_SCOPE, idOrEntityOrSpecification);
     }

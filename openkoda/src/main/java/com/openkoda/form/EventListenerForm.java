@@ -92,7 +92,8 @@ public class EventListenerForm extends AbstractOrganizationRelatedEntityForm<Eve
         if (dto.consumer != null && dto.event != null) {
             String eventObjectClassName = StringUtils.substringAfterLast(dto.event, ",");
             String consumerObjectClassName = dto.consumer.split(",")[2];
-            if (!isPerfectMatch(eventObjectClassName, consumerObjectClassName)) {
+            if (!isPerfectMatch(eventObjectClassName, consumerObjectClassName)
+                    && !isPerfectMatch(dto.eventObj.getEventClassName(), consumerObjectClassName)) {
                 br.rejectValue("dto.consumer", "incompatible.consumer", defaultErrorMessage);
                 br.rejectValue("dto.event", "incompatible.consumer", defaultErrorMessage);
             }

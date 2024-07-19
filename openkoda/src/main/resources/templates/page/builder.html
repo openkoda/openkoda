@@ -19,14 +19,15 @@
             }
             .trash:hover {background-color: #18B2C6;}
             .trash i {font-size: 2rem;}
-            iframe.embedded-iframe {border: 0;
+            iframe.embedded-iframe {
+                border: 0;
                 border-top: solid 20px #18B2C6;
                 padding: 0; margin: 0; width: 100%; height: 100%;
                 background-color: #fff;}
 
-            img.embedded-image {border: 0;
-                border-top: solid 20px #18B2C6;
-                padding: 0; margin: 0; width: 100%; height: 100%;
+            img.embedded-image {
+                border: 0;
+                padding: 2rem .5rem .5rem .5rem; margin: 0; width: 100%; height: 100%;
                 background-color: #fff;
                 max-height:100%;
                 max-width:100%;
@@ -60,12 +61,12 @@
                             <h6 class="card-subtitle mt-2 mb-2 text-muted"><th:block th:text="#{template.components.instruction}"></th:block></h6>
 
                             <div class="row">
-                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.tables}, 'getKey()', #{template.tables}, 'addNewWidget', 'table', 'col-6')"/>
-                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.frontendResources}, 'getValue()', #{template.frontendResources}, 'addNewWidget', 'frontendResource', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.tables}, 'getKey()', 'getKey()', #{template.tables}, 'addNewWidget', 'table', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.frontendResources}, 'getKey()', 'getValue()', #{template.frontendResources}, 'addNewWidget', 'frontendResource', 'col-6')"/>
                             </div>
                             <div class="row">
-                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.uiComponents}, 'getValue()', #{template.frontendElements}, 'addNewWidget', 'webEndpoint', 'col-6')"/>
-                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.images}, 'url', #{template.images}, 'addNewWidget', 'image', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.uiComponents}, 'getKey()', 'getValue()', #{template.frontendElements}, 'addNewWidget', 'webEndpoint', 'col-6')"/>
+                                <div th:replace="forms::multiselect-with-onclick-action(${embeddableComponents.images}, 'id', 'url', #{template.images}, 'addNewWidget', 'image', 'col-6')"/>
                             </div>
                             <div class="col text-center">
                                 <button class="btn btn-primary btn-submit" onclick="savePage(this.form)" type="button">Save</button>
@@ -77,27 +78,30 @@
         </div>
         <div class="grid-stack preview"></div>
         <script type="text/javascript" th:inline="javascript">
-            addNewWidget = function(url, type) {
-                if($('[gs-id="' + url + '"]').length === 0) {
+            addNewWidget = function(id, name, type) {
+
+                if($('[gs-id="' + id + '"]').length === 0) {
                     let content = "";
-                    let src = "";
+                    let generate = true;
                     if (type === "frontendResource") {
-                        src = "/" + url;
-                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                        content = `<div class="embedded-preview embedded-frontendResource"><div class="embedded-preview-title">Frontend Resource: ${name}</div>` +
+                            `<div>Edit here: <a target="_blank" href="../../frontendresource/${id}/settings">${name}</a></div></div>`;
                     } else if (type == "webEndpoint") {
-                        src = "../../cn/" + url + "?__view=plain";
-                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                        content = `<div class="embedded-preview embedded-webEndpoint"><div class="embedded-preview-title">Web Endpoint: ${name}</div>` +
+                            `<div>View here: <a target="_blank" href="../../cn/${name}">${name}</a></div></div>`;
                     } else if (type == "table") {
-                        src = "../../" + url + "/all?__view=plain";
-                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><iframe class="embedded-iframe" src="' + src +'"></iframe>';
+                        content = `<div class="embedded-preview embedded-table"><div class="embedded-preview-title">Table: ${name}</div>` +
+                            `<div>View here: <a target="_blank" href="../../${id}/all">${name}</a></div></div>`;
                     } else if (type == "image") {
-                        src = url;
-                        content = '<i class="fas fa-xmark dashboard-widget-x" data-id="' + url + '"></i><img class="embedded-image dashboard-widget" src="' + src +'"/>';
+                        let src = "/html/file/" + id + "/content";
+                        content = `<img class="embedded-image dashboard-widget" src="${src}"/>`;
+                        generate = false;
                     }
-                    let w = grid.addWidget({w:6, h:3, content: content, id: url, type: type});
+                    content = `<i class="fas fa-xmark dashboard-widget-x" data-id="${id}"></i>` + content;
+                    let w = grid.addWidget({w:6, h:3, content: content, id: id, name: name, type: type, generate: generate});
                     registerClick();
                 } else {
-                    removeWidget(url);
+                    removeWidget(id);
                 }
             };
             let items = /*[[${ frontendResourceEntity?.content == null ? '[]' : frontendResourceEntity.content }]]*/ '[]';

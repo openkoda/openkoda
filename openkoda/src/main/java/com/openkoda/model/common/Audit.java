@@ -77,6 +77,7 @@ public class Audit extends TimestampedEntity implements SearchableEntity, Organi
    }
 
    private String entityName;
+   private String entityKey;
 
    @Enumerated(EnumType.STRING)
    private AuditOperation operation;
@@ -238,6 +239,14 @@ public class Audit extends TimestampedEntity implements SearchableEntity, Organi
     */
    public void setEntityName(String entityName) {
       this.entityName = entityName;
+   }
+
+   public String getEntityKey() {
+      return entityKey;
+   }
+
+   public void setEntityKey(String entityKey) {
+      this.entityKey = entityKey;
    }
 
    /**

@@ -39,7 +39,7 @@ import static com.openkoda.controller.common.URLConstants.AUDIT;
         entityKey = AUDIT,
         entityClass = Audit.class,
         searchIndexFormula = """
-            lower(COALESCE(entity_name, '') || ':' || COALESCE(entity_id, -1) || ' ' || change || ' ' || 
+            lower(COALESCE(entity_key, '') || ':' || COALESCE(entity_id, -1) || ' ' || change || ' ' || 
             (LPAD(coalesce(organization_id, 0)||'', 5, '0') || '/' || id)|| ' ' || COALESCE(ip_address, '') || ' '
             || ' modifiedby:' || COALESCE(CAST (user_id as text), '') || ' orgid:' || COALESCE(CAST (organization_id as text), '')
             || ' ' || request_id)

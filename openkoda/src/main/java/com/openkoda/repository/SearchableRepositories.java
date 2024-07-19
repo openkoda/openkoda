@@ -63,6 +63,7 @@ public class SearchableRepositories {
      */
     private static String[] searchIndexUpdates = {};
     private static List<String> searchIndexUpdatesForDynamicEntities = new ArrayList<>();
+    private static Map<String, Class> dynamicEntities = new HashMap<>();
     private static final CamelCaseToUnderscoresNamingStrategy camelCaseToUnderscoredNamingStrategy = new CamelCaseToUnderscoresNamingStrategy();
 
     /** Run on the application startup.
@@ -154,11 +155,14 @@ public class SearchableRepositories {
         searchableRepositoryMetadataByEntityKey.put(gsa.entityKey(), gsa);
         searchableRepositoryMetadataByEntityClass.put(gsa.entityClass(), gsa);
         searchIndexUpdatesForDynamicEntities.add(String.format(UPDATE_INDEX_QUERY, tableName, INDEX_STRING_COLUMN, gsa.searchIndexFormula(), UPDATED_ON));
+        dynamicEntities.put(gsa.entityKey(), gsa.entityClass());
     }
 
     public static Class<SearchableEntity> getSearchableRepositoryEntityClass(String entityKey) {
         SearchableRepositoryMetadata gsa = searchableRepositoryMetadataByEntityKey.get(entityKey);
+
         if (gsa == null) { return null; }
+
         return (Class<SearchableEntity>) gsa.entityClass();
     }
     public static SearchableRepositoryMetadata getSearchableRepositoryMetadata(String entityKey) {
@@ -184,5 +188,12 @@ public class SearchableRepositories {
         return i.getText();
     }
 
+    public static String[] getDynamicSearchableRepositoriesEntityKeys() {
+        return dynamicEntities.keySet().toArray(new String[0]);
+    }
+
+    public static Map<String, Class> getDynamicSearchableRepositoriesMap() {
+        return dynamicEntities;
+    }
 
 }

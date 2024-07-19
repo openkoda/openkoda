@@ -45,7 +45,11 @@ import static com.openkoda.model.common.ModelConstants.ORGANIZATION_ID;
  *
  */
 @Table(name = "users_roles",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", ORGANIZATION_ID})}
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", ORGANIZATION_ID})},
+        indexes = {
+                @Index(name = "role_users_roles", columnList = "role_id"),
+                @Index(name = "user_role_organization", columnList = "user_id, role_id, organization_id"),
+        }
 )
 public class UserRole extends TimestampedEntity implements AuditableEntityOrganizationRelated, SearchableEntity, Serializable {
 

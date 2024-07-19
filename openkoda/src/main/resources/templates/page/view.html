@@ -4,25 +4,44 @@
 <body>
 <div class="container-fluid">
     <div layout:fragment="content" th:attr="data-menu-item=${frontendResourceEntity.name}">
-        <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"></script>
-        <link href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css" rel="stylesheet" />
         <style>
-            .grid-stack { }
-            .grid-stack-item-content { }
-            iframe.embedded-iframe {border: 0; padding: 0; margin: 0; width: 100%; height: 100%;}
-            img.embedded-image {border: 0; padding: 0; margin: 0; max-height:100%; max-width:100%; object-fit: contain;}
-            .grid-stack>.grid-stack-item>.grid-stack-item-content {overflow-y: hidden;}
+            img.embedded-image {
+                padding: .5rem;
+                margin: 0;
+                object-fit: contain;
+                border-radius: .5rem;
+                border: 1px solid #e3e6f0;
+                background-color: #fff;
+                max-height:100%;
+                max-width:100%;
+            }
         </style>
-        <div class="grid-stack"></div>
+        <div id="css-grid"></div>
         <script type="text/javascript" th:inline="javascript">
             let items = /*[[${ frontendResourceEntity.content }]]*/ '';
             items = JSON.parse(items);
-            var grid = GridStack.init({styleInHead: true, staticGrid: true});
-            grid.load(items);
-			$('iframe').each(function () {
-				$(this).attr('src', app.passCurrentQueryParams($(this).attr('src')));
-            });
+            const timestamp = Date.now();
+            let grid = $("#css-grid");
+            for (let k = 0; k < items.length; k++) {
+                let e = items[k];
+                let w = $(e.content);
+                e.x += 1;
+                e.y += 1;
+                w.css("grid-column", e.x + " / span " + e.w);
+                w.css("grid-row", e.y + " / span " + e.h);
+                console.log("grid-column " + e.x + " / " + e.w);
+                console.log("grid-row " + e.y + " / " + e.h);
+                grid.append(w);
+            }
         </script>
+        <style>
+            div#css-grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 10px;
+                grid-auto-rows: minmax(100px, auto);
+            }
+        </style>
     </div>
 </div>
 </body>

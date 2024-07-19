@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -127,6 +128,11 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String form(Long organizationId, String entityKey, Long entityId) {
         return operation(organizationId, entityKey, entityId, _SETTINGS);
+    }
+
+    public String reportCsv(Long organizationId, String entityKey) {
+        String base = entityBase(organizationId, entityKey);
+        return base + _REPORT + _CSV;
     }
 
     public String view(Long organizationId, String entityKey, Long entityId) {
@@ -247,14 +253,26 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return all(ROLE);
     }
 
+    public String allPrivileges() {
+        return all(PRIVILEGE);
+    }
+    
     public String newRole() {
         return form(ROLE);
     }
 
+    public String newPrivilege() {
+        return form(PRIVILEGE);
+    }
+    
     public String roleSettings(long id) {
         return operation(ROLE, id, _SETTINGS);
     }
 
+    public String privilegeSettings(long id) {
+        return operation(PRIVILEGE, id, _SETTINGS);
+    }
+    
     public String rolePrivileges(long id) {
         return operation(ROLE, id, _PRIVILEGES);
     }
@@ -343,8 +361,18 @@ public class UrlHelper implements URLConstants, ReadableCode {
     public String deleteFrontendResource(long frontendResourceId) {
         return operation(FRONTENDRESOURCE,  frontendResourceId, _REMOVE);
     }
+
+    public String deleteFrontendResourceDraft(long frontendResourceId) {
+        return operation(FRONTENDRESOURCE,  frontendResourceId, _REMOVE + _DRAFT);
+    }
     public String frontendResourceSettings(long frontendResourceId) {
         return form(FRONTENDRESOURCE, frontendResourceId);
+    }
+    public String frontendResourceCopyLiveToDraft(long frontendResourceId) {
+        return operation(FRONTENDRESOURCE,  frontendResourceId, _COPY + _LIVE);
+    }
+    public String frontendResourceCopyResourceToDraft(long frontendResourceId) {
+        return operation(FRONTENDRESOURCE,  frontendResourceId, _COPY + _RESOURCE);
     }
 
     public String publishFrontendResource(long frontendResourceId) {
@@ -409,6 +437,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return all(EVENTLISTENER);
     }
 
+    public String allCustomEvents(){
+        return all(CUSTOM_EVENT);
+    }
+    
     public String newEventListener(){
         return form(EVENTLISTENER);
     }
@@ -419,6 +451,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String sendEvent(){
         return operation(EVENTLISTENER, _SEND);
+    }
+    
+    public String newCustomEvent() {
+        return form(CUSTOM_EVENT);
     }
 
 //    Admin Dashboard
@@ -529,6 +565,10 @@ public class UrlHelper implements URLConstants, ReadableCode {
     public String yamlAllEventResources(){
         return operation(EVENTLISTENER, _EXPORT_YAML);
     }
+    
+    public String yamlAllCustomEventResources(){
+        return operation(CUSTOM_EVENT, _EXPORT_YAML);
+    }
 
     public String yamlAllSchedulerResources(){
         return operation(SCHEDULER, _EXPORT_YAML);
@@ -552,6 +592,33 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String integrations() {
         return entityBase(INTEGRATIONS);
+    }
+
+//    AI
+
+    public String aiReporting(Long orgId) {
+        return (orgId != null ? organizationBase(orgId) : _HTML) + _CN + "/reporting-report";
+    }
+
+    public String reportPrompt(Long orgId) {
+        return entityBase(orgId, QUERY_REPORT) + _PROMPT;
+    }
+
+    public String reportQuery(Long orgId) {
+        return entityBase(orgId, QUERY_REPORT) + _QUERY;
+    }
+
+    public String reportQueryCsv(Long orgId) {
+        return reportQuery(orgId) + _CSV;
+    }
+
+    public String allQueryReports(Long orgId){
+        return all(orgId, QUERY_REPORT);
+    }
+
+
+    public String queryReport(Long orgId, Long reportId){
+        return entityBase(orgId, QUERY_REPORT) + "/" + (reportId != null ? reportId : "");
     }
 
 //    OTHER
@@ -611,8 +678,26 @@ public class UrlHelper implements URLConstants, ReadableCode {
         return String.format("?%s_page=%d&%s_size=%d&%s_sort=%s&%s_search=%s", qualifier, page.getNumber(), qualifier, page.getSize(), qualifier, pageSort(page, property), qualifier, (search == null ? "" : search));
     }
 
+    public String sortParams(String property, String qualifier, PageImpl page, String search, Map<String, String> filters, String remainingParameters) {
+        return pageableParams(property, qualifier, page, search) + filterParams(qualifier, filters) + (remainingParameters == null ? "" : remainingParameters);
+//        @url.pageableParams(property, qualifier, page, searchTerm) + ' | ' + @url.filterParams(qualifier, objFilters) + remainingParameters
+    }
+
+    public String filterParams(String qualifier, Map<String, String> filters) {
+        StringBuilder sb = new StringBuilder();
+        if(filters != null && !filters.isEmpty()) {
+            for(Map.Entry<String, String> entry : filters.entrySet()) {
+                if(StringUtils.isNotBlank(entry.getValue())) {
+                    sb.append(String.format("&%s_filter_%s=%s", qualifier, entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+        String result = sb.toString();
+        return result;
+    }
+
     public String createThymeleafExpressionForPagination(String qualifer ,String pageParam){
-        return "@{${#ctx.springRequestContext.requestUri}(${qualifier} + '_page' =" + pageParam +" , ${qualifier} + '_size' = ${page.size}, ${qualifier} + '_sort' =" + "${param. " + qualifer + "_sort}, ${qualifier} + '_search' =" + "${param." + qualifer + "_search})}";
+        return "@{${currentUri}(${qualifier} + '_page' =" + pageParam +" , ${qualifier} + '_size' = ${page.size}, ${qualifier} + '_sort' =" + "${param. " + qualifer + "_sort}, ${qualifier} + '_search' =" + "${param." + qualifer + "_search})}";
     }
 
     public static String getSearchForParamPrefix(HttpServletRequest request, String paramPrefix) {
@@ -735,6 +820,7 @@ public class UrlHelper implements URLConstants, ReadableCode {
 
     public String getFrontendResourcePreviewUrl(FrontendResource frontendResource, boolean draft, boolean resource) {
         String accessLevelPath = "";
+        String uiComponentPath = frontendResource.getResourceType().equals(FrontendResource.ResourceType.UI_COMPONENT) ? _CN : "";
 
         if (frontendResource.getAccessLevel().equals(FrontendResource.AccessLevel.GLOBAL)) {
             accessLevelPath = _HTML;
@@ -742,7 +828,8 @@ public class UrlHelper implements URLConstants, ReadableCode {
             accessLevelPath = _HTML_ORGANIZATION + (frontendResource.getOrganizationId() != null ? "/" + frontendResource.getOrganizationId() : "");
         }
 
-        return accessLevelPath + "/" + frontendResource.getName() + (draft ? "?draft" : "") + (resource ? "?resource" : "");
+        return accessLevelPath + uiComponentPath + "/" + frontendResource.getName()
+                + (StringUtils.isEmpty(uiComponentPath) ? (draft ? "?draft" : "") + (resource ? "?resource" : "") : "");
     }
 
 }

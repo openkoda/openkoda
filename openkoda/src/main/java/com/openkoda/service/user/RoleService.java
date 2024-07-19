@@ -23,14 +23,17 @@ package com.openkoda.service.user;
 
 import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.GlobalOrganizationRole;
-import com.openkoda.model.GlobalRole;
-import com.openkoda.model.OrganizationRole;
-import com.openkoda.model.Role;
+import com.openkoda.model.*;
+import com.openkoda.service.user.BasicPrivilegeService.PrivilegeChangeEvent;
+import jakarta.inject.Inject;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -46,8 +49,11 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
     public static final String ROLE_TYPE_ORG = "ORG";
     public static final String ROLE_TYPE_GLOBAL = "GLOBAL";
     public static final String ROLE_TYPE_GLOBAL_ORG = "GLOBAL_ORG";
+    
+    @Inject private ApplicationEventPublisher applicationEventPublisher;
+    
 
-    public GlobalRole createOrUpdateGlobalRole(String name, Set<Enum> privileges, boolean removable) {
+    public GlobalRole createOrUpdateGlobalRole(String name, Set<PrivilegeBase> privileges, boolean removable) {
         debug("[createOrUpdateGlobalRole] name: {}; privilages: {}; removable: {}", name, privileges, removable);
         GlobalRole role = repositories.unsecure.globalRole.findByName(name);
         if (role == null) {
@@ -57,14 +63,15 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
         role.setRemovable(removable);
         repositories.unsecure.globalRole.save(role);
         role = repositories.unsecure.globalRole.findByName(name);
+        applicationEventPublisher.publishEvent(new PrivilegeChangeEvent(this));
         return role;
     }
 
-    public OrganizationRole createOrUpdateOrgRole(String name, Set<Enum> privileges, boolean removable) {
+    public OrganizationRole createOrUpdateOrgRole(String name, Set<PrivilegeBase> privileges, boolean removable) {
         return createOrUpdateOrgRole(null, name, privileges, removable);
     }
 
-    public OrganizationRole createOrUpdateOrgRole(Long id, String name, Set<Enum> privileges, boolean removable) {
+    public OrganizationRole createOrUpdateOrgRole(Long id, String name, Set<PrivilegeBase> privileges, boolean removable) {
         debug("[createOrUpdateOrgRole] orgName: {}; privilages: {}; removable: {}", name, privileges, removable);
         OrganizationRole role = repositories.unsecure.organizationRole.findByName(name);
         if (role == null) {
@@ -74,14 +81,15 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
         role.setRemovable(removable);
         repositories.unsecure.organizationRole.save(role);
         role = repositories.unsecure.organizationRole.findByName(name);
+        applicationEventPublisher.publishEvent(new PrivilegeChangeEvent(this));
         return role;
     }
 
-    public GlobalOrganizationRole createOrUpdateGlobalOrgRole(String name, Set<Enum> privileges, boolean removable) {
+    public GlobalOrganizationRole createOrUpdateGlobalOrgRole(String name, Set<PrivilegeBase> privileges, boolean removable) {
         return createOrUpdateGlobalOrgRole(null, name, privileges, removable);
     }
 
-    public GlobalOrganizationRole createOrUpdateGlobalOrgRole(Long id, String name, Set<Enum> privileges, boolean removable) {
+    public GlobalOrganizationRole createOrUpdateGlobalOrgRole(Long id, String name, Set<PrivilegeBase> privileges, boolean removable) {
         debug("[createOrUpdateGlobalOrgRole] orgName: {}; privilages: {}; removable: {}", name, privileges, removable);
         GlobalOrganizationRole role = repositories.unsecure.globalOrganizationRole.findByName(name);
         if (role == null) {
@@ -91,6 +99,7 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
         role.setRemovable(removable);
         repositories.unsecure.globalOrganizationRole.save(role);
         role = repositories.unsecure.globalOrganizationRole.findByName(name);
+        applicationEventPublisher.publishEvent(new PrivilegeChangeEvent(this));
         return role;
     }
 
@@ -98,7 +107,7 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
      * Creates new role considering its type (discrimination value)
      */
     @PreAuthorize(CHECK_CAN_MANAGE_ROLES)
-    public Role createRole(String name, String type, Set<Enum> privileges) {
+    public Role createRole(String name, String type, Set<PrivilegeBase> privileges) {
         debug("[createRole] Creating role {} of type {} and privileges {}", name, type, privileges);
         if (type.equals(ROLE_TYPE_GLOBAL)) {
             return createOrUpdateGlobalRole(name, privileges, true);
@@ -130,7 +139,7 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
         return roleExists;
     }
 
-    public Role addPrivilegesToRole(String roleName, Set<Enum> privileges) {
+    public Role addPrivilegesToRole(String roleName, Set<PrivilegeBase> privileges) {
         debug("[addPrivilagesToRole] role name: {}; privilages: {}", roleName, privileges);
         Role role = repositories.unsecure.role.findByName(roleName);
         if (role == null) {
@@ -139,9 +148,26 @@ public class RoleService extends ComponentProvider implements HasSecurityRules {
         }
         privileges.addAll(role.getPrivilegesSet());
         role.setPrivilegesSet(privileges);
-        repositories.unsecure.role.save(role);
-        role = repositories.unsecure.globalRole.findByName(roleName);
+        role = repositories.unsecure.role.save(role);
+        applicationEventPublisher.publishEvent(new PrivilegeChangeEvent(this));
         return role;
+    }
+    
+    public void removePrivilegesFromRoles(Set<PrivilegeBase> privileges) {
+        debug("[addPrivilagesToRole] privilages: {}", privileges);
+        List<Role> roles = repositories.unsecure.role.findAll();
+        List<Role> modifiedRoles = new ArrayList<>();
+        for (Role role : roles) {
+            Set<PrivilegeBase> currentPrivs = new HashSet<>(role.getPrivilegesSet());
+            if(currentPrivs.removeAll(privileges)) {
+                modifiedRoles.add(role);
+            }
+            
+            role.setPrivilegesSet(currentPrivs); 
+        }
+        
+        applicationEventPublisher.publishEvent(new PrivilegeChangeEvent(this));
+        repositories.unsecure.role.saveAll(modifiedRoles);
     }
 
 }

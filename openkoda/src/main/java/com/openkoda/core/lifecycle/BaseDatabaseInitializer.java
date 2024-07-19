@@ -25,14 +25,10 @@ import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.security.UserProvider;
-import com.openkoda.model.GlobalRole;
-import com.openkoda.model.OpenkodaModule;
-import com.openkoda.model.OrganizationRole;
-import com.openkoda.model.User;
+import com.openkoda.model.*;
 import com.openkoda.model.component.ServerJs;
-import com.openkoda.service.export.ComponentImportService;
+import com.openkoda.service.export.ClasspathComponentImportService;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -128,24 +124,24 @@ public class BaseDatabaseInitializer extends ComponentProvider {
 
     private QueryExecutor queryExecutor;
 
-    private ComponentImportService componentImportService;
+    private ClasspathComponentImportService classpathComponentImportService;
 
     public BaseDatabaseInitializer(
             @Autowired QueryExecutor queryExecutor,
             @Value("${global.initialization.scripts.commaseparated:}") String initializationScripts,
             @Value("${global.initialization.externalScript:}") String initializationExternalScript,
-            @Autowired ComponentImportService componentImportService) {
+            @Autowired ClasspathComponentImportService classpathComponentImportService) {
         this.queryExecutor = queryExecutor;
         if (StringUtils.isNotBlank(initializationScripts)) {
             globalInitializationScripts = Arrays.stream(initializationScripts.split(",")).map(a -> StringUtils.trim(a)).collect(Collectors.toList());
         }
-        
+
         if (StringUtils.isNotBlank(initializationExternalScript)) {
             // need to unescape double quotes most likely inserted by a bash scripts
             this.initializationExternalScript = initializationExternalScript.replace("\"", "");
         }
-        
-        this.componentImportService = componentImportService;
+
+        this.classpathComponentImportService = classpathComponentImportService;
     }
 
     /**
@@ -168,7 +164,7 @@ public class BaseDatabaseInitializer extends ComponentProvider {
             createInitialRoles();
             createRegistrationFormServerJs();
             runInitializationScripts();
-            componentImportService.loadResourcesFromFiles();
+            classpathComponentImportService.loadAllComponents();
             alreadySetup = true;
         } finally {
             UserProvider.clearAuthentication();
@@ -218,11 +214,11 @@ public class BaseDatabaseInitializer extends ComponentProvider {
             System.exit(1);
         }
 
-        Set<Enum> adminPrivileges = PrivilegeHelper.getAdminPrivilegeSet();
-        Set<Enum> userPrivileges = new HashSet<>(PrivilegeHelper.getUserPrivilegeSet());
-        Set<Enum> unauthenticatedPrivileges = new HashSet<>(Arrays.asList());
-        Set<Enum> orgAdminPrivileges = new HashSet<>(PrivilegeHelper.getOrgAdminPrivilegeSet());
-        Set<Enum> orgUserPrivileges = new HashSet<>(PrivilegeHelper.getOrgUserPrivilegeSet());
+        Set<PrivilegeBase> adminPrivileges = PrivilegeHelper.getAdminPrivilegeSet();
+        Set<PrivilegeBase> userPrivileges = new HashSet<>(PrivilegeHelper.getUserPrivilegeSet());
+        Set<PrivilegeBase> unauthenticatedPrivileges = new HashSet<>(Arrays.asList());
+        Set<PrivilegeBase> orgAdminPrivileges = new HashSet<>(PrivilegeHelper.getOrgAdminPrivilegeSet());
+        Set<PrivilegeBase> orgUserPrivileges = new HashSet<>(PrivilegeHelper.getOrgUserPrivilegeSet());
 
         services.role.createOrUpdateGlobalRole("ROLE_UNAUTHENTICATED", unauthenticatedPrivileges, false);
 

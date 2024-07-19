@@ -32,6 +32,7 @@ public interface URLConstants {
     String NUMBERREGEX = "[0-9]+";
     String _HOME = "/home";
     String SEND = "send";
+    //String CREATE_EVENT = "createEvent";
     String REDIRECT = "redirect:";
     String FORWARD = "forward:";
     String _XML_HEADER = "Accept=application/xml";
@@ -108,11 +109,13 @@ public interface URLConstants {
     String CONTROLLER_ENDPOINT = "controllerEndpoint";
     String SERVERJS = "serverjs";
     String ROLE = "role";
+    String PRIVILEGE = "privilege";
     String PRIVILEGES = "privileges";
     String MODULE = "module";
     String CONTENT = "content";
     String TYPE = "type";
     String EVENTLISTENER = "eventListener";
+    String CUSTOM_EVENT = "customEvent";
     String SCHEDULER = "scheduler";
     String SPOOF = "spoof";
     String ENTITY = "entity";
@@ -154,9 +157,12 @@ public interface URLConstants {
     String _LOGS = "/" + LOGS;
     String _USER = "/" + USER;
     String _ROLE = "/" + ROLE;
+    String _PRIVILEGE = "/" + PRIVILEGE;
     String _CONTENT = "/" + CONTENT;
     String _UPLOAD = "/upload";
     String _EVENTLISTENER = "/" + EVENTLISTENER;
+    String _CUSTOM_EVENT = "/" + CUSTOM_EVENT;
+    //String _CREATE_EVENT = "/" + CREATE_EVENT;
     String _SCHEDULER = "/" + SCHEDULER;
     String _SPOOF = "/" + SPOOF;
     String _NEW_SETTINGS = _NEW + _SETTINGS;
@@ -165,6 +171,7 @@ public interface URLConstants {
     String _HTML_ORGANIZATION = _HTML + _ORGANIZATION;
     String _HTML_USER = _HTML + _USER;
     String _HTML_ROLE = _HTML + _ROLE ;
+    String _HTML_PRIVILEGE = _HTML + _PRIVILEGE ;
     String _USER_SETTINGS = "/" + USER + _USERID + _SETTINGS;
     String _PREVIEW = "/" + PREVIEW;
     String VIEW = "view";
@@ -223,7 +230,13 @@ public interface URLConstants {
 
     String DEBUG_MODEL = "debugModel";
     String DRAFT = "draft";
+    String _DRAFT = "/" + DRAFT;
+    String COPY = "copy";
+    String _COPY = "/" + COPY;
     String RESOURCE = "resource";
+    String _RESOURCE = "/" + RESOURCE;
+    String LIVE = "live";
+    String _LIVE = "/" + LIVE;
 
     String _APIKEY = "/apikey";
     String _TOKEN = "/token";
@@ -265,5 +278,16 @@ public interface URLConstants {
     String _CN = "/" + CN;
     
     String FILE_ASSET = "/file-asset-";
+    String AI = "ai";
+    String _AI = "/" + AI;
+    String PROMPT = "prompt";
+    String _PROMPT = "/" + PROMPT;
+    String QUERY = "query";
+    String _QUERY = "/" + QUERY;
+
+    String _CSV = "/csv";
+    String _REPORT = "/report";
+    String QUERY_REPORT = "queryreport";
+    String _QUERY_REPORT = "/" + QUERY_REPORT;
 
 }

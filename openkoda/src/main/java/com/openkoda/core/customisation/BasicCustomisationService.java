@@ -51,7 +51,7 @@ import com.openkoda.dto.NotificationDto;
 import com.openkoda.dto.OrganizationRelatedObject;
 import com.openkoda.dto.system.ScheduledSchedulerDto;
 import com.openkoda.integration.service.PushNotificationService;
-import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.User;
 import com.openkoda.model.common.AuditableEntity;
 import com.openkoda.model.common.SearchableEntity;
@@ -137,6 +137,16 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
      */
     public final <T extends AuditableEntity> PropertyChangeListener registerAuditableClass(Class<T> c, String classLabel) {
         return auditInterceptor.registerAuditableClass(c, classLabel);
+    }
+
+    @Override
+    public void unregisterAuditableClass(Class c) {
+        auditInterceptor.unregisterAuditableClass(c);
+    }
+
+    @Override
+    public boolean isAuditableClass(Class c) {
+        return auditInterceptor.isAuditableClass(c);
     }
 
     private List<Consumer<CustomisationService>> onApplicationStartListeners = new ArrayList<>();
@@ -282,10 +292,22 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
                 CanonicalObject.class,
                 SlackService.class,
                 "sendToSlackWithCanonical",
-                "Sends message generated in FrontendResource(first param) to slack via webHook(second param).",
+                "Sends message generated in FrontendResource(1st param) to slack via webHook(2nd param)",
                 EventConsumerCategory.MESSAGE,
                 String.class,
                 String.class);
+        
+        services.applicationEvent.registerEventConsumerWithMethod(
+                CanonicalObject.class,
+                SlackService.class,
+                "sendToSlackWithCanonical",
+                "Sends message generated in FrontendResource(1st param) to slack via webHook(2nd param), channel name (3rd param, optional), username (4rd param, optional) ",
+                EventConsumerCategory.MESSAGE,
+                String.class,
+                String.class,
+                String.class,
+                String.class);
+        
         services.applicationEvent.registerEventConsumerWithMethod(
                 ScheduledSchedulerDto.class,
                 ServerJSRunner.class,
@@ -357,7 +379,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
     }
 
     @Override
-    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege) {
+    public CRUDControllerConfiguration registerHtmlCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
         return htmlCrudControllerConfigurationMap.registerAndExposeCRUDController(definition, repository, ReflectionBasedEntityForm.class, readPrivilege, writePrivilege);
     }
 
@@ -372,7 +394,7 @@ public class BasicCustomisationService extends ComponentProvider implements Cust
     }
 
     @Override
-    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, Privilege readPrivilege, Privilege writePrivilege) {
+    public CRUDControllerConfiguration registerApiCrudController(FrontendMappingDefinition definition, ScopedSecureRepository repository, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
         return apiCrudControllerConfigurationMap.registerCRUDController(definition, repository, ReflectionBasedEntityForm.class, readPrivilege, writePrivilege);
     }
 

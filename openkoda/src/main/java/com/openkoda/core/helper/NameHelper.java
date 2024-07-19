@@ -23,7 +23,6 @@ package com.openkoda.core.helper;
 
 import com.google.common.base.CaseFormat;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -33,8 +32,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.CaseFormat.*;
-import static com.openkoda.model.component.Form.TABLE_NAME_PREFIX;
-import static org.apache.commons.lang3.StringUtils.uncapitalize;
 
 /**
  * Manipulate class or method names
@@ -42,7 +39,6 @@ import static org.apache.commons.lang3.StringUtils.uncapitalize;
 @Component("namehelper")
 public class NameHelper {
 
-    private static final CamelCaseToUnderscoresNamingStrategy namingStrategy = new CamelCaseToUnderscoresNamingStrategy();
     public final static String DELIMITER = "#;#";
 
     /**
@@ -86,16 +82,17 @@ public class NameHelper {
         }
         return (Class<?>[]) new Class[0];
     }
-    public static String toDynamicTableName(String tableName){
-         return tableName.startsWith(TABLE_NAME_PREFIX) ? tableName : TABLE_NAME_PREFIX + tableName;
+
+    public static String toTableName(String entityKey){
+         return CaseFormat.LOWER_CAMEL.to(LOWER_UNDERSCORE, entityKey);
     }
 
-    public static String toEntityName(String tableName){
-        return LOWER_UNDERSCORE.to(UPPER_CAMEL, tableName.replace(TABLE_NAME_PREFIX, ""));
+    public static String toEntityClassName(String formName){
+        return LOWER_CAMEL.to(UPPER_CAMEL, formName);
     }
 
-    public static String toEntityKey(String tableName){
-        return uncapitalize(toEntityName(tableName));
+    public static String toEntityKey(String formName){
+        return formName;
     }
 
     public static String toFieldName(String columnName){
@@ -106,8 +103,8 @@ public class NameHelper {
         return LOWER_CAMEL.to(LOWER_UNDERSCORE, fieldName);
     }
 
-    public static String toRepositoryName(String tableName){
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, "SecureGenerated" + toEntityName(tableName) + "Repository");
+    public static String toRepositoryName(String formName){
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, "SecureGenerated" + toEntityClassName(formName) + "Repository");
     }
 
 }

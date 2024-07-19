@@ -23,11 +23,16 @@ package com.openkoda.core.helper;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Helper to simplify accessing messages in code.
@@ -63,7 +68,36 @@ public class Messages {
     public String getFieldLabel(String code, String fieldName) {
         String result = accessor.getMessage(code, NO_MESSAGE);
         if (NO_MESSAGE.equals(result)) {
-            result = StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(StringUtils.capitalize(fieldName)), ' ');
+            result = getDefaultLabel(fieldName);
+            if (showMessageKeyForDefaultFieldLabel) {
+                result += " (" + code + ")";
+            }
+        }
+        return result;
+    }
+
+    @NotNull
+    public String getDefaultLabel(String fieldName) {
+        String result = WordUtils.capitalize(Arrays.stream(StringUtils.splitByCharacterTypeCamelCase(StringUtils.capitalize(fieldName))).filter(s -> !s.equals(".")).collect(Collectors.joining(" ")));
+        return result;
+    }
+
+
+    /**
+     * Method returning generic table header label if exists
+     * or generate default one otherwise
+     */
+    public String getTableHeaderLabel(String code, String fieldName) {
+        String result = accessor.getMessage(code, NO_MESSAGE);
+        if (NO_MESSAGE.equals(result)) {
+            if(fieldName.contains(".")) {
+//                modify header label if it refers to another entity and contains repeats
+                String[] fieldNameParts = fieldName.split("\\.");
+                if(fieldNameParts[1].contains(fieldNameParts[0])) {
+                    fieldName = fieldNameParts[1];
+                }
+            }
+            result = WordUtils.capitalize(Arrays.stream(StringUtils.splitByCharacterTypeCamelCase(StringUtils.capitalize(fieldName))).filter(s -> !s.equals(".")).collect(Collectors.joining(" ")));
             if (showMessageKeyForDefaultFieldLabel) {
                 result += " (" + code + ")";
             }
@@ -81,5 +115,30 @@ public class Messages {
         }
         return result;
     }
+    /**
+     * Method returning message field tooltip if exists
+     * or generate default one otherwise
+     */
+    public String getFieldTooltip(String code, String fieldName) {
+        String result = accessor.getMessage(code, NO_MESSAGE);
+        if (NO_MESSAGE.equals(result)) {
+            result = StringUtils.EMPTY;
+        }
+        return result;
+    }
 
+    /**
+     * Method returning message column name if exists
+     * or generate default one otherwise
+     */
+    public String getColumnLabel(String columnName) {
+        String result = accessor.getMessage(columnName, NO_MESSAGE);
+        if (NO_MESSAGE.equals(result)) {
+            result = WordUtils.capitalize(String.join(" ", columnName.split("_")));
+            if (showMessageKeyForDefaultFieldLabel) {
+                result += " (" + columnName + ")";
+            }
+        }
+        return result;
+    }
 }

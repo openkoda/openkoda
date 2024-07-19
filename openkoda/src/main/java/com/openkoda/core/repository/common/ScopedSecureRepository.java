@@ -22,12 +22,15 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.repository.common;
 
 import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.model.common.SearchableRepositoryMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import reactor.util.function.Tuple3;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ScopedSecureRepository<T> {
 
@@ -42,6 +45,9 @@ public interface ScopedSecureRepository<T> {
     Page<T> search(String searchTerm, Specification<T> specification, int page, int size, String sortField, String sortDirection) ;
     Page<T> search(String searchTerm, Long organizationId, int page, int size, String sortField, String sortDirection);
     Page<T> search(String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable);
+    Page<T> search(String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
+    Page<T> search(String searchTerm, Set<Long> organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
+    List<T> search(String searchTerm, Long organizationId, Specification<T> specification, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
     T findOne(Object idOrEntityOrSpecification);
     List<T> findAll();
     <S extends T> S saveOne(S entity);

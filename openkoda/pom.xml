@@ -12,10 +12,68 @@
     <parent>
         <groupId>com.openkoda</groupId>
         <artifactId>openkoda-app</artifactId>
-        <version>1.5.1</version>
+        <version>1.7.1</version>
         <relativePath>../openkoda-app</relativePath>
     </parent>
 
     <artifactId>openkoda</artifactId>
+    
+    <profiles>
+        <profile>
+            <id>development-module</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.openkoda</groupId>
+                    <artifactId>openkoda-development-module</artifactId>
+                    <version>${version}</version>                    
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+    
+    <build>
+        <plugins>
+            <!-- configure JAR build -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>application-dev*.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                    <groupId>io.github.git-commit-id</groupId>
+                    <artifactId>git-commit-id-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>get-the-git-infos</id>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                            <configuration>
+                                <verbose>false</verbose>
+                                <offline>true</offline>
+                                <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                                <skipPoms>false</skipPoms>
+                                <replacementProperties>
+                                    <replacement>
+                                        <property>git.branch</property>
+                                        <token>origin/</token>
+                                        <value />
+                                    </replacement>
+                                    <replacement>
+                                        <property>git.branch</property>
+                                        <token>/</token>
+                                        <value>_</value>
+                                    </replacement>
+                                </replacementProperties>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+        </plugins>
+    </build>
 
 </project>

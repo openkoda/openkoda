@@ -65,7 +65,7 @@ public abstract class Role implements SearchableEntity, LongIdEntity, AuditableE
     private String privileges;
 
     @Transient
-    private Set<Enum> privilegesSet;
+    private Set<PrivilegeBase> privilegesSet;
 
     @Column(name = INDEX_STRING_COLUMN, length = INDEX_STRING_COLUMN_LENGTH, insertable = false)
     @ColumnDefault("''")
@@ -101,7 +101,7 @@ public abstract class Role implements SearchableEntity, LongIdEntity, AuditableE
      *
      * @return a {@link java.util.Set} object.
      */
-    public Set<Enum> getPrivilegesSet() {
+    public Set<PrivilegeBase> getPrivilegesSet() {
         if ( privilegesSet == null ) {
             privilegesSet = PrivilegeHelper.fromJoinedStringInParenthesisToPrivilegeEnumSet( privileges );
         }
@@ -121,8 +121,8 @@ public abstract class Role implements SearchableEntity, LongIdEntity, AuditableE
         return getPrivilegesSet().stream().anyMatch(a -> a.name().equals(privilege));
     }
 
-    public void addPrivilege(Enum privilege) {
-        Set<Enum> privileges = getPrivilegesSet();
+    public void addPrivilege(PrivilegeBase privilege) {
+        Set<PrivilegeBase> privileges = getPrivilegesSet();
         privileges.add(privilege);
         setPrivilegesSet(privileges);
     }
@@ -150,7 +150,7 @@ public abstract class Role implements SearchableEntity, LongIdEntity, AuditableE
      *
      * @param privilegesSet a {@link java.util.Set} object.
      */
-    public void setPrivilegesSet(Set<Enum> privilegesSet) {
+    public void setPrivilegesSet(Set<PrivilegeBase> privilegesSet) {
         this.privilegesSet = privilegesSet;
         this.privileges = PrivilegeHelper.toJoinedStringInParenthesis( privilegesSet );
     }

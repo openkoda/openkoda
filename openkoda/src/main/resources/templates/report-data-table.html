@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en" layout:decorate="~{${defaultLayout}}">
+<body>
+<div class="container-fluid">
+  <div layout:fragment="content" th:attr="data-menu-item='reports'">
+      <th:block th:replace="snippets::codemirror-import"></th:block>
+      <nav th:replace="~{navigation-fragments::reporting-nav-tabs('reports')}"></nav>
+
+      <div class="card shadow mb-4">
+          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between ">
+              <h6 class="m-0 font-weight-bold text-nowrap"><th:block th:if="${reportId != null}" th:text="${organizationRelatedForm.dto[name]}"></th:block></h6>
+              <div class="d-flex align-items-center ">
+                  <div class="card-header-buttons">
+                      <button th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId)}"
+                              class="btn-primary btn btn-sm btn-icon-split"
+                              type="button" data-toggle="collapse"
+                              data-target="#query-form" th:aria-expanded="${error != null or reportId == null}"
+                              aria-controls="query-form">
+                          <span class="icon text-white-50">
+                              <i class="fas fa-caret-down"></i>
+                          </span>
+                          <span class="text"><th:block th:text="#{template.query}">Query</th:block></span>
+                      </button>
+                      <!-- Button trigger modal -->
+                      <button th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId) and organizationRelatedForm != null}"
+                              type="button" class="btn btn-primary btn-sm btn-icon-split"
+                              data-toggle="modal" data-target="#saveReport">
+                          <span class="icon text-white-50">
+                              <i class="fas fa-save"></i>
+                          </span>
+                          <span class="text"><th:block th:text="#{template.saveAs}">Save As</th:block></span>
+                      </button>
+
+                      <form th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntityId) and genericReportViewLinkedHashMap != null and #lists.size(genericReportViewLinkedHashMap) > 0}"
+                            th:action="${@url.reportQueryCsv(organizationEntityId)}" method="post">
+                          <input type="hidden" name="query" th:value="${query}">
+                          <input type="hidden" name="reportId" th:value="${reportId}">
+                          <button type="submit" class="btn-primary btn btn-sm btn-icon-split">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-download"></i>
+                            </span>
+                              <span class="text"><th:block th:text="#{template.download}">Download</th:block></span>
+                          </button>
+                      </form>
+                  </div>
+              </div>
+
+          </div>
+
+          <!-- Modal -->
+          <div th:if="${@auth.hasGlobalOrOrgPrivilege('canCreateReports',organizationEntityId) and organizationRelatedForm != null}"  class="modal fade" th:object="${organizationRelatedForm}"
+               id="saveReport" role="dialog" aria-labelledby="saveReportLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title" id="saveReportLabel"
+                              th:text="(${reportId != null} ? #{template.update} : #{template.new}) + ' ' + #{template.report}">New Report</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          <form class="organizationRelatedForm" id="saveReportForm"
+                                th:action="${@url.form(organizationEntityId, 'queryreport', reportId)}" method="post" th:object="${organizationRelatedForm}"
+                                th:data-report-url="${@url.queryReport(organizationEntityId, reportId)}">
+                              <input type="hidden" name="frontendMappingDefinition" value="queryreport">
+                              <input type="hidden" name="dto[query]" id="dto[query]"  th:field="*{dto[query]}"/>
+                              <div class="form-group">
+                                  <input th:replace="~{forms::text-simple('dto[name]', #{template.name}, '')}"/>
+                              </div>
+                              <div class="col text-center">
+                                  <button type="button" class="btn btn-primary btn-submit" onclick="app.submitAndCallback(this.form, redirectToReport)">
+                                      <span class="text"><th:block th:text="#{template.save}">Save</th:block></span>
+                                  </button>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <div class="card-body">
+
+              <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntityId)}">
+                  <div th:if="${error != null}" class="alert alert-danger"><pre class="mb-0" th:text="${error}"/></div>
+
+                  <form th:action="${@url.reportQuery(organizationEntityId)}" method="post" id="query-form"
+                        th:class="'mb-4 collapse' + ${error != null or reportId == null ? ' show' : ''}">
+                      <input type="hidden" name="reportId" th:value="${reportId}">
+                      <div class="form-group">
+                          <textarea class="form-control d-none" rows="3" name="query" id="query-input"
+                                    th:text="${query}" ></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary btn-submit btn-icon-split d-none">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-rotate"></i>
+                        </span>
+                          <span class="text"><th:block th:text="#{template.reload}">Reload</th:block></span>
+                      </button>
+                  </form>
+              </th:block>
+
+              <div class="table-responsive">
+                  <table class="table table-hover">
+                      <thead th:if="${genericReportViewLinkedHashMap != null and #lists.size(genericReportViewLinkedHashMap) > 0}">
+                      <tr>
+                          <th:block th:each="tableValue: ${genericReportViewLinkedHashMap.get(0)}">
+                              <th th:text="${@messages.getColumnLabel(tableValue.key)}"/>
+                          </th:block>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr th:each="a : ${genericReportViewLinkedHashMap}">
+                          <td th:each="tableValue: ${a}"
+                              th:text="(${T(org.apache.commons.lang3.math.NumberUtils).isCreatable(tableValue.value)} and ${#strings.contains(tableValue.value,'.')}) ? ${#numbers.formatDecimal(tableValue.value,1,'COMMA',2,'POINT')} : ${tableValue.value}"
+                              th:class="${T(org.apache.commons.validator.GenericValidator).isDate(tableValue.value, 'MM/dd/yy', false)}? 'text-nowrap'"></td>
+                      </tr>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+      <script th:inline="javascript">
+	      let error = /*[[${ error }]]*/ false;
+	      let reportId = /*[[${ reportId }]]*/ null;
+		  let codeRendered = false;
+		  let config = {
+			  lineNumbers: true,
+			  mode: 'text/x-sql',
+			  indentWithTabs: true,
+			  smartIndent: true,
+			  matchBrackets: true,
+			  lint: true,
+			  hint: true
+		  };
+
+		  function initSqlEditor() {
+			  let editor = CodeMirror.fromTextArea(document.getElementById('query-input'), config);
+			  $('#query-form button').removeClass('d-none');
+			  editor.on('inputRead', function onChange(editor, input) {
+				  if (editor.state.completionActive || input.text[0] === ';' || input.text[0] === ' ') {
+					  return;
+				  }
+				  editor.showHint({
+					  hint: CodeMirror.hint.auto
+				  });
+			  });
+			  editor.on("keyup", function (cm, event) {
+				  if (!cm.state.completionActive && /*Enables keyboard navigation in autocomplete list*/
+					  event.keyCode != 13) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
+					  CodeMirror.commands.autocomplete(cm, null, {completeSingle: false});
+				  }
+			  });
+			  editor.on("change", function (cm, event) {
+				  if(codeRendered) {
+				    $('#saveReportForm #dto\\[query\\]').val(cm.getValue());
+                  }
+			  });
+          }
+
+          function redirectToReport(data, form) {
+	          $(`#dto*`).removeClass('border-danger');
+	          if(!data.toString().startsWith('dto')) {
+                window.location.replace(form.attr('data-report-url').endsWith('/') ? form.attr('data-report-url') + data : form.attr('data-report-url'));
+              } else {
+				  let errorInput = document.querySelector(`input[name="${data}"]`);
+				  errorInput.classList = errorInput.classList + ' border-danger';
+              }
+          }
+
+		  $(document).ready(function () {
+			  if(error || !reportId) {
+				  initSqlEditor();
+				  codeRendered = true;
+              }
+
+			  $('#query-form').on('shown.bs.collapse', function (e) {
+				  if (!codeRendered) {
+					  initSqlEditor();
+					  codeRendered = true;
+				  }
+			  })
+		  });
+      </script>
+  </div>
+</div>
+</body>
+</html>

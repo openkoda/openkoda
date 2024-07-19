@@ -24,11 +24,11 @@ package com.openkoda.controller.admin;
 import com.openkoda.App;
 import com.openkoda.core.flow.Flow;
 import com.openkoda.core.security.HasSecurityRules;
-import com.openkoda.model.component.FrontendResource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import static com.openkoda.controller.common.URLConstants._HTML;
 
@@ -79,10 +79,7 @@ public class SystemHealthController extends AbstractSystemHealthController imple
     @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
     @GetMapping(_DASHBOARD)
     public Object adminDashboard(@Qualifier("obj") Pageable pageable) {
-        return Flow.init()
-                .thenSet(frontendResourcePage, a -> repositories.unsecure.frontendResource.findByResourceType(FrontendResource.ResourceType.UI_COMPONENT,pageable))
-                .execute()
-                .mav("admin-dashboard");
+        return new ModelAndView("admin-dashboard");
 
     }
 
@@ -98,7 +95,7 @@ public class SystemHealthController extends AbstractSystemHealthController imple
     @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
     @GetMapping("/restart")
     public Object restart() {
-        App.restart();
+        App.shutdown();
         return null;
 
     }

@@ -6,8 +6,10 @@
 <body>
 
 <div th:fragment="file(filePage, title)" class="card shadow mb-4">
+    <!--PRINTJS-->
+    <link href="/vendor/printjs/print.min.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="/vendor/printjs/print.min.js"></script>
     <div class="card-header py-3 d-flex flex-row align-items-center ">
-        <h6 class="m-0 font-weight-bold" th:text="${title}">File</h6>
     </div>
 
     <div class="card-body pt-0">
@@ -30,7 +32,7 @@
                     <td><span th:text="${a.id}">1</span></td>
                     <td>
                         <th:block th:if="${a.publicFile}">
-                            <i class="fas fa-circle fa-sm fa-fw text-primary-light" data-toggle="tooltip"
+                            <i class="fas fa-check fa-sm fa-fw text-primary-light" data-toggle="tooltip"
                                data-placement="top" th:title="#{template.public}"></i>
                         </th:block>
                     </td>
@@ -45,7 +47,8 @@
                             <th:block th:if="${a.isImage()}">
                                 <div class="dropdown no-arrow">
                                     <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                       data-toggle-second="tooltip" data-placement="top" th:title="#{template.resize}">
                                         <i class="fas fa-maximize text-primary"></i>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
@@ -58,6 +61,9 @@
                                     </div>
                                 </div>
                             </th:block>
+                            <th:block th:unless="${a.isImage()}">
+                                <button class="bg-transparent p-0 border-0" disabled><i class="fas fa-maximize text-gray-500"></i></button>
+                            </th:block>
                             <a class="" th:href="'javascript:app.copyToClipboard(\'' + ${@url.getAbsoluteFileURL(a)} + '\', \'Copied\')'"
                                data-toggle="tooltip" data-placement="top" th:title="#{template.copyAbsoluteURLPath}">
                                 <i class="fas fa-link text-primary"></i>
@@ -65,7 +71,27 @@
                             <a class="" th:href="${@url.form(a.organizationId, 'file', a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
                                 <i class="fas fa-pen-to-square text-primary"></i>
                             </a>
-
+                            <th:block th:if="${a.getContentType() != null and #strings.contains(a.getContentType(),'image/')}">
+                                <a class="" href='javascript:;' data-toggle="tooltip" data-placement="top" title="Print" th:onclick="printJS([[${@url.getAbsoluteFileURL(a)}]], 'image')">
+                                    <i class="fas fa-print text-primary"></i>
+                                </a>
+                            </th:block>
+                            <th:block th:if="${a.getContentType() != null and a.getContentType() == 'application/pdf'}">
+                                <a class="" href='javascript:;' data-toggle="tooltip" data-placement="top" title="Print" th:onclick="printJS([[${@url.getAbsoluteFileURL(a)}]])">
+                                    <i class="fas fa-print text-primary"></i>
+                                </a>
+                            </th:block>
+                            <th:block th:unless="${a.getContentType() != null and (#strings.contains(a.getContentType(),'image/') || a.getContentType() == 'application/pdf')}">
+                                <button class="bg-transparent p-0 border-0" disabled><i class="fas fa-print text-gray-500"></i></button>
+                            </th:block>
+                            <th:block th:if="${a.getContentType() != null and (#strings.contains(a.getContentType(),'image/') || a.getContentType() == 'application/pdf')}">
+                                <a class="" th:href="${@url.getAbsoluteFileURL(a)}" target="_blank" data-toggle="tooltip" data-placement="top" th:title="#{template.view}">
+                                    <i class="fas fa-eye text-primary"></i>
+                                </a>
+                            </th:block>
+                            <th:block th:unless="${a.getContentType() != null and (#strings.contains(a.getContentType(),'image/') || a.getContentType() == 'application/pdf')}">
+                                <button class="bg-transparent p-0 border-0" disabled><i class="fas fa-eye text-gray-500"></i></button>
+                            </th:block>
 
                         </div>
                     </td>

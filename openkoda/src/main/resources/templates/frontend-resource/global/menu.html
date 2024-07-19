@@ -5,19 +5,21 @@
 </head>
 <body>
 <div th:fragment="users-menu">
-
     <th:block th:if="${organizationEntity != null
-            and #strings.contains(#ctx.springRequestContext.requestUri,'organization')
-            and !#strings.contains(#ctx.springRequestContext.requestUri,'organization/all')}">
+            and (#strings.contains(currentUri,'organization') and !#strings.contains(currentUri,'organization/all'))}">
 
         <li class="nav-item">
-            <a th:attr="data-sidebar-menu-item='dashboard'" class="nav-link" th:href="${@url.organizationDashboard(organizationEntity.id)}" onclick="app.adminMode(false)" th:text="#{template.dashboard}">Dashboard</a>
+            <a th:attr="data-sidebar-menu-item='dashboard'" class="nav-link" th:href="${@url.organizationDashboard(organizationEntity.id)}" onclick="app.adminMode(false)"><span th:text="#{template.dashboard}">Dashboard</span></a>
+            <th:block th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntity.id)}">
+                <a th:attr="data-sidebar-menu-item='reports'" th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntity.id)}" class="nav-link" th:href="${@url.allQueryReports(organizationEntity.id)}" onclick="app.adminMode(false)"><span th:text="#{template.reports}">Reports</span></a>
+                <a th:attr="data-sidebar-menu-item='reporting-ai'" th:if="${@auth.hasGlobalOrOrgPrivilege('canUseReportingAI',organizationEntity.id) and #arrays.contains(@environment.getActiveProfiles(),'development')}" class="nav-link" th:href="${@url.aiReporting(organizationEntity.id)}" onclick="app.adminMode(false)"><span th:text="#{template.reportingAi}">Reporting AI</span></a>
+            </th:block>
             <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposedSorted(organizationEntity.id)}">
                 <a th:attr="data-sidebar-menu-item=${@url.all(organizationEntity.id, entry.key)}" th:if="${@auth.hasGlobalOrOrgPrivilege('readOrgData',organizationEntity.id)}"
-                   class="nav-link" th:href="${@url.all(organizationEntity.id, entry.key)}" onclick="app.adminMode(false)" th:text="${@messages.getFieldLabel(entry.key, entry.value.getFrontendMappingDefinition().name)}">Entry</a>
+                   class="nav-link" th:href="${@url.all(organizationEntity.id, entry.key)}" onclick="app.adminMode(false)"><span th:text="${@messages.getFieldLabel(entry.key, entry.value.getFrontendMappingDefinition().name)}">Entry</span></a>
             </th:block>
-            <a th:attr="data-sidebar-menu-item=${'organization-settings-' + organizationEntity.id}" class="nav-link"  th:href="${@url.organizationSettings(organizationEntity.id)}" onclick="app.adminMode(false)" th:text="#{template.settings}">Settings</a>
-            <a th:attr="data-sidebar-menu-item=${'organization-settings-history-' + organizationEntity.id}" th:if="${@auth.hasOrgPrivilege('manageOrgData',organizationEntity.id)}" class="nav-link" th:href="${@url.organizationHistory(organizationEntity.id)}" onclick="app.adminMode(false)" th:text="#{template.audit}">Audit</a>
+            <a th:attr="data-sidebar-menu-item=${'organization-settings-' + organizationEntity.id}" class="nav-link"  th:href="${@url.organizationSettings(organizationEntity.id)}" onclick="app.adminMode(false)"><span th:text="#{template.settings}">Settings</span></a>
+            <a th:attr="data-sidebar-menu-item=${'organization-settings-history-' + organizationEntity.id}" th:if="${@auth.hasOrgPrivilege('manageOrgData',organizationEntity.id)}" class="nav-link" th:href="${@url.organizationHistory(organizationEntity.id)}" onclick="app.adminMode(false)"><span th:text="#{template.audit}">Audit</span></a>
         </li>
 
     </th:block>

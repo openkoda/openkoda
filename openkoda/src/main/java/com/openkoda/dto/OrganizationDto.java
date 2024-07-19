@@ -45,6 +45,13 @@ public class OrganizationDto implements CanonicalObject, OrganizationRelatedObje
     public Integer assignedDatasource;
 
     public boolean setupTrial;
+    public boolean personalizeDashboard;
+
+    public String mainBrandColor;
+
+    public String secondBrandColor;
+
+    public Long logoId;
 
     public OrganizationDto(Organization organization, boolean setupTrial) {
         this.id = organization.getId();
@@ -92,5 +99,37 @@ public class OrganizationDto implements CanonicalObject, OrganizationRelatedObje
 
     public void setSetupTrial(boolean setupTrial) {
         this.setupTrial = setupTrial;
+    }
+
+    public boolean isPersonalizeDashboard() {
+        return personalizeDashboard;
+    }
+
+    public void setPersonalizeDashboard(boolean personalizeDashboard) {
+        this.personalizeDashboard = personalizeDashboard;
+    }
+
+    public String getMainBrandColor() {
+        return mainBrandColor;
+    }
+
+    public void setMainBrandColor(String mainBrandColor) {
+        this.mainBrandColor = mainBrandColor;
+    }
+
+    public String getSecondBrandColor() {
+        return secondBrandColor;
+    }
+
+    public void setSecondBrandColor(String secondBrandColor) {
+        this.secondBrandColor = secondBrandColor;
+    }
+
+    public Long getLogoId() {
+        return logoId;
+    }
+
+    public void setLogoId(Long logoId) {
+        this.logoId = logoId;
     }
 }

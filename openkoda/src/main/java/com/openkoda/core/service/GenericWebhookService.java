@@ -27,10 +27,12 @@ import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.model.task.HttpRequestTask;
 import jakarta.inject.Inject;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.expression.ThymeleafEvaluationContext;
 
 import java.util.Map;
 
@@ -42,6 +44,7 @@ public class GenericWebhookService extends ComponentProvider {
 
     @Inject
     private TemplateEngine templateEngine;
+    @Inject ApplicationContext context;
 
     public boolean sendToUrlWithCanonical(CanonicalObject object, String url, String jsonContentTemplateName, String jsonHeadersTemplateName) {
         debug("[sendToUrlWithCanonical]");
@@ -58,6 +61,9 @@ public class GenericWebhookService extends ComponentProvider {
         debug("[prepareContent] {}", templateName);
         final Context ctx = new Context(LocaleContextHolder.getLocale());
 
+        //modulesInterceptor.emailModelPreHandle(model);
+        ctx.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME,
+                new ThymeleafEvaluationContext(context, null));
         for (Map.Entry<String, Object> entry : model.entrySet()) {
             ctx.setVariable(entry.getKey(), entry.getValue());
         }

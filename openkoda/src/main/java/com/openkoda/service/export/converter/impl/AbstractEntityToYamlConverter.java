@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
 import static com.openkoda.service.export.FolderPathConstants.EXPORT_PATH;
@@ -21,13 +22,20 @@ public abstract class AbstractEntityToYamlConverter<T,D> implements EntityToYaml
     @Autowired
     ZipUtils zipUtils;
 
-    public D addToZip(T entity, ZipOutputStream zipOut){
-        if(getPathToContentFile(entity) != null) {
-            zipUtils.addToZipFile(getContent(entity), getPathToContentFile(entity), zipOut);
+    public D addToZip(T entity, ZipOutputStream zipOut, Set<String> zipEntries){
+        final String pathToContentFile = getPathToContentFile(entity);
+        if(pathToContentFile != null && !zipEntries.contains(pathToContentFile)) {
+            String content = getContent(entity);
+            if(content != null) {
+                zipUtils.addToZipFile(content, pathToContentFile, zipOut);
+                zipEntries.add(pathToContentFile);
+            }
         }
         D dto = getConversionDto(entity);
-        if(getPathToYamlComponentFile(entity) != null) {
-            zipUtils.addToZipFile(dtoToYamlString(dto), getPathToYamlComponentFile(entity), zipOut);
+        final String pathToComponentFile = getPathToYamlComponentFile(entity);
+        if(pathToComponentFile != null && !zipEntries.contains(pathToComponentFile)) {
+            zipUtils.addToZipFile(dtoToYamlString(dto), pathToComponentFile, zipOut);
+            zipEntries.add(pathToComponentFile);
         }
         return dto;
     }

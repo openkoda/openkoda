@@ -10,6 +10,19 @@
     <li class="nav-item" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}">
         <a th:class="'nav-link ' + ${activeTab == 'roles' ? 'active' : ''}" th:href="${@url.allRoles()}" th:text="#{template.roles}"></a>
     </li>
+    <li class="nav-item" th:if="${@auth.hasGlobalPrivilege('canManageBackend') && #arrays.contains(@environment.getActiveProfiles(),'development')}">
+        <a th:class="'nav-link ' + ${activeTab == 'privileges' ? 'active' : ''}" th:href="${@url.allPrivileges()}" th:text="#{template.privileges}"></a>
+    </li>
+</ul>
+
+<ul class="nav nav-tabs dashboard-nav" th:fragment="reporting-nav-tabs(activeTab)">
+    <li class="nav-item">
+        <a th:class="'nav-link ' + ${activeTab == 'reports' ? 'active' : ''}" th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntityId)}"
+           th:href="${#strings.contains(currentUri,'organization') ? @url.allQueryReports(organizationEntityId) : @url.allQueryReports(null)}" th:text="#{template.reports}"></a>
+    </li>
+    <li class="nav-item" th:if="${@auth.hasGlobalOrOrgPrivilege('canReadReports',organizationEntityId) and @auth.hasGlobalOrOrgPrivilege('canUseReportingAI',organizationEntityId) and #arrays.contains(@environment.getActiveProfiles(),'development')}">
+        <a th:class="'nav-link ' + ${activeTab == 'reporting-ai' ? 'active' : ''}" th:href="${#strings.contains(currentUri,'organization') ? @url.aiReporting(organizationEntityId) : @url.aiReporting(null)}" th:text="#{template.reportingAi}"></a>
+    </li>
 </ul>
 
 <ul class="nav nav-tabs dashboard-nav" th:fragment="configuration-nav-tabs(activeTab)">

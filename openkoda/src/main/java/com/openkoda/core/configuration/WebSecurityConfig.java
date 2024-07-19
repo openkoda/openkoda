@@ -45,9 +45,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.filter.CompositeFilter;
@@ -80,7 +83,7 @@ public class WebSecurityConfig implements URLConstants {
     @Value("${rememberme.key:uniqueRememberKey}")
     private String rememberMeKey;
 
-    @Value("${rememberme.parameter:remember}")
+    @Value("${rememberme.parameter:remember-me}")
     private String rememberMeParameter;
 
     @Value("${rememberme.parameter:remember-me}")
@@ -199,12 +202,11 @@ public class WebSecurityConfig implements URLConstants {
                         .loginPage(_LOGIN)
                         .loginProcessingUrl("/perform_login")
                 )
-                .rememberMe(rememberMe -> rememberMe
+                .rememberMe(rememberMe -> rememberMe.rememberMeServices(rememberMeServices(customUserDetailsService))
                         .rememberMeCookieName(rememberMeCookieName)
                         .rememberMeParameter(rememberMeParameter)
                         .key(rememberMeKey)
-                )
-        ;
+                );
     }
     public HttpSecurity apiAuthHttpSecurity(HttpSecurity http) throws Exception {
         return http.securityMatcher(_API_AUTH_ANT_EXPRESSION)
@@ -259,7 +261,11 @@ public class WebSecurityConfig implements URLConstants {
                 .logout(logout -> logout
                         .logoutUrl(_LOGOUT)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/")
+                        .logoutSuccessHandler( (request, response, authentication) -> {
+                            String email = authentication.getName();
+                            customUserDetailsService.unsubscribeUser(email);
+                            response.sendRedirect("/");
+                            })
                 );
     }
     private Filter ssoFilter() {
@@ -291,5 +297,14 @@ public class WebSecurityConfig implements URLConstants {
     public SecurityContextRepository securityContextRepository(){
         return new HttpSessionSecurityContextRepository();
     }
+
+    @Bean
+    RememberMeServices rememberMeServices(UserDetailsService userDetailsService) {
+        TokenBasedRememberMeServices.RememberMeTokenAlgorithm encodingAlgorithm = TokenBasedRememberMeServices.RememberMeTokenAlgorithm.SHA256;
+        TokenBasedRememberMeServices rememberMe = new TokenBasedRememberMeServices(rememberMeKey, userDetailsService, encodingAlgorithm);
+        rememberMe.setMatchingAlgorithm(TokenBasedRememberMeServices.RememberMeTokenAlgorithm.MD5);
+        return rememberMe;
+    }
+
 
 }

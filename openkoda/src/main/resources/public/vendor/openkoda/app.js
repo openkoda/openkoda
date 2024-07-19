@@ -69,8 +69,9 @@ app.submitToUrlAndCallback = function( domForm, targetUrl, callback ) {
             if (app.assertNotRedirectToLogin(data)) {
                 if(typeof callback == "function") {
                     callback( data, form );
+                } else {
+                    eval(callback)(data, form);
                 }
-                eval(callback)( data, form );
             }
         }
     };
@@ -103,8 +104,9 @@ app.submitJsonToUrlAndCallback = function( domForm, targetUrl, callback ) {
             if (app.assertNotRedirectToLogin(data)) {
                 if(typeof callback == "function") {
                     callback( data, form );
+                } else {
+                    eval(callback)(data, form);
                 }
-                eval(callback)( data, form );
             }
         }
     };
@@ -133,8 +135,9 @@ app.submitToUrlAndCallbackOrElseFailure = function( domForm, callback, failureCa
             if (!data.isError && app.assertNotRedirectToLogin(data) && app.assertNotRedirectToLoginOrError(data)) {
                 if(typeof callback == "function") {
                     callback( data, form );
+                } else {
+                    eval(callback)(data, form);
                 }
-                eval(callback)( data, form );
             } else {
                 failureCallback(data, form);
             }
@@ -175,11 +178,12 @@ app.submitCheckboxAndCallback = function( element, formId, callback) {
         url : form.attr('action'),
         data : data,
         success : (data) => {
-            if(typeof callback == "function") {
-                callback( data, form );
+            if (typeof callback == "function") {
+                callback(data, form);
+            } else {
+                eval(callback)(data, form);
             }
-            eval(callback)( data, form );
-            }
+        }
     };
     $.post(postParam)
 };
@@ -213,8 +217,9 @@ app.confirmAndSubmitAndCallback = function(confirmText, domForm, callback ) {
             if (app.assertNotRedirectToLogin(data)) {
                 if(typeof callback == "function") {
                     callback( data, form );
+                } else {
+                    eval(callback)(data, form);
                 }
-                eval(callback)( data, form );
             }
         }
       };
@@ -252,7 +257,7 @@ app.confirmAndSubmit = function( confirmText, domForm ) {
   app.confirmAndSubmitAndCallback(confirmText, domForm, app.refreshView);
 };
 
-app.dictionaryToOptions = function (dictionaryName, fieldName, selectedValue, showDefault, defaultText) {
+app.dictionaryToOptions = function (dictionaryName, fieldName, selectedValue, showDefault, defaultText, isMultiselect = false) {
     let a = commonDictionaries[dictionaryName];
     let result = showDefault ? "<option value=''>" + defaultText + "</option>" : "";
     try {
@@ -267,13 +272,13 @@ app.dictionaryToOptions = function (dictionaryName, fieldName, selectedValue, sh
                     data += `data-${key}="${option[key]}" `;
                 })
             }
-            let selected = (selectedValue === e['k']) ? " selected='selected'" : "";
+            let selected = (isMultiselect ? selectedValue.split(',').includes(e['k']) : selectedValue === e['k']) ? " selected='selected'" : "";
             let disabled = (e['disabled'] === false) ? " disabled " : "";
             result = result + `<option value="${e['k']}" ${selected} ${disabled} ${data}>${label}</option>`;
         })
     } catch (exception) {
         for (e in a) {
-            let selected = (selectedValue === e) ? " selected='selected'" : "";
+            let selected = (isMultiselect && selectedValue != null ? selectedValue.split(',').includes(e) : selectedValue === e) ? " selected='selected'" : "";
             result = result + "<option value='" + e + "'" + selected + ">" + a[e] + "</option>";
         }
     }
@@ -284,21 +289,29 @@ app.dictionaryToRadiobuttonTable = function (dictionaryName, fieldName, selected
     let a = commonDictionaries[dictionaryName];
     let result = "";
     let fieldNameClass = "radio-option " + fieldName.replace(".", "-")
-    let arr = JSON.parse(a)
+    let arr = typeof a === 'object' ? Object.entries(a) : JSON.parse(a)
     arr.forEach(e => {
-        let row = Object.hasOwn(e, 'v') ? e['v'] : a[e];
-        let isArray = Array.isArray(row);
-        let labels = "";
-        if (isArray) {
-            for (td in row) {
-                labels = labels + "<td class='" + fieldNameClass + "'>" + row[td] + "</td>"
+        if(Object.hasOwn(e, 'v')) {
+            let row = e['v'];
+            let isArray = Array.isArray(row);
+            let labels = "";
+            if (isArray) {
+                for (td in row) {
+                    labels = labels + "<td class='" + fieldNameClass + "'>" + row[td] + "</td>"
+                }
+            } else {
+                labels = row ;
             }
+            let val = Object.hasOwn(e, 'k') ? e['k'] : e;
+            let selected = (!!selectedValue && selectedValue.toString() === val) ? " checked='checked'" : "";
+            result += `<tr><td class="${fieldNameClass}"><input type="radio" name="${fieldName}" value="${val}" ${selected}/><label class="checkbox-label ml-2">${labels}</label></td></tr>`;
+
         } else {
-            labels = row ;
+            let val = e[0];
+            let label = e[1];
+            let selected = (!!selectedValue && selectedValue.toString() === val) ? " checked='checked'" : "";
+            result += `<tr><td class="${fieldNameClass}"><input type="radio" name="${fieldName}" value="${val}" ${selected}/><label class="checkbox-label ml-2">${label}</label></td></tr>`;
         }
-        let val = Object.hasOwn(e, 'k') ? e['k'] : e;
-        let selected = (!!selectedValue && selectedValue.toString() === val) ? " checked='checked'" : "";
-        result += `<tr><td class="${fieldNameClass}"><input type="radio" name="${fieldName}" value="${val}" ${selected}/><label class="checkbox-label">${labels}</label></td></tr>`;
 
     })
     return result;
@@ -412,10 +425,14 @@ app.dictionaryToCheckboxTableGrouped = function (dictionaryName, fieldName, sele
                     result += `<div class="row">`;
                     Object.keys(arrByGroups).forEach(group => {
                         if(group !== 'undefined') {
-                            result += `<div class="checkbox-table-group col-3">`;
-                            result += `<div class="checkbox-table-group-name">${group}</div>`
-                            result += app.getCheckboxTableRows(arrByGroups[group], fieldName);
-                            result += `</div>`;
+                            const grouped = app.getCheckboxTableRows(arrByGroups[group], fieldName, cat);
+                            // only add category if there are items matching it's name in the definition
+                            if(!!grouped){
+                                result += `<div class="checkbox-table-group col-3">`;
+                                result += `<div class="checkbox-table-group-name">${group}</div>`
+                                result += grouped;
+                                result += `</div>`;
+                            }
                         }
                     });
                     result += `</div>`;
@@ -434,9 +451,14 @@ app.dictionaryToCheckboxTable = function (dictionaryName, fieldName, selectedVal
     return app.getCheckboxTableRows(arr, fieldName);
  };
 
-app.getCheckboxTableRows = function (arr, fieldName) {
+app.getCheckboxTableRows = function (arr, fieldName, cat = null) {
     let result = "";
     arr.forEach(e => {
+        // only add item for matching category 
+        if(!!cat && e.c != cat) {
+            return;
+        }
+        
         let row = Object.hasOwn(e, 'v') ? e['v'] : a[e];
         let isArray = Array.isArray(row);
         let labels = "";
@@ -476,6 +498,11 @@ app.dictionaryTableHeader = function(dictionaryName){
 app.populateSelect = function( selectId, fieldName, fieldValue, datalistId, showDefault, defaultText, disableOptions) {
     let elem = document.getElementById(selectId);
     elem.innerHTML = app.dictionaryToOptions(datalistId, fieldName, fieldValue, showDefault, defaultText);
+};
+
+app.populateMultiselect = function( selectId, fieldName, fieldValue, datalistId, showDefault, defaultText, disableOptions) {
+    let elem = document.getElementById(selectId);
+    elem.innerHTML = app.dictionaryToOptions(datalistId, fieldName, fieldValue, showDefault, defaultText, true);
 };
 
 app.populateRadiobuttonTable = function( selectId, fieldName, fieldValue, datalistId ) {
@@ -520,6 +547,28 @@ app.getAndAppend = function( selector, url, reqData ) {
 app.refreshView = function () {
     location.reload();
 };
+
+app.refreshViewWithoutParams = function () {
+    window.location = window.location.pathname;
+};
+
+app.refreshViewWithoutEntityKeyParams = function (entityKey) {
+    let url = new URL(window.location.href);
+    let params = url.searchParams;
+    let paramsToDelete = [];
+
+    for (let param of params.keys()) {
+        if (param.startsWith(entityKey + '_')) {
+            paramsToDelete.push(param);
+        }
+    }
+
+    paramsToDelete.forEach(param => params.delete(param));
+
+    window.location = url.pathname + '?' + params.toString();
+}
+
+
 
 app.assertNotRedirectToLogin = function (data) {
     if (((typeof data) === "string") && data.indexOf('action="/login"') > 0) {
@@ -578,6 +627,16 @@ app.wrapCheckboxSectionAndShowIfAllGroupVisible = function (allSelector, element
 }
 
 app.wrapCheckboxSection = function (elementSelector, collapseId, isVisible) {
+    if(isVisible) {
+        $("div[class*=" + elementSelector).css("display", "block");
+    }
+    $(document).ready(function(){
+        $("div[class*=" + elementSelector).wrapAll( "<div class='collapse" + (isVisible ? " show" : "") + "' id='" + collapseId + "' />");
+        $("div[class*=" + elementSelector).css("display", "block");
+    });
+};
+
+app.wrapLinkSection = function (elementSelector, collapseId, isVisible) {
     if(isVisible) {
         $("div[class*=" + elementSelector).css("display", "block");
     }
@@ -760,8 +819,10 @@ app.manageDropdownSwitch = function (sectionClass, selectedValue) {
     let allElements = $("div[class*=" + sectionClass + "]");
     allElements.css("display", "none");
     if(selectedValue == '') return;
-    let selectedElements = $("div[class*=" + selectedValue + "]");
-    selectedElements.css("display", "block");
+    let selectedElements = $("." + sectionClass + "." + selectedValue);
+    if(selectedElements) {
+        selectedElements.css("display", "block");
+    }
 }
 
 app.copyToClipboard = function (url, copiedMessage) {
@@ -821,3 +882,4 @@ app.passCurrentQueryParams = function (url) {
     }
     return url + queryParams;
 }
+

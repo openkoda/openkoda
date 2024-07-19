@@ -2,9 +2,10 @@ package cucumber.page;
 
 import com.openkoda.TestDataLoader;
 import com.openkoda.core.flow.LoggingComponent;
-import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.Organization;
 import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
+import com.openkoda.model.component.FrontendResource;
 import cucumber.common.StepsBase;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -36,7 +37,7 @@ public class PrivilegesStepsDefs extends StepsBase implements LoggingComponent {
 
     @When("Create user {string} {string} with {string} privilege {string} and organization {string} {string}")
     public void createUserWithPrivilege(String userName, String password, String area, String privilege, String organization, String privilegeName) {
-        Set<Enum> privileges = new HashSet<>();
+        Set<PrivilegeBase> privileges = new HashSet<>();
         for (String p : privilege.split(";")) {
             privileges.add(Privilege.valueOf(p));
         }

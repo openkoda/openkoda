@@ -22,13 +22,16 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.repository.common;
 
 import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.core.security.HasSecurityRules.SecurityScope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.NoRepositoryBean;
+import reactor.util.function.Tuple3;
 
 import java.util.List;
+import java.util.Set;
 
 @NoRepositoryBean
 public interface UnscopedSecureRepository<T> {
@@ -44,6 +47,9 @@ public interface UnscopedSecureRepository<T> {
     Page<T> search(SecurityScope scope, String searchTerm, Specification<T> specification, int page, int size, String sortField, String sortDirection) ;
     Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, int page, int size, String sortField, String sortDirection);
     Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable);
+    Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
+    Page<T> search(SecurityScope scope, String searchTerm, Set<Long> organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
+    List<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters);
     T findOne(SecurityScope scope, Object idOrEntityOrSpecification);
     List<T> findAll(SecurityScope scope);
     <S extends T> S saveOne(SecurityScope scope, S entity);

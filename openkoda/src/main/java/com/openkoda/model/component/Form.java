@@ -24,17 +24,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.model.component;
 
-import com.openkoda.model.Privilege;
+import com.openkoda.core.helper.PrivilegeHelper;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.PrivilegeNames;
 import com.openkoda.model.common.ComponentEntity;
 import jakarta.persistence.*;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "form")
+
 public class Form extends ComponentEntity {
 
-    public static final String TABLE_NAME_PREFIX = "dynamic_";
+    private static final long serialVersionUID = 6206245838333775713L;
+
+    final static List<String> contentProperties = Arrays.asList("code");
+
     @Column
     private String name;
 
@@ -42,15 +53,33 @@ public class Form extends ComponentEntity {
     private String code;
 
 //    read privilege for the registered form
+    @Transient
+    private PrivilegeBase readPrivilege;
+    
+    @Transient
+    private long readPrivilegeTimestamp;
+    
+    @Access( AccessType.PROPERTY )
     @Column(name = "read_privilege")
-    @Enumerated(EnumType.STRING)
-    private Privilege readPrivilege;
-
+    private String readPrivilegeString;
+    
+    @Transient
+    private long readPrivilegeStringTimestamp;
+    
 //    write privilege for the registered form
+    @Transient
+    private PrivilegeBase writePrivilege;
+    
+    @Transient
+    private long writePrivilegeTimestamp;
+    
+    //  write privilege for the registered form
+    @Access( AccessType.PROPERTY )
     @Column(name = "write_privilege")
-    @Enumerated(EnumType.STRING)
-    private Privilege writePrivilege;
-
+    private String writePrivilegeString;
+    @Transient
+    private long writePrivilegeStringTimestamp;
+    
 //    read privilege for form entity
     @Formula("( '" + PrivilegeNames._canReadBackend + "' )")
     private String requiredReadPrivilege;
@@ -63,7 +92,14 @@ public class Form extends ComponentEntity {
 
     private boolean registerHtmlCrudController;
 
+    private boolean showOnOrganizationDashboard;
+
+    @Column(columnDefinition = "boolean default true")
+    private boolean registerAsAuditable;
+    ///@Transient
+    ///private boolean registerWithEvents;
     private String tableColumns;
+    private String filterColumns;
 
     private String tableName;
 
@@ -73,12 +109,14 @@ public class Form extends ComponentEntity {
         super(null);
         registerApiCrudController = false;
         registerHtmlCrudController = false;
+        showOnOrganizationDashboard = false;
     }
 
     public Form(Long organizationId) {
         super(organizationId);
         registerApiCrudController = false;
         registerHtmlCrudController = false;
+        showOnOrganizationDashboard = false;
     }
 
     public String getName() {
@@ -97,20 +135,54 @@ public class Form extends ComponentEntity {
         this.code = code;
     }
 
-    public Privilege getReadPrivilege() {
+    public PrivilegeBase getReadPrivilege() {
+        if(this.readPrivilegeStringTimestamp > this.readPrivilegeTimestamp || readPrivilegeTimestamp == 0) {
+            this.readPrivilege = PrivilegeHelper.valueOfString(this.readPrivilegeString);
+        }
+        
         return readPrivilege;
     }
 
-    public void setReadPrivilege(Privilege readPrivilege) {
+    public String getReadPrivilegeString() {
+        return this.readPrivilegeString;
+    }
+    
+    public void setReadPrivilege(PrivilegeBase readPrivilege) {
         this.readPrivilege = readPrivilege;
+        this.readPrivilegeStringTimestamp = System.nanoTime();
+        if(readPrivilege != null) {
+            this.readPrivilegeString = readPrivilege.name();
+        }
+    }
+    
+    public void setReadPrivilegeString(String privilegeString) {
+        this.readPrivilegeString = privilegeString;
+        this.readPrivilegeStringTimestamp = System.nanoTime();
     }
 
-    public Privilege getWritePrivilege() {
+    public PrivilegeBase getWritePrivilege() {
+        if(this.writePrivilegeStringTimestamp > this.writePrivilegeTimestamp || writePrivilegeTimestamp == 0) {
+            this.writePrivilege = PrivilegeHelper.valueOfString(this.writePrivilegeString);
+        }
+        
         return writePrivilege;
     }
+    
+    public String getWritePrivilegeString() {
+        return this.writePrivilegeString;
+    }
+    
+    public void setWritePrivilegeString(String privilegeString) {
+        this.writePrivilegeString = privilegeString;
+        this.writePrivilegeStringTimestamp = System.nanoTime();
+    }
 
-    public void setWritePrivilege(Privilege writePrivilege) {
+    public void setWritePrivilege(PrivilegeBase writePrivilege) {
         this.writePrivilege = writePrivilege;
+        this.writePrivilegeStringTimestamp = System.nanoTime();
+        if(writePrivilege != null) {
+            this.writePrivilegeString = writePrivilege.name();
+        }
     }
 
     @Override
@@ -139,16 +211,44 @@ public class Form extends ComponentEntity {
         this.registerHtmlCrudController = registerHtmlCrudController;
     }
 
+    public boolean isShowOnOrganizationDashboard() {
+        return showOnOrganizationDashboard;
+    }
+
+    public void setShowOnOrganizationDashboard(boolean showOnOrganizationDashboard) {
+        this.showOnOrganizationDashboard = showOnOrganizationDashboard;
+    }
+
+    public boolean isRegisterAsAuditable() {
+        return registerAsAuditable;
+    }
+
+    public void setRegisterAsAuditable(boolean registerAsAuditable) {
+        this.registerAsAuditable = registerAsAuditable;
+    }
+
     public String getTableColumns() {
         return tableColumns;
     }
 
     public void setTableColumns(String tableColumns) {
-        this.tableColumns = tableColumns.replaceAll("\\s", "");
+        this.tableColumns = StringUtils.isNotEmpty(tableColumns) ? tableColumns.replaceAll("\\s", "") : null;
     }
 
     public String[] getTableColumnsList() {
-        return tableColumns.split(",");
+        return tableColumns != null ? tableColumns.split(",") : ArrayUtils.EMPTY_STRING_ARRAY;
+    }
+
+    public String getFilterColumns() {
+        return filterColumns;
+    }
+
+    public void setFilterColumns(String filterColumns) {
+        this.filterColumns = StringUtils.isNotEmpty(filterColumns) ? filterColumns.replaceAll("\\s", "") : null;
+    }
+
+    public String[] getFilterColumnsList() {
+        return filterColumns != null ? filterColumns.split(",") : ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
     public String getTableName() {
@@ -167,10 +267,15 @@ public class Form extends ComponentEntity {
     }
 
     public String getReadPrivilegeAsString(){
-        return getReadPrivilege() != null ? getReadPrivilege().name() : null;
+        return this.readPrivilegeString;
     }
 
     public String getWritePrivilegeAsString(){
-        return getWritePrivilege() != null ? getWritePrivilege().name() : null;
+        return this.writePrivilegeString;
+    }
+
+    @Override
+    public Collection<String> contentProperties() {
+        return contentProperties;
     }
 }

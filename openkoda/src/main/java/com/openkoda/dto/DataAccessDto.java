@@ -1,20 +1,21 @@
 package com.openkoda.dto;
 
-import com.openkoda.core.helper.NameHelper;
-import com.openkoda.model.Privilege;
-
-
 public class DataAccessDto implements OrganizationRelatedObject{
 
     public Long id;
     public String name;
     public String code;
+    public boolean advanced;
     public Long organizationId;
     public String readPrivilege;
     public String writePrivilege;
+    public boolean registerAsAuditable;
+    public boolean registerEntityEvent = true;
     public boolean registerApiCrudController;
     public boolean registerHtmlCrudController;
+    public boolean showOnOrganizationDashboard = true;
     public String tableColumns;
+    public String filterColumns;
     public String existingTableName;
     public String newTableName;
     public boolean createNewTable;
@@ -54,6 +55,13 @@ public class DataAccessDto implements OrganizationRelatedObject{
         this.organizationId = organizationId;
     }
 
+    public boolean isRegisterAsAuditable() {
+        return registerAsAuditable;
+    }
+
+    public void setRegisterAsAuditable(boolean registerAsAuditable) {
+        this.registerAsAuditable = registerAsAuditable;
+    }
 
     public boolean isRegisterApiCrudController() {
         return registerApiCrudController;
@@ -71,12 +79,28 @@ public class DataAccessDto implements OrganizationRelatedObject{
         this.registerHtmlCrudController = registerHtmlCrudController;
     }
 
+    public boolean isShowOnOrganizationDashboard() {
+        return showOnOrganizationDashboard;
+    }
+
+    public void setShowOnOrganizationDashboard(boolean showOnOrganizationDashboard) {
+        this.showOnOrganizationDashboard = showOnOrganizationDashboard;
+    }
+
     public String getTableColumns() {
         return tableColumns;
     }
 
     public void setTableColumns(String tableColumns) {
         this.tableColumns = tableColumns;
+    }
+
+    public String getFilterColumns() {
+        return filterColumns;
+    }
+
+    public void setFilterColumns(String filterColumns) {
+        this.filterColumns = filterColumns;
     }
 
     public String getExistingTableName() {
@@ -140,5 +164,21 @@ public class DataAccessDto implements OrganizationRelatedObject{
 
     public void setWritePrivilege(String writePrivilege) {
         this.writePrivilege = writePrivilege;
+    }
+
+    public boolean isAdvanced() {
+        return advanced;
+    }
+
+    public void setAdvanced(boolean advanced) {
+        this.advanced = advanced;
+    }
+    
+    public void setRegisterEntityEvent(boolean registerEntityEvent) {
+        this.registerEntityEvent = registerEntityEvent;
+    }
+    
+    public boolean isRegisterEntityEvent() {
+        return registerEntityEvent;
     }
 }

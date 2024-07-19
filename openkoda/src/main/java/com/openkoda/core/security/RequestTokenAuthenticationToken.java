@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.security;
 
+import com.openkoda.model.PrivilegeBase;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import java.util.Collections;
@@ -38,11 +39,11 @@ public class RequestTokenAuthenticationToken extends UsernamePasswordAuthenticat
 
     private final Long userId;
 
-    private final Set<Enum> privileges;
+    private final Set<PrivilegeBase> privileges;
 
     private final boolean singleRequest;
 
-    public RequestTokenAuthenticationToken(Long userId, String email, String token, Set<Enum> privileges, boolean singleRequest) {
+    public RequestTokenAuthenticationToken(Long userId, String email, String token, Set<PrivilegeBase> privileges, boolean singleRequest) {
         super(email, null);
         this.token = token;
         this.userId = userId;
@@ -59,7 +60,7 @@ public class RequestTokenAuthenticationToken extends UsernamePasswordAuthenticat
         return userId;
     }
 
-    public Set<Enum> getPrivileges() {
+    public Set<PrivilegeBase> getPrivileges() {
         return privileges;
     }
 

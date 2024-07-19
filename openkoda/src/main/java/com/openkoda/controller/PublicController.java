@@ -37,8 +37,10 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -46,6 +48,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import reactor.util.function.Tuple2;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static com.openkoda.core.service.FrontendResourceService.frontendResourceTemplateNamePrefix;
@@ -182,6 +186,21 @@ public class PublicController extends AbstractController implements HasSecurityR
         } else {
             response.setStatus(200);
         }
+    }
+    
+    @GetMapping("/session-id")
+    @ResponseBody()
+    public ResponseEntity<String> getSessionId(HttpServletRequest request, HttpServletResponse response) {
+        // Get the HttpSession object from the HttpServletRequest
+        HttpSession session = request.getSession();
+        
+        // Get the session ID
+        String sessionId = session.getId();
+        
+        // Return the session ID
+        Map<String, String> map = new HashMap<>();
+        map.put("sessionId", sessionId);
+        return ResponseEntity.ok(sessionId);
     }
 
 }

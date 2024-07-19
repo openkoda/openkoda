@@ -57,18 +57,28 @@ public class SlackService extends ComponentProvider {
     }
 
     public boolean sendToSlackWithCanonical(CanonicalObject object, String templateName, String webHook) {
+        return sendToSlackWithCanonical(object, templateName, webHook, null, null);
+    }
+
+    public boolean sendToSlackWithCanonical(CanonicalObject object, String templateName, String webHook, String channel, String username) {
         debug("[sendToSlackWithCanonical]");
         PageModelMap model = new PageModelMap();
         model.put(PageAttributes.canonicalObject, object);
         String message = prepareContent(templateName, model);
-        sendMessageToSlack(message, webHook);
+        sendMessageToSlack(message, webHook, channel, username);
         return true;
     }
-
+    
     public boolean sendMessageToSlack(String message, String webHook) {
+        return sendMessageToSlack(message, webHook, null, null);
+    }
+    
+    public boolean sendMessageToSlack(String message, String webHook, String channel, String username) {
         debug("[sendMessageToSlack] Message to {}", webHook);
-        String requestJson = String.format("{\"text\":\"%s\"}",
-                StringUtils.replace(message, "\"", "\\\""));
+        String requestJson = String.format("{\"text\":\"%s\"%s%s}",
+                StringUtils.replace(message, "\"", "\\\""),
+                StringUtils.defaultIfBlank(channel != null ? String.format(", \"channel\": \"%s\"", channel) : null, ""),
+                StringUtils.defaultIfBlank(username != null ? String.format(", \"username\": \"%s\"", username) : null, ""));
         return sendJSONMessageToSlack(requestJson, webHook);
 
     }

@@ -22,11 +22,16 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.security;
 
 import com.openkoda.controller.ComponentProvider;
+import com.openkoda.core.cache.RequestSessionCacheService;
 import com.openkoda.core.flow.Tuple;
 import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.dto.user.BasicUser;
 import com.openkoda.model.User;
 import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,8 +50,16 @@ import static com.openkoda.core.service.event.ApplicationEvent.USER_MODIFIED;
 import static com.openkoda.model.PrivilegeNames.*;
 
 @Service
+@Scope("singleton")
 public class UserProvider extends ComponentProvider {
+    private final static Logger logger = LoggerFactory.getLogger(UserProvider.class);
 
+    @Inject
+    private RequestSessionCacheService cacheService;
+    
+    @Inject private OrganizationUserDetailsService organizationUserDetailsService;
+
+    @Inject
     private static UserProvider instance;
 
     @PostConstruct
@@ -60,7 +73,12 @@ public class UserProvider extends ComponentProvider {
     }
 
     public static final Optional<OrganizationUser> getFromContext() {
-        return getFromContext(true);
+        OrganizationUser user = instance.cacheService.tryGet(OrganizationUser.class, () -> getFromContext(true).orElse(null));
+        if(user == null) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(user);
     }
 
     public static boolean isAuthenticated() {
@@ -74,7 +92,7 @@ public class UserProvider extends ComponentProvider {
     }
 
     private static final Optional<OrganizationUser> getFromContext(boolean checkWasModified) {
-
+        logger.trace("[getFromContext]");
         SecurityContext context = SecurityContextHolder.getContext();
         if (context == null) {
             return Optional.empty();
@@ -101,8 +119,10 @@ public class UserProvider extends ComponentProvider {
             User u = p.get().getUser();
             Long userId = u.getId();
 
+            logger.trace("[getFromContext] >>> checking for modified");
             Optional<Boolean> wasModified = instance.repositories.unsecure.user.wasModifiedSince(userId, u.getUpdatedOn());
             Optional<Boolean> rolesWereModified = instance.repositories.unsecure.userRole.wasModifiedSince(userId, u.getUpdatedOn());
+            logger.trace("[getFromContext] <<< checking for modified");
             boolean wasModifiedValue = wasModified.orElse(false);
             boolean rolesWereModifiedValue = rolesWereModified.orElse(false);
             if (wasModifiedValue || rolesWereModifiedValue) {
@@ -114,7 +134,7 @@ public class UserProvider extends ComponentProvider {
 
                 List<Tuple> info = instance.repositories.unsecure.user.getUserRolesAndPrivileges(user.getId());
 
-                OrganizationUser userDetails = OrganizationUserDetailsService.setUserDetails(user, info, p.get());
+                OrganizationUser userDetails = instance.organizationUserDetailsService.setUserDetails(user, info, p.get());
 
                 Authentication a = new PreAuthenticatedAuthenticationToken(
                         userDetails, "N/A", userDetails.getAuthorities());

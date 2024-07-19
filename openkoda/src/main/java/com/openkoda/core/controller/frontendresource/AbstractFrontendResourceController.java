@@ -47,8 +47,8 @@ import com.openkoda.repository.FrontendResourceRepository;
 import com.openkoda.uicomponent.JsFlowRunner;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -175,12 +175,31 @@ public class AbstractFrontendResourceController extends AbstractController imple
      * @param frontendResourceId
      * @return com.openkoda.core.flow.PageModelMap
      */
-    protected PageModelMap reloadFrontendResourceToDraft(long frontendResourceId) {
+    protected PageModelMap copyResourceContentToDraft(long frontendResourceId) {
         debug("[loadFrontendResourceToDraft] FrontendResourceId: {}", frontendResourceId);
         return Flow.init()
                 .then(a -> repositories.unsecure.frontendResource.findOne(frontendResourceId))
                 .then(a -> {
                     a.result.setDraftContent(services.frontendResource.getContentOrDefault(a.result.getType(), a.result.getName(), a.result.getAccessLevel(), a.result.getOrganizationId()));
+                    return a.result;
+                })
+                .then(a -> repositories.unsecure.frontendResource.save(a.result))
+                .execute();
+    }
+
+    /**
+     * Copies the live content of {@link FrontendResource} as draft.
+     * See also {@link FrontendResourceService}, {@link com.openkoda.repository.FrontendResourceRepository}
+     *
+     * @param frontendResourceId
+     * @return com.openkoda.core.flow.PageModelMap
+     */
+    protected PageModelMap copyLiveContentToDraft(long frontendResourceId) {
+        debug("[copyLiveContentToDraft] FrontendResourceId: {}", frontendResourceId);
+        return Flow.init()
+                .then(a -> repositories.unsecure.frontendResource.findOne(frontendResourceId))
+                .then(a -> {
+                    a.result.setDraftContent(a.result.getContent());
                     return a.result;
                 })
                 .then(a -> repositories.unsecure.frontendResource.save(a.result))
@@ -229,8 +248,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
      * @param organizationId
      * @param frontendResourcePath url path of the {@link FrontendResource}
      * @param subPath              sub path for the resource being invoked
-     * @param httpServletRequest   {@link HttpServletRequest}
-     * @param isPublic             is the requested resource public
+     * @param httpMethod           {@link ControllerEndpoint.HttpMethod}
      * @param preview              is this triggered in the preview mode
      * @param requestParams        params retrieved from {@link HttpServletRequest}
      * @param form
@@ -240,20 +258,18 @@ public class AbstractFrontendResourceController extends AbstractController imple
                                                  String frontendResourcePath,
                                                  Long frontendResourceId,
                                                  String subPath,
-                                                 HttpServletRequest httpServletRequest,
-                                                 HttpServletResponse httpServletResponse,
+                                                 ControllerEndpoint.HttpMethod httpMethod,
                                                  boolean preview,
                                                  Map<String,String> requestParams,
                                                  AbstractOrganizationRelatedEntityForm form) {
         debug("[invokeFrontendResourceEntry] FrontendResourcePath: {}", frontendResourcePath);
         FrontendResourceRepository fr = repositories.unsecure.frontendResource;
         FrontendResource frontendResource = null;
-        Page<FrontendResource> frontendResources = null;
-        Pageable pageable = PageRequest.of(0,1, Sort.Direction.DESC, "organizationId");
+        Pageable pageable = PageRequest.of(0,1, Sort.Direction.ASC, "priority");
         TenantResolver.TenantedResource tenantedResource = TenantResolver.getTenantedResource();
 
 
-        frontendResources = fr.findByUrlPathAndAccessLevelAndOrganizationId(
+        Page<Object[]> frontendResources = fr.findByUrlPathAndAccessLevelAndOrganizationId(
                 frontendResourcePath,
                 frontendResourceId,
                 tenantedResource.accessLevel,
@@ -261,7 +277,7 @@ public class AbstractFrontendResourceController extends AbstractController imple
                 pageable);
 
         if(!frontendResources.isEmpty()) {
-            frontendResource = frontendResources.getContent().get(0);
+            frontendResource = (FrontendResource) frontendResources.getContent().get(0)[0];
         }
 
         ModelAndView mav = new ModelAndView();
@@ -271,13 +287,12 @@ public class AbstractFrontendResourceController extends AbstractController imple
         if (frontendResource != null) {
             mav.setViewName(FrontendResourceService.frontendResourceTemplateNamePrefix + frontendResource.getName());
             if(frontendResource.getResourceType().equals(FrontendResource.ResourceType.UI_COMPONENT)) {
-                ControllerEndpoint.HttpMethod httpMethod = ControllerEndpoint.HttpMethod.valueOf(httpServletRequest.getMethod());
                 ControllerEndpoint controllerEndpoint = repositories.unsecure.controllerEndpoint.findByFrontendResourceIdAndSubPathAndHttpMethod(
                     frontendResource.getId(),
                     subPath,
                     httpMethod);
                 if(controllerEndpoint != null) {
-                    return evaluateControllerEndpoint(organizationId, frontendResourcePath, subPath, httpServletRequest, httpServletResponse,
+                    return evaluateControllerEndpoint(organizationId, frontendResourcePath, subPath,
                             mav, frontendResource, httpMethod, controllerEndpoint, preview, requestParams, form);
                 }
             }
@@ -307,8 +322,6 @@ public class AbstractFrontendResourceController extends AbstractController imple
     private Object evaluateControllerEndpoint(Long organizationId,
                                               String frontendResourcePath,
                                               String subPath,
-                                              HttpServletRequest httpServletRequest,
-                                              HttpServletResponse httpServletResponse,
                                               ModelAndView mav,
                                               FrontendResource frontendResource,
                                               ControllerEndpoint.HttpMethod httpMethod,
@@ -318,13 +331,14 @@ public class AbstractFrontendResourceController extends AbstractController imple
                                               AbstractOrganizationRelatedEntityForm form) {
         switch (controllerEndpoint.getResponseType()) {
             case HTML -> {
+                String scriptSourceFileName = deductScriptSourceFileName(controllerEndpoint);
 //                        display frontend resource normally and run if available
                 debug("[evaluateControllerEndpoint] Run ControllerEndpoint Flow Id {} for HTTP Method {}",
-                        controllerEndpoint.getId(), httpServletRequest.getMethod());
+                        controllerEndpoint.getId(), httpMethod);
                 long userId = UserProvider.getUserIdOrNotExistingId();
                 PageModelMap pageModelMap = preview
-                        ? jsFlowRunner.runPreviewFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form)
-                        : jsFlowRunner.runLiveFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form);
+                        ? jsFlowRunner.runPreviewFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form, scriptSourceFileName)
+                        : jsFlowRunner.runLiveFlow(controllerEndpoint.getCode(), requestParams, organizationId, userId, form, scriptSourceFileName);
                 mav.getModelMap().putAll(pageModelMap);
                 boolean isError = Boolean.TRUE.equals(pageModelMap.get(BasePageAttributes.isError));
                 if (pageModelMap.has(reload) && !isError) {
@@ -422,10 +436,11 @@ public class AbstractFrontendResourceController extends AbstractController imple
                                                        AbstractOrganizationRelatedEntityForm form) {
         debug("[getControllerEndpointResult] organizationId: {} frontendResourceUrl: {} subPath: {}", organizationId, frontendResourceUrl, subPath);
         long userId = UserProvider.getUserIdOrNotExistingId();
+        String scriptSourceFileName = deductScriptSourceFileName(cEndpoint);
         return Flow.init()
                 .thenSet(controllerEndpoint, a -> cEndpoint)
                 .thenSet(frontendResourceEntity, a -> frontendResource)
-                .thenSet(uiComponentModel, a -> a.result != null ? (preview ? jsFlowRunner.runPreviewFlow(cEndpoint.getCode(), requestParams, organizationId, userId, form) : jsFlowRunner.runLiveFlow(cEndpoint.getCode(), requestParams, organizationId, userId, form)) : new PageModelMap())
+                .thenSet(uiComponentModel, a -> a.result != null ? (preview ? jsFlowRunner.runPreviewFlow(cEndpoint.getCode(), requestParams, organizationId, userId, form, scriptSourceFileName) : jsFlowRunner.runLiveFlow(cEndpoint.getCode(), requestParams, organizationId, userId, form, scriptSourceFileName)) : new PageModelMap())
                 .thenSet(httpHeaders, a -> setupHttpHeaders(cEndpoint))
                 .thenSet(controllerEndpointResult, a -> {
                     switch (cEndpoint.getResponseType()) {
@@ -506,6 +521,11 @@ public class AbstractFrontendResourceController extends AbstractController imple
         if(!httpHeaders.containsKey(HttpHeaders.CONTENT_DISPOSITION)){
             httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"");
         }
+    }
+
+    @NotNull
+    private String deductScriptSourceFileName(ControllerEndpoint ce) {
+        return "controllerEndpoint-" + ce.getId() + ".mjs";
     }
 
 }

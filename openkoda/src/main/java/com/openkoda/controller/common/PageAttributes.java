@@ -27,6 +27,7 @@ import com.openkoda.core.flow.BasePageAttributes;
 import com.openkoda.core.flow.PageAttr;
 import com.openkoda.core.flow.PageModelMap;
 import com.openkoda.core.flow.mbean.LoggingEntriesStack;
+import com.openkoda.core.form.AbstractForm;
 import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.form.FrontendMappingFieldDefinition;
@@ -49,6 +50,7 @@ import com.openkoda.model.component.Form;
 import com.openkoda.model.component.FrontendResource;
 import com.openkoda.model.component.Scheduler;
 import com.openkoda.model.component.event.EventListenerEntry;
+import com.openkoda.model.file.File;
 import com.openkoda.model.notification.Notification;
 import com.openkoda.repository.notifications.NotificationKeeper;
 import org.springframework.data.domain.Page;
@@ -59,6 +61,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 import reactor.util.function.Tuple5;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,13 +122,18 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<String> accountVerificationLink = new PageAttr<>("accountVerificationLink");
     PageAttr<String> websiteUrl = new PageAttr<>("websiteUrl");
     PageAttr<Page<Role>> rolePage = new PageAttr<>("rolePage");
+    PageAttr<Page<PrivilegeBase>> privilegePage = new PageAttr<>("privilegePage");
     PageAttr<Role> roleEntity = new PageAttr<>("roleEntity");
-    PageAttr<List<Enum>> rolesEnum = new PageAttr<>("rolesEnum");
+    PageAttr<List<PrivilegeBase>> rolesEnum = new PageAttr<>("rolesEnum");
     PageAttr<RoleForm> roleForm = new PageAttr<>("roleForm");
+    PageAttr<PrivilegeForm> privilegeForm = new PageAttr<>("privilegeForm");
+    PageAttr<PrivilegeBase> privilegeEntity = new PageAttr<>("privilegeEntity");
+    PageAttr<List<DynamicPrivilege>> dynamicPrivilegesList = new PageAttr<>("dynamicPrivilegesList");
     PageAttr<Page<FrontendResource>> frontendResourcePage = new PageAttr<>("frontendResourcePage");
     PageAttr<FrontendResource> frontendResourceEntity = new PageAttr<>("frontendResourceEntity");
     PageAttr<FrontendResourceForm> frontendResourceForm = new PageAttr<>("frontendResourceForm");
     PageAttr<PageBuilderForm> pageBuilderForm = new PageAttr<>("pageBuilderForm");
+    PageAttr<PageBuilderForm> dataAiForm = new PageAttr<>("dataAiForm");
     PageAttr<FrontendResourcePageForm> frontendResourcePageForm = new PageAttr<>("frontendResourcePageForm");
     PageAttr<ControllerEndpoint> controllerEndpoint = new PageAttr<>("controllerEndpoint");
     PageAttr<List<ControllerEndpoint>> controllerEndpoints = new PageAttr<>("controllerEndpoints");
@@ -134,7 +142,7 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<String> uiComponentPreviewUrl = new PageAttr<>("uiComponentPreviewUrl");
     PageAttr<String> uiComponentUrl = new PageAttr<>("uiComponentUrl");
     PageAttr<EventListenerForm> eventListenerForm = new PageAttr<>("eventListenerForm");
-    PageAttr<SendEventForm> sendEventForm = new PageAttr<SendEventForm>("sendEventForm");
+    PageAttr<AbstractForm<?>> sendEventForm = new PageAttr<AbstractForm<?>>("sendEventForm");
     PageAttr<SchedulerForm> schedulerForm = new PageAttr<>("schedulerForm");
     PageAttr<Page<EventListenerEntry>> eventListenerPage = new PageAttr<>("eventListenerPage");
     PageAttr<Page<Scheduler>> schedulerPage = new PageAttr<>("schedulerPage");
@@ -185,9 +193,14 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<List<String>> errorList = new PageAttr<>("errorList");
     PageAttr<AbstractOrganizationRelatedEntityForm> organizationRelatedForm = new PageAttr<>("organizationRelatedForm");
     PageAttr<FrontendMappingDefinition> frontendMappingDefinition = new PageAttr<>("frontendMappingDefinition");
-    PageAttr<List<Object[]>> genericTableViewList = new PageAttr<>("genericTableViewList");
+    PageAttr<List<List<Object>>> genericTableViewList = new PageAttr<>("genericTableViewList");
     PageAttr<List<Map<String,Object>>> genericTableViewMap = new PageAttr<>("genericTableViewMap");
+    PageAttr<List<LinkedHashMap<String,Object>>> genericReportViewLinkedHashMap = new PageAttr<>("genericReportViewLinkedHashMap");
     PageAttr<List<FrontendMappingFieldDefinition>> genericTableViewHeaders = new PageAttr<>("genericTableViewHeaders");
+    PageAttr<String[]> genericTableHeaders = new PageAttr<>("genericTableHeaders");
+    PageAttr<List<FrontendMappingFieldDefinition>> genericTableFilters = new PageAttr<>("genericTableFilters");
+    PageAttr<Long> reportId = new PageAttr<>("reportId");
+    PageAttr<Map<String,String>> objFilters = new PageAttr<>("objFilters");
     PageAttr<String> genericViewNavigationFragment = new PageAttr<>("genericViewNavigationFragment");
     PageAttr<Boolean> isMapEntity = new PageAttr<>("isMapEntity");
     PageAttr<Boolean> isPageEditor = new PageAttr<>("isPageEditor");
@@ -198,6 +211,14 @@ public interface PageAttributes extends BasePageAttributes, ReadableCode {
     PageAttr<String> reload = new PageAttr<>("reload");
     PageAttr<PageBuilderController.EmbeddableComponents> embeddableComponents = new PageAttr<>("embeddableComponents");
     PageAttr<String> importLog = new PageAttr<>("importLog");
+    PageAttr<File> file = new PageAttr<>("file");
+    PageAttr<String> query = new PageAttr<>("query");
+    PageAttr<String> fileName = new PageAttr<>("fileName");
+    PageAttr<Map<String, Object>> buildInfo = new PageAttr<>("buildInfo");
+    PageAttr<Boolean> isAuditable = new PageAttr<>("isAuditable");
+
+    PageAttr<String> remainingParameters = new PageAttr<>("remainingParameters");
+    PageAttr<Map<String, String>> remainingParametersMap = new PageAttr<>("remainingParametersMap");
 
 
 

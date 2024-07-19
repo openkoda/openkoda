@@ -23,13 +23,13 @@ package com.openkoda;
 
 import com.openkoda.core.customisation.BasicCustomisationService;
 import com.openkoda.core.helper.SpringProfilesHelper;
-import com.openkoda.model.common.OpenkodaEntity;
-import com.openkoda.repository.SecureRepository;
+import com.openkoda.model.component.Form;
+import com.openkoda.repository.FormRepository;
 import com.openkoda.service.dynamicentity.DynamicEntityDescriptor;
 import com.openkoda.service.dynamicentity.DynamicEntityDescriptorFactory;
+import com.openkoda.service.dynamicentity.DynamicEntityRegistrationService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -37,7 +37,6 @@ import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -45,13 +44,15 @@ import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.util.function.Tuple2;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationService.PACKAGE;
-import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationService.createAndLoadDynamicClasses;
+import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationService.buildAndLoadDynamicClasses;
 
 /**
  * <p>App class.</p>
@@ -60,12 +61,11 @@ import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationServic
  * 
  */
 @SpringBootApplication(
-        scanBasePackages = "com.openkoda")
-@EnableCaching(mode = AdviceMode.ASPECTJ)
+        scanBasePackages = "com.openkoda", exclude = { SecurityAutoConfiguration.class })
+@EnableCaching//(mode = AdviceMode.ASPECTJ)
 @RestController
 @Configuration
 @EnableJpaRepositories(basePackages = {"com.openkoda","com.openkoda.dynamicentity.generated"})
-@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class })
 @EnableTransactionManagement
 public class App extends SpringBootServletInitializer {
     protected static ConfigurableApplicationContext context;
@@ -81,9 +81,16 @@ public class App extends SpringBootServletInitializer {
     }
 
     protected static void startApp(Class appClass, String[] args) {
+        startApp(appClass, args, false);
+    }
+    
+    protected static void startApp(Class appClass, String[] args, boolean forced) {
         mainClass = appClass;
-        boolean isForce = args != null && Arrays.stream(args).anyMatch(a -> "--force".equals(a));
-        initializationSafetyCheck(isForce);
+        if(!forced) {
+            boolean isForce = args != null && Arrays.stream(args).anyMatch(a -> "--force".equals(a));
+            initializationSafetyCheck(isForce);
+        }
+        
         System.setProperty("jakarta.xml.bind.JAXBContextFactory", "com.sun.xml.bind.v2.ContextFactory");
         context = SpringApplication.run(appClass, args);
         BasicCustomisationService customisationService = context.getBean(BasicCustomisationService.class);
@@ -112,7 +119,16 @@ public class App extends SpringBootServletInitializer {
         }
     }
 
+
+    public static void shutdown() {
+        System.exit(0);
+    }
+    
     public static void restart() {
+        restart(false);
+    }
+    
+    public static void restart(boolean reloadAllForms) {
 
         System.out.println("*********************************************************************");
         System.out.println(" Application restart...");
@@ -121,10 +137,24 @@ public class App extends SpringBootServletInitializer {
         ApplicationArguments args = context.getBean(ApplicationArguments.class);
 
         Thread thread = new Thread(() -> {
-            context.close();
-            for (DynamicEntityDescriptor ded : DynamicEntityDescriptorFactory.loadableInstances()) {
-                Tuple2<Class<? extends OpenkodaEntity>, Class<? extends SecureRepository<? extends OpenkodaEntity>>> rt = createAndLoadDynamicClasses(ded, App.class.getClassLoader());
+            //review
+            List<Form> forms = null;
+            if (reloadAllForms) {
+                FormRepository fr = context.getBean(FormRepository.class);
+                forms = fr.findAll();
             }
+            context.close();
+            if (reloadAllForms) {
+                DynamicEntityRegistrationService.generateDynamicEntityDescriptors(forms, System.currentTimeMillis());
+            }
+
+            try {
+                buildAndLoadDynamicClasses(App.class.getClassLoader());
+            } catch (IOException|URISyntaxException e) {
+                System.err.println(e.getMessage());
+                throw new RuntimeException(e);
+            }
+
             context = new SpringApplicationBuilder(mainClass).run(args.getSourceArgs());
         });
 
@@ -135,7 +165,7 @@ public class App extends SpringBootServletInitializer {
     public PersistenceUnitPostProcessor persistenceUnitPostProcessor() {
         return pui -> {
             for (DynamicEntityDescriptor a : DynamicEntityDescriptorFactory.instances()) {
-                pui.addManagedClassName(PACKAGE + a.getSufixedEntityName());
+                pui.addManagedClassName(PACKAGE + a.getSuffixedEntityClassName());
             }
         };
     }

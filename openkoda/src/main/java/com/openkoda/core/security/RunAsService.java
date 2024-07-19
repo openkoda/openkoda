@@ -24,6 +24,7 @@ package com.openkoda.core.security;
 import com.openkoda.controller.ComponentProvider;
 import com.openkoda.core.flow.Tuple;
 import com.openkoda.model.User;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ public class RunAsService extends ComponentProvider implements HasSecurityRules 
     @Autowired
     @Lazy
     SecurityContextRepository securityContextRepository;
+    
+    @Inject private OrganizationUserDetailsService organizationUserDetailsService;
 
     @PreAuthorize(CHECK_CAN_IMPERSONATE_OR_IS_SPOOFED)
     public boolean startRunAsUser(User user, HttpServletRequest request, HttpServletResponse response) {
@@ -67,7 +70,7 @@ public class RunAsService extends ComponentProvider implements HasSecurityRules 
         if(user != null) {
 //            SecurityContextHolder.clearContext();
             List<Tuple> info = repositories.unsecure.user.getUserRolesAndPrivileges(user.getId());
-            OrganizationUser userDetails = (OrganizationUser) OrganizationUserDetailsService.setUserDetails(user, info);
+            OrganizationUser userDetails = (OrganizationUser) organizationUserDetailsService.setUserDetails(user, info);
             userDetails.setSpoofed(isSpoofed);
 
             Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

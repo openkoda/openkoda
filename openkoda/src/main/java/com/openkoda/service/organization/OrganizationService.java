@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.openkoda.controller.common.SessionData.CURRENT_ORGANIZATION_ID;
 
 /**
  *
@@ -93,10 +92,6 @@ public class OrganizationService extends ComponentProvider {
             deleted = false;
             throw new RuntimeException("sql exception in [removeOrganization]", throwables);
         } finally {
-            Object objOrgId = services.sessionService.getSessionAttribute(CURRENT_ORGANIZATION_ID);
-            if (deleted && orgId.equals(objOrgId)) {
-                services.sessionService.removeAttribute(CURRENT_ORGANIZATION_ID);
-            }
             DataSourceUtils.releaseConnection(connection, dataSource);
         }
         return true;

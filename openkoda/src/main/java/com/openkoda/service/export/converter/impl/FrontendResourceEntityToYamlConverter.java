@@ -30,6 +30,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
@@ -47,12 +48,12 @@ public class FrontendResourceEntityToYamlConverter extends AbstractEntityToYamlC
 
 
     @Override
-    public FrontendResourceConversionDto addToZip(FrontendResource entity, ZipOutputStream zipOut){
+    public FrontendResourceConversionDto addToZip(FrontendResource entity, ZipOutputStream zipOut, Set<String> zipEntries){
          List<ControllerEndpoint> controllerEndpoints = controllerEndpointRepository.findByFrontendResourceId(entity.getId());
          for(ControllerEndpoint ce : controllerEndpoints){
-             controllerEndpointEntityToYamlConverter.addToZip(ce, zipOut);
+             controllerEndpointEntityToYamlConverter.addToZip(ce, zipOut, zipEntries);
          }
-         return super.addToZip(entity, zipOut);
+         return super.addToZip(entity, zipOut, zipEntries);
 
     }
     @Override

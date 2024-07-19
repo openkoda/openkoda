@@ -52,6 +52,7 @@ public class ComponentsController extends ComponentProvider implements HasSecuri
         allResources.addAll(repositories.secure.eventListener.findAll());
         allResources.addAll(repositories.secure.scheduler.findAll());
         allResources.addAll(repositories.secure.form.findAll());
+        allResources.addAll(repositories.secure.privilege.findAll());
 
         return services.componentExport.exportToZip(allResources).toByteArray();
     }
@@ -163,10 +164,10 @@ public class ComponentsController extends ComponentProvider implements HasSecuri
     @PreAuthorize(CHECK_CAN_MANAGE_BACKEND)
     @Transactional
     @RequestMapping(value = _COMPONENT + _IMPORT + _ZIP, method = RequestMethod.POST)
-    public Object importComponentsZip(@RequestParam("file") MultipartFile file) {
+    public Object importComponentsZip(@RequestParam("file") MultipartFile file, @RequestParam(value = "delete", defaultValue = "false") Boolean delete) {
         debug("[importComponentsZip]");
         return Flow.init()
-                .thenSet(importLog ,a -> services.componentImport.loadResourcesFromZip(file))
+                .thenSet(importLog ,a -> services.zipComponentImport.loadResourcesFromZip(file, delete))
                 .execute()
                 .mav("components");
     }

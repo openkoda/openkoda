@@ -1,41 +1,37 @@
 package com.openkoda;
 
 import com.openkoda.core.helper.SpringProfilesHelper;
-import com.openkoda.model.common.OpenkodaEntity;
-import com.openkoda.repository.EntityUnrelatedQueries;
-import com.openkoda.repository.SecureRepository;
-import com.openkoda.service.dynamicentity.DynamicEntityDescriptor;
-import com.openkoda.service.dynamicentity.DynamicEntityDescriptorFactory;
+import com.openkoda.repository.NativeQueries;
 import org.springframework.beans.factory.annotation.Autowired;
-import reactor.util.function.Tuple2;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.openkoda.core.helper.SpringProfilesHelper.SPRING_PROFILES_ACTIVE_ENV;
 import static com.openkoda.core.helper.SpringProfilesHelper.SPRING_PROFILES_ACTIVE_PROP;
-import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationService.createAndLoadDynamicClasses;
+import static com.openkoda.service.dynamicentity.DynamicEntityRegistrationService.buildAndLoadDynamicClasses;
 
 public class OpenkodaApp {
 
     @Autowired
-    EntityUnrelatedQueries entityUnrelatedQueries;
-    public static void main(String[] args) throws ClassNotFoundException, IOException {
+    NativeQueries nativeQueries;
+
+    public static void main(String[] args) throws ClassNotFoundException, IOException, URISyntaxException {
+        boolean isForce = args != null && Arrays.stream(args).anyMatch(a -> "--force".equals(a));
+        App.initializationSafetyCheck(isForce);
         OpenkodaApp.startOpenkodaApp(App.class, args);
     }
 
-    public static void startOpenkodaApp(Class appClass, String[] args) throws IOException, ClassNotFoundException {
+    public static void startOpenkodaApp(Class appClass, String[] args) throws IOException, ClassNotFoundException, URISyntaxException {
         setProfiles(args);
         JDBCApp.main(args);
         if(!SpringProfilesHelper.isInitializationProfile()) {
-            for (DynamicEntityDescriptor a : DynamicEntityDescriptorFactory.loadableInstances()) {
-                Tuple2<Class<? extends OpenkodaEntity>, Class<? extends SecureRepository<? extends OpenkodaEntity>>> rt =
-                        createAndLoadDynamicClasses(a, App.class.getClassLoader());
-            }
-
+            buildAndLoadDynamicClasses(App.class.getClassLoader());
         }
-        App.startApp(appClass, args);
+        App.startApp(appClass, args, true);
     }
     /* Used for setting active spring profiles when they are provided in args array
 

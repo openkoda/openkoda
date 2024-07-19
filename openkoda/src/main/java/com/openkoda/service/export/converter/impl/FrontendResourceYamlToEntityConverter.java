@@ -98,14 +98,17 @@ public class FrontendResourceYamlToEntityConverter extends ComponentProvider imp
     }
 
     private FrontendResource getFrontendResource(FrontendResourceConversionDto dto){
-        FrontendResource frontendResource = new FrontendResource();
-        frontendResource.setName(dto.getName());
+        FrontendResource frontendResource = repositories.unsecure.frontendResource.findByNameAndAccessLevelAndOrganizationId(dto.getName(), dto.getAccessLevel(), dto.getOrganizationId());
+        if(frontendResource == null) {
+            frontendResource = new FrontendResource();
+            frontendResource.setName(dto.getName());
+            frontendResource.setAccessLevel(dto.getAccessLevel());
+            frontendResource.setOrganizationId(dto.getOrganizationId());
+        }
         frontendResource.setIncludeInSitemap(dto.getIncludeInSitemap());
-        frontendResource.setAccessLevel(dto.getAccessLevel());
         frontendResource.setRequiredPrivilege(dto.getRequiredPrivilege());
         frontendResource.setType(dto.getType());
         frontendResource.setResourceType(dto.getResourceType());
-        frontendResource.setOrganizationId(dto.getOrganizationId());
         frontendResource.setModuleName(dto.getModule());
         frontendResource.setEmbeddable(dto.isEmbeddable());
         return frontendResource;

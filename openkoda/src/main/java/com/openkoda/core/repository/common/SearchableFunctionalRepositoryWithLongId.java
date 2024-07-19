@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.core.repository.common;
 
 import com.openkoda.core.form.AbstractEntityForm;
+import com.openkoda.core.form.FrontendMappingFieldDefinition;
 import com.openkoda.core.multitenancy.TenantResolver;
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.core.security.OrganizationUser;
@@ -42,8 +43,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.util.function.Tuple3;
 
 import java.lang.reflect.Constructor;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -89,6 +94,10 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
      * @param searchTerm array of search terms
      */
     default Specification<T> searchSpecification(String ... searchTerm) {
+        return searchSpecificationFactory(searchTerm);
+    }
+
+    static Specification searchSpecificationFactory(String ... searchTerm) {
         if (ArrayUtils.isEmpty(searchTerm)) {
             return (root, query, cb) -> cb.conjunction();
         }
@@ -101,11 +110,51 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
         };
     }
 
+    default Specification<T> filterSpecification(List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        if (filters.isEmpty()) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> {
+            Predicate[] searchPredicates = new Predicate[filters.size()];
+            int i = 0;
+            for (Tuple3<String, FrontendMappingFieldDefinition, String> filter : filters) {
+                switch (filter.getT2().getType()) {
+                    case text, textarea:
+                        searchPredicates[i] = cb.like(cb.lower(root.get(filter.getT1())), "%" + StringUtils.lowerCase(filter.getT3()) + "%");
+                        break;
+                    case number:
+                        searchPredicates[i] = cb.equal(root.get(filter.getT1()), new BigDecimal(filter.getT3()));
+                        break;
+                    case dropdown, many_to_one:
+                        searchPredicates[i] = cb.equal(root.get(filter.getT1()), filter.getT3());
+                        break;
+                    case date, datetime:
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        searchPredicates[i] = filter.getT1().endsWith("_to") ? cb.lessThanOrEqualTo(root.get(filter.getT2().getName()), LocalDate.parse(filter.getT3(), formatter))
+                                : cb.greaterThanOrEqualTo(root.get(filter.getT2().getName()), LocalDate.parse(filter.getT3(), formatter));
+                        break;
+                    default:
+                        switch (filter.getT2().getType().getDbType()) {
+                            case BOOLEAN:
+                                searchPredicates[i] = cb.equal(root.get(filter.getT1()), Boolean.valueOf(filter.getT3()));
+                                break;
+                        }
+                }
+                i++;
+            }
+            return cb.and(searchPredicates);
+        };
+    }
+
     /**
      * Constructs search specification for organizationId field of the mapped repository entity.
      */
     default Specification<T> organizationIdSpecification(Long organizationId) {
         return (root, query, cb) -> organizationId == null ? cb.conjunction() : cb.equal(root.get("organizationId"), organizationId);
+    }
+    
+    default Specification<T> organizationIdSpecification(Set<Long> organizationIds) {
+        return (root, query, cb) -> (organizationIds == null || organizationIds.isEmpty()) ? cb.conjunction() : cb.in(root.get("organizationId")).value(organizationIds);
     }
 
     /**
@@ -148,6 +197,10 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
      */
     default Specification<T> secureSpecification(SecurityScope scope, Specification<T> specification, Enum requiredPrivilege, Long organizationId){
         return secureSpecification(scope, Specification.where(specification).and(organizationIdSpecification(organizationId)), requiredPrivilege);
+    }
+    
+    default Specification<T> secureSpecification(SecurityScope scope, Specification<T> specification, Enum requiredPrivilege, Set<Long> organizationIds){
+        return secureSpecification(scope, Specification.where(specification).and(organizationIdSpecification(organizationIds    )), requiredPrivilege);
     }
 
     @Override
@@ -205,6 +258,21 @@ public interface SearchableFunctionalRepositoryWithLongId<T extends SearchableEn
     @Override
     default Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable) {
         return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification), null, organizationId), pageable);
+    }
+
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification).and(filterSpecification(filters)), null, organizationId), pageable);
+    }
+    
+    @Override
+    default Page<T> search(SecurityScope scope, String searchTerm, Set<Long> organizationIds, Specification<T> specification, Pageable pageable, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification).and(filterSpecification(filters)), null, organizationIds), pageable);
+    }
+
+    @Override
+    default List<T> search(SecurityScope scope, String searchTerm, Long organizationId, Specification<T> specification, List<Tuple3<String, FrontendMappingFieldDefinition, String>> filters) {
+        return this.findAll(secureSpecification(scope, searchSpecification(searchTerm).and(specification).and(filterSpecification(filters)), null, organizationId));
     }
 
     @Override

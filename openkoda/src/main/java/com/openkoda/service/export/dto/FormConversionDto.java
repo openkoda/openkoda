@@ -28,8 +28,11 @@ public class FormConversionDto extends ComponentDto {
     private String writePrivilege;
     private boolean registerApiCrudController;
     private boolean registerHtmlCrudController;
+    private boolean showOnOrganizationDashboard;
     private String tableColumns;
+    private String filterColumns;
     private String tableName;
+    private String tableView;
 
     public String getName() {
         return name;
@@ -79,6 +82,14 @@ public class FormConversionDto extends ComponentDto {
         this.registerHtmlCrudController = registerHtmlCrudController;
     }
 
+    public boolean isShowOnOrganizationDashboard() {
+        return showOnOrganizationDashboard;
+    }
+
+    public void setShowOnOrganizationDashboard(boolean showOnOrganizationDashboard) {
+        this.showOnOrganizationDashboard = showOnOrganizationDashboard;
+    }
+
     public String getTableColumns() {
         return tableColumns;
     }
@@ -87,11 +98,27 @@ public class FormConversionDto extends ComponentDto {
         this.tableColumns = tableColumns;
     }
 
+    public String getFilterColumns() {
+        return filterColumns;
+    }
+
+    public void setFilterColumns(String filterColumns) {
+        this.filterColumns = filterColumns;
+    }
+
     public String getTableName() {
         return tableName;
     }
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getTableView() {
+        return tableView;
+    }
+
+    public void setTableView(String tableView) {
+        this.tableView = tableView;
     }
 }

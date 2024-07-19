@@ -34,9 +34,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.openkoda.controller.common.URLConstants._HTML_ORGANIZATION;
 import static com.openkoda.core.service.FrontendResourceService.frontendResourceTemplateNamePrefix;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -155,7 +152,7 @@ public class OrganizationControllerHtml extends AbstractOrganizationController {
             br) {
         debug("[inviteUser] orgId {}", organizationId);
         return inviteUser(userFormData, organizationId, br)
-                .mav(ENTITY + '-' + FORMS + "::invite-user-form-success",
+                .mav(String.format("generic-forms::go-to(url='%s')", services.url.organizationSettings(organizationId)),
                         ENTITY + '-' + FORMS + "::invite-user-form-error");
     }
 

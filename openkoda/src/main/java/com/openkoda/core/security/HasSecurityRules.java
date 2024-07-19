@@ -34,7 +34,6 @@ import com.openkoda.model.common.EntityWithRequiredPrivilege;
 import com.openkoda.model.common.LongIdEntity;
 import com.openkoda.model.common.OrganizationRelatedEntity;
 import jakarta.persistence.criteria.*;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Array;
@@ -97,6 +96,9 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
     //More complex rules - can be directly used in @PreAuthorize
     String CHECK_CAN_MANAGE_ORG_DATA =              HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _manageOrgData  + HAS_ORG_PRIVILEGE_CLOSE;
     String CHECK_CAN_READ_ORG_DATA =                HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _readOrgData  + HAS_ORG_PRIVILEGE_CLOSE;
+    String CHECK_CAN_USE_AI =                       HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _useReportingAI + HAS_ORG_PRIVILEGE_CLOSE;
+    String CHECK_CAN_CREATE_REPORTS =               HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _createReports  + HAS_ORG_PRIVILEGE_CLOSE;
+    String CHECK_CAN_READ_REPORTS =                 HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _readReports  + HAS_ORG_PRIVILEGE_CLOSE;
     String CHECK_CAN_READ_USER_SETTINGS =           BB_OPEN +  HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _readUserData + HAS_ORG_PRIVILEGE_CLOSE + OR  + CHECK_IS_THIS_USERID + BB_CLOSE;
     String CHECK_CAN_MANAGE_USER_SETTINGS =         BB_OPEN +  HAS_GLOBAL_OR_ORG_PRIVILEGE_STRING_OPEN + _manageUserData + HAS_ORG_PRIVILEGE_CLOSE + OR  + CHECK_IS_THIS_USERID + BB_CLOSE;
     String CHECK_CAN_IMPERSONATE_OR_IS_SPOOFED =    BB_OPEN + CHECK_CAN_IMPERSONATE         + OR + CHECK_IS_SPOOFED                                                 + BB_CLOSE;
@@ -213,6 +215,15 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
         return hasGlobalPrivilege(Privilege.canAccessGlobalSettings) || hasGlobalPrivilege(Privilege.canReadBackend) || hasGlobalPrivilege(Privilege.canReadSupportData)
                 || hasGlobalPrivilege(Privilege.readUserData) || hasGlobalPrivilege(Privilege.readOrgData) || hasGlobalPrivilege(Privilege.readFrontendResource);
     }
+    
+    default boolean isSuperUser(){
+        return hasGlobalPrivilege(Privilege.canAccessGlobalSettings) && hasGlobalPrivilege(Privilege.canReadBackend)
+                && hasGlobalPrivilege(Privilege.readUserData) && hasGlobalPrivilege(Privilege.readOrgData)
+                && hasGlobalPrivilege(Privilege.canManageBackend)
+                && hasGlobalPrivilege(Privilege.manageUserData) && hasGlobalPrivilege(Privilege.manageOrgData)
+                && hasGlobalPrivilege(Privilege.canChangeEntityOrganization);
+    }
+    
     default Optional<OrganizationUser> getLoggedOrganizationUser() {
         return UserProvider.getFromContext();
     }
@@ -222,7 +233,7 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
     }
 
     default boolean canReadField(FrontendMappingFieldDefinition field, LongIdEntity entity) {
-        return hasFieldPrivileges(field.readPrivilege, field.canReadCheck, entity, null);
+        return hasFieldPrivileges(field.readPrivilege, field.canReadCheck, entity, null, field.isStrictReadAccess());
     }
 
     default boolean canReadOption(OptionWithPrivilege option, Long orgId) {
@@ -233,12 +244,16 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
         return hasGlobalPrivilege(field.readPrivilege);
     }
 
+    default boolean canReadGlobalOrOrgField(FrontendMappingFieldDefinition field, Long organizationId) {
+        return hasGlobalOrOrgPrivilege(field.readPrivilege, organizationId);
+    }
+    
     default boolean canWriteFieldInOrganization(FrontendMappingFieldDefinition field, LongIdEntity entity, Long organizationId) {
         return hasFieldPrivileges(field.writePrivilege, field.canWriteCheck, entity, organizationId);
     }
 
     default boolean canWriteField(FrontendMappingFieldDefinition field, LongIdEntity entity) {
-        return hasFieldPrivileges(field.writePrivilege, field.canWriteCheck, entity, null);
+        return hasFieldPrivileges(field.writePrivilege, field.canWriteCheck, entity, null, field.isStrictWriteAccess());
     }
 
     default boolean canWriteGlobalField(FrontendMappingFieldDefinition field) {
@@ -254,12 +269,11 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
         return IsManyOrganizationsRelatedEntity.class.isAssignableFrom(cls);
     }
 
-    default boolean hasFieldPrivileges(
-            PrivilegeBase fieldPrivilege,
+    default boolean hasFieldPrivileges(PrivilegeBase fieldPrivilege,
             BiFunction<OrganizationUser, LongIdEntity, Boolean> check,
             LongIdEntity entity,
-            Long organizationId) {
-
+            Long organizationId,
+            boolean explicitPrivileges) {
         Optional<OrganizationUser> u = UserProvider.getFromContext();
 
         if (!u.isPresent()) {
@@ -296,13 +310,21 @@ public interface HasSecurityRules extends LoggingComponentWithRequestId {
 
         }
 
-        //if still has no access but there is check function, check it against the entity (entity can be null)
-        if (!canDo && check != null) {
+        //if still has access but there is check function, check it against the entity (entity can be null)
+        if ((explicitPrivileges && canDo || !explicitPrivileges && !canDo) && check != null) {
             Boolean checkResult = check.apply(user, entity);
             canDo = (checkResult != null && checkResult);
         }
 
         return canDo;
+    }
+    
+    default boolean hasFieldPrivileges(
+            PrivilegeBase fieldPrivilege,
+            BiFunction<OrganizationUser, LongIdEntity, Boolean> check,
+            LongIdEntity entity,
+            Long organizationId) {
+        return hasFieldPrivileges(fieldPrivilege, check, entity, null, false);
     }
 
     default boolean isItYou(Long userId) {

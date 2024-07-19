@@ -30,6 +30,7 @@ import com.openkoda.model.Privilege;
 import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.common.SearchableOrganizationRelatedEntity;
 import com.openkoda.repository.SearchableRepositories;
+import org.apache.groovy.util.Arrays;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -37,6 +38,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E extends SearchableOrganizationRelatedEntity, F extends AbstractOrganizationRelatedEntityForm<D, E>> {
+    
+    public static final String ID = "id";
+    public static final String ORGANIZATION_ID = "organizationId";
+    
         private final String key;
         private final FrontendMappingDefinition frontendMappingDefinition;
         private final Class<E> entityClass;
@@ -48,6 +53,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private boolean frontendMappingDefinitionInConstructor = false;
         private Constructor<F> formConstructor;
         private Constructor<F> formEntityConstructor;
+        @SuppressWarnings("unchecked")
         private Class<D> dtoClass = (Class<D>) OrganizationRelatedMap.class;
         private PrivilegeBase defaultControllerPrivilege = Privilege.isUser;
         private PrivilegeBase getAllPrivilege;
@@ -71,6 +77,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         private Specification<E> additionalPredicate;
 
         private String[] genericTableFields;
+        private String[] filterFields;
         private Long organizationId;
 
         private CRUDControllerConfiguration(String key, FrontendMappingDefinition frontendMappingDefinition,
@@ -91,7 +98,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
         }
         private CRUDControllerConfiguration(String key, FrontendMappingDefinition frontendMappingDefinition,
                                             ScopedSecureRepository<E> secureRepository,
-                                            Class<F> formClass, Privilege readPrivilege, Privilege writePrivilege) {
+                                            Class<F> formClass, PrivilegeBase readPrivilege, PrivilegeBase writePrivilege) {
                 try {
                         this.key = key;
                         this.frontendMappingDefinition = frontendMappingDefinition;
@@ -125,8 +132,8 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
                 FrontendMappingDefinition frontendMappingDefinition,
                 ScopedSecureRepository secureRepository,
                 Class formClass,
-                Privilege readPrivilege,
-                Privilege writePrivilege){
+                PrivilegeBase readPrivilege,
+                PrivilegeBase writePrivilege){
                 return new CRUDControllerConfiguration(key, frontendMappingDefinition,
                         secureRepository, formClass, readPrivilege, writePrivilege);
         }
@@ -195,8 +202,21 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
                 return genericTableFields;
         }
 
+        public String[] getReportFormFieldNames() {
+                return Arrays.concat(new String[]{ID, ORGANIZATION_ID}, genericTableFields);
+        }
+
+        public String[] getFilterFieldNames() {
+                return filterFields;
+        }
+
         public CRUDControllerConfiguration<D, E, F> setGenericTableFields(String... genericTableFields) {
                 this.genericTableFields = genericTableFields;
+                return this;
+        }
+
+        public CRUDControllerConfiguration<D, E, F> setFilterFields(String... filterFields) {
+                this.filterFields = filterFields;
                 return this;
         }
 
@@ -386,7 +406,7 @@ public class CRUDControllerConfiguration<D extends OrganizationRelatedObject, E 
 
         public Specification<E> getAdditionalSpecification() {
                 return isMapEntity ? (additionalPredicate != null ? (root, query, cb) -> cb.and(cb.equal(root.get("key"), key), additionalPredicate.toPredicate(root, query, cb))
-                        : (root, query, cb) -> cb.equal(root.get("key"), key)) : (additionalPredicate != null ? ((root, query, cb) -> additionalPredicate.toPredicate(root, query, cb))  : null);
+                        : (root, query, cb) -> cb.equal(root.get("key"), key)) : (additionalPredicate != null ? ((root, query, cb) -> additionalPredicate.toPredicate(root, query, cb)) : (root, query, cb) -> cb.conjunction());
         }
 
         public boolean isMapEntity() {

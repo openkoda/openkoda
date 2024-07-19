@@ -8,4 +8,7 @@ public class Validator {
     public static Function<String,String> notBlank(){
         return v -> isBlank(v) ? "not.empty" : null;
     }
+    public static Function<String,String> notCamelCase(){
+        return v -> isBlank(v) || !v.matches("([a-z]+[a-zA-Z0-9]*)+") ? "not.matching.camelCase" : null;
+    }
 }

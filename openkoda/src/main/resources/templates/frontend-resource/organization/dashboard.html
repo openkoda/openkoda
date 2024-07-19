@@ -6,9 +6,10 @@
 <div class="container-fluid">
 
     <div layout:fragment="content" th:attr="data-menu-item='dashboard'">
+
         <th:block th:if="${!#lists.isEmpty(@htmlCRUDControllerConfigurationMap.getExposedSorted(organizationEntityId))}">
             <div class="row col gap-10 mb-4" id="registered-cruds">
-                <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposedSorted()}">
+                <th:block th:each="entry : ${@htmlCRUDControllerConfigurationMap.getExposedSorted(organizationEntityId)}">
                         <a class="card shadow entity-link large text-secondary" th:href="${@url.all(organizationEntity.id, entry.key)}">
                             <div class="flex-grow-1 flex-shrink-1 flex-none d-flex align-items-center justify-content-center flex-column justify-center">
                                 <div class="icon-div"><i class="fas fa-table-list fa-2x"></i></div>

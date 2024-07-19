@@ -22,7 +22,6 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.model.component.event;
 
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Arrays;
 
 /**
  * Helper Event object to perform mapping between {@link com.openkoda.form.EventListenerForm} adn {@link EventListenerEntry}
@@ -73,7 +72,7 @@ public class Event {
     }
 
     public String getEventString(){
-        return StringUtils.join(Arrays.array(eventClassName, eventName, eventObjectType), ",");
+        return StringUtils.join(new String[] {eventClassName, eventName, eventObjectType}, ",");
     }
 
 }

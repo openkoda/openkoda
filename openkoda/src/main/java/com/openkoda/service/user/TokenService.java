@@ -23,6 +23,7 @@ package com.openkoda.service.user;
 
 import com.openkoda.controller.ComponentProvider;
 import com.openkoda.model.Privilege;
+import com.openkoda.model.PrivilegeBase;
 import com.openkoda.model.Token;
 import com.openkoda.model.User;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +50,7 @@ public class TokenService extends ComponentProvider {
     /**
      * Creates multiple use token for the given userId.
      */
-    public Token createMultipleUseTokenForUser(Long id, int expirationTimeInSeconds, Enum ... allowedPrivileges) {
+    public Token createMultipleUseTokenForUser(Long id, int expirationTimeInSeconds, PrivilegeBase ... allowedPrivileges) {
         debug("[createMultipleUseTokenForUser] {}", id);
         return repositories.unsecure.token.saveAndFlush(new Token(repositories.unsecure.user.findOne(id), true, false, expirationTimeInSeconds, allowedPrivileges));
     }
@@ -57,7 +58,7 @@ public class TokenService extends ComponentProvider {
     /**
      * Creates multiple use token for the given userId.
      */
-    public Token createMultipleUseTokenForUser(Long id, Enum ... allowedPrivileges) {
+    public Token createMultipleUseTokenForUser(Long id, PrivilegeBase ... allowedPrivileges) {
         debug("[createMultipleUseTokenForUser] {}", id);
         return repositories.unsecure.token.saveAndFlush(new Token(repositories.unsecure.user.findOne(id), false, allowedPrivileges));
     }
@@ -74,7 +75,7 @@ public class TokenService extends ComponentProvider {
      * Creates token for the given user with narrowed privileges.
      * Once the request is authenticated, the user should have narrowed privileges only to these in the token.
      */
-    public Token createTokenForUser(User user, Enum ... allowedPrivileges) {
+    public Token createTokenForUser(User user, PrivilegeBase... allowedPrivileges) {
         debug("[createTokenForUser] {} with privileges {}", user.getId(), Arrays.toString(allowedPrivileges));
         return repositories.unsecure.token.saveAndFlush(new Token(user, allowedPrivileges));
     }
@@ -83,7 +84,7 @@ public class TokenService extends ComponentProvider {
      * Creates token for the given user with narrowed privileges and expiration time.
      * Once the request is authenticated, the user should have narrowed privileges only to these in the token.
      */
-    public Token createTokenForUser(User user, int expirationTimeInSeconds, Enum ... allowedPrivileges) {
+    public Token createTokenForUser(User user, int expirationTimeInSeconds, PrivilegeBase ... allowedPrivileges) {
         debug("[createTokenForUser] {} with privileges {}", user.getId(), Arrays.toString(allowedPrivileges));
         return repositories.unsecure.token.saveAndFlush(new Token(user, expirationTimeInSeconds, allowedPrivileges));
     }

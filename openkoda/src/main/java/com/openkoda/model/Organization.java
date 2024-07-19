@@ -21,8 +21,10 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.openkoda.dto.CanonicalObject;
 import com.openkoda.model.common.*;
+import com.openkoda.model.file.File;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
@@ -87,6 +89,20 @@ public class Organization extends TimestampedEntity implements AuditableEntity, 
     @Column(name = "value")
     private Map<String, String> properties = new HashMap<>();
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean personalizeDashboard = false;
+    @Column
+    private String mainBrandColor;
+    @Column
+    private String secondBrandColor;
+
+    @JsonIgnore
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true, insertable = false, updatable = false, name = "logo_id")
+    protected File logo;
+
+    @Column(nullable = true, name = "logo_id", updatable = true)
+    protected Long logoId;
 
     public Organization() {
     }
@@ -165,5 +181,41 @@ public class Organization extends TimestampedEntity implements AuditableEntity, 
 
     public String setProperty(String name, String value) {
         return properties.put(name, value);
+    }
+
+    public Boolean getPersonalizeDashboard() {
+        return personalizeDashboard;
+    }
+
+    public void setPersonalizeDashboard(Boolean personalizeDashboard) {
+        this.personalizeDashboard = personalizeDashboard;
+    }
+
+    public String getMainBrandColor() {
+        return mainBrandColor;
+    }
+
+    public void setMainBrandColor(String mainBrandColor) {
+        this.mainBrandColor = mainBrandColor;
+    }
+
+    public String getSecondBrandColor() {
+        return secondBrandColor;
+    }
+
+    public void setSecondBrandColor(String secondBrandColor) {
+        this.secondBrandColor = secondBrandColor;
+    }
+
+    public Long getLogoId() {
+        return logoId;
+    }
+
+    public void setLogoId(Long logoId) {
+        this.logoId = logoId;
+    }
+
+    public File getLogo() {
+        return logo;
     }
 }

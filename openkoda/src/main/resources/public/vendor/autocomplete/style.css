@@ -1,3 +1,17 @@
 .CodeMirror-hints-documentation{
  word-wrap: break-word;
 }
+
+.CodeMirror-hints {
+ z-index: 1002!important;
+}
+
+li.CodeMirror-hint-active {
+ background: #16a0b2!important;
+ color: white;
+}
+
+li.CodeMirror-hint:hover {
+ background: #18b2c6!important;
+ color: white;
+}

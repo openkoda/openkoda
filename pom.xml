@@ -17,11 +17,20 @@
 
     <groupId>com.openkoda</groupId>
     <artifactId>openkoda-aggregator</artifactId>
-    <version>1.5.1</version>
+    <version>1.7.1</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>openkoda-app</module>
         <module>openkoda</module>
     </modules>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <distribution>repo</distribution>
+            <url>https://choosealicense.com/licenses/mit/</url>
+            <comments>A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.</comments>
+        </license>
+    </licenses>
 </project>

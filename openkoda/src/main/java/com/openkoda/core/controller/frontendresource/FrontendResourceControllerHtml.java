@@ -142,7 +142,39 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
     @PreAuthorize(CHECK_CAN_MANAGE_FRONTEND_RESOURCES)
     public Object reloadToDraft(@PathVariable(ID) Long frontendResourceId) {
         debug("[reload] FrontendResourceId: {}", frontendResourceId);
-        return reloadFrontendResourceToDraft(frontendResourceId)
+        return copyResourceContentToDraft(frontendResourceId)
+                .mav(a -> true);
+    }
+
+    /**
+     * Copies live content of {@link FrontendResource} to draft.
+     * See also {@link AbstractFrontendResourceController}
+     *
+     * @param frontendResourceId
+     * @return java.lang.Object
+     */
+    @RequestMapping(value = _ID + _COPY + _LIVE, method = POST)
+    @PreAuthorize(CHECK_CAN_MANAGE_FRONTEND_RESOURCES)
+    @ResponseBody
+    public Object copyLiveToDraft(@PathVariable(ID) Long frontendResourceId) {
+        debug("[copyLiveToDraft] FrontendResourceId: {}", frontendResourceId);
+        return copyLiveContentToDraft(frontendResourceId)
+                .mav(a -> true);
+    }
+
+    /**
+     * Copies resource content of {@link FrontendResource} to draft.
+     * See also {@link AbstractFrontendResourceController}
+     *
+     * @param frontendResourceId
+     * @return java.lang.Object
+     */
+    @RequestMapping(value = _ID + _COPY + _RESOURCE, method = POST)
+    @PreAuthorize(CHECK_CAN_MANAGE_FRONTEND_RESOURCES)
+    @ResponseBody
+    public Object copyResourceToDraft(@PathVariable(ID) Long frontendResourceId) {
+        debug("[copyResourceToDraft] FrontendResourceId: {}", frontendResourceId);
+        return copyResourceContentToDraft(frontendResourceId)
                 .mav(a -> true);
     }
 
@@ -213,6 +245,26 @@ public class FrontendResourceControllerHtml extends AbstractFrontendResourceCont
                 .then(a -> repositories.secure.scheduler.findOne(objectId))
                 .then(a -> services.componentExport.removeExportedFilesIfRequired(a.result))
                 .then(a -> conf.getSecureRepository().deleteOne(objectId))
+                .execute()
+                .mav(a -> true, a -> false);
+    }
+    @PostMapping(_ID_REMOVE + _DRAFT)
+    @Transactional
+    public Object removeDraft(
+            @PathVariable(name=ID) Long objectId,
+            @PathVariable(name = ORGANIZATIONID, required = false) Long organizationId) {
+        CRUDControllerConfiguration conf = controllers.htmlCrudControllerConfigurationMap.get(FRONTENDRESOURCE);
+        PrivilegeBase privilege = conf.getPostRemovePrivilege();
+        if (not(hasGlobalOrOrgPrivilege(privilege, organizationId))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return Flow.init(componentProvider, objectId)
+                .thenSet(frontendResourceEntity, a -> repositories.secure.frontendResource.findOne(objectId))
+                .then(a -> {
+                    a.model.get(frontendResourceEntity).setDraftContent(null);
+                    return a.result;
+                })
+                .then(a -> repositories.secure.frontendResource.saveOne(a.model.get(frontendResourceEntity)))
                 .execute()
                 .mav(a -> true, a -> false);
     }

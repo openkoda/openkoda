@@ -11,7 +11,6 @@
     <link rel="icon" type="image/png" th:href="${@environment.getProperty('application.icon')}">
 
     <title><th:block th:text="${@environment.getProperty('application.name')}"></th:block> - Dashboard</title>
-
     <!-- Custom CSS -->
     <th:block th:replace="~{frontend-resource/global/head-customization::css}"></th:block>
     <link href="/vendor/bootstrap-select/bootstrap-select.min.css" rel="stylesheet">
@@ -48,6 +47,65 @@
     <th:block th:if="${#arrays.contains(@environment.getActiveProfiles(),'tutorial')}">
         <th:block th:replace="~{tutorial::tutorial}"></th:block>
     </th:block>
+    <style th:inline="css" th:if="${@environment.getProperty('dashboard.personalization.enabled') and organizationEntity != null and organizationEntity.personalizeDashboard}">
+        :root {
+            --primary: [(${organizationEntity.secondBrandColor})];
+            --primary-light: color-mix(in srgb, var(--primary), white 20%);
+            --primary-dark: color-mix(in srgb, var(--primary), black 20%);
+            --primary-with-alpha: color-mix(in srgb, var(--primary), transparent 75%);
+            --main-bg-color: [(${organizationEntity.mainBrandColor})];
+            --main-bg-color-light: color-mix(in srgb, var(--main-bg-color), white 20%);
+            --main-bg-color-dark: color-mix(in srgb, var(--main-bg-color), black 20%);
+        }
+        .sidebar-dark {
+            background-color: var(--main-bg-color);
+        }
+        .sidebar-dark #sidebarToggle::after {
+            color: var(--main-bg-color);
+        }
+        .text-secondary {
+            color: var(--main-bg-color);
+        }
+        .btn-primary, .page-item.active .page-link, input[type=file]::file-selector-button {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .page-link:focus {
+            box-shadow: 0 0 0 .2rem var(--primary-with-alpha)!important;
+        }
+        .btn-primary:hover, input[type=file]::file-selector-button:hover {
+            background-color: var(--primary-dark)!important;
+            border-color: var(--primary-dark)!important;
+        }
+        .btn-primary.focus, .btn-primary:focus, .btn-primary.active, .btn-primary:active {
+            background-color: var(--primary-dark)!important;
+            border-color: var(--primary-dark)!important;
+            box-shadow: 0 0 0 .2rem var(--primary-with-alpha)!important;
+        }
+        .btn-primary.disabled, .btn-primary:disabled {
+            background-color: var(--primary-light)!important;
+            border-color: var(--primary-light)!important;
+        }
+        .text-primary, a:not(.btn-primary):not(.page-link), ul.nav-tabs .nav-link.active, .gpt-message code, li:not(.page-item.active) a.page-link {
+            color: var(--primary)!important;
+        }
+        .dropdown-item.active, .dropdown-item:active {
+            background-color: var(--primary)!important;
+        }
+        a:not(.btn-primary):hover, ul.nav-tabs .nav-link.active:hover {
+            color: var(--primary-dark)!important;
+        }
+        .text-primary-light {
+            color: var(--primary-light)!important;
+        }
+        .form-control:focus {
+            border-color: var(--primary-light)!important;
+            box-shadow: 0 0 0 .2rem var(--primary-with-alpha)!important;
+        }
+        input[type="checkbox"] {
+            accent-color: var(--primary)!important;
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -61,6 +119,7 @@
 </script>
 <script th:each="k : ${commonDictionariesNames}" th:if="${#messages.msgOrNull('commonDictionaries.' + k + '.headers') != null }"
           th:utext="${'commonDictionariesHeaders[''' + k + '''] = ''' + #messages.msg('commonDictionaries.' + k + '.headers') + '''.split('','');'}"/>
+
 <!-- Page Wrapper -->
 <div id="wrapper" class="main-view">
 
@@ -164,8 +223,8 @@
 
 
                     <th:block th:if="${organizationEntity != null
-                        and #strings.contains(#ctx.springRequestContext.requestUri,'organization')
-                        and !#strings.contains(#ctx.springRequestContext.requestUri,'organization/all')}">
+                        and #strings.contains(currentUri,'organization')
+                        and !#strings.contains(currentUri,'organization/all')}">
                         <div class="topbar-divider d-none d-sm-block"></div>
                         <li class="nav-item">
                             <a class="nav-link" th:href="${@url.organizationDashboard(organizationEntity.id)}">
@@ -190,7 +249,7 @@
                              aria-labelledby="userDropdown">
 
                             <a th:each="org : ${@user.organizations()}" class="dropdown-item" th:href="${@url.organizationDashboard(org.key)}">
-                                <i th:class="'fas fa-circle fa-sm fa-fw mr-2 ' + ${#strings.contains(#ctx.springRequestContext.requestUri,org.key) ? 'text-primary-light' : 'text-gray-400'}"></i>
+                                <i th:class="'fas fa-circle fa-sm fa-fw mr-2 ' + ${#strings.contains(currentUri,org.key) ? 'text-primary-light' : 'text-gray-400'}"></i>
                                 <th:block th:text="${org.value}">Organization</th:block>
                             </a>
                             <a class="dropdown-item" th:if="${@auth.hasGlobalPrivilege('canAccessGlobalSettings')}" th:href="${@url.adminDashboard()}">
@@ -244,6 +303,9 @@
             <div class="container my-auto">
                 <div class="copyright text-center my-auto">
                     <span>Copyright &copy; <th:block th:text="${@environment.getProperty('application.name')}"></th:block> 2024</span>
+                </div>
+                <div class="copyright font-italic text-center my-auto">
+                    <span>Version : <th:block th:text="${buildInfo.get('Version') + ' (Branch: ' + buildInfo.get('Branch') + ' @ ' + buildInfo.get('Hostname') + ', ' + buildInfo.get('Timestamp') + ')'}"></th:block></span>
                 </div>
             </div>
         </footer>

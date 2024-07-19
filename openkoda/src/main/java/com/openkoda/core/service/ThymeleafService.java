@@ -60,7 +60,7 @@ public class ThymeleafService implements LoggingComponentWithRequestId {
             ctx.setVariable(entry.getKey(), entry.getValue());
         }
 
-        Set<String> fragments = Collections.singleton(fragment);
+        Set<String> fragments = fragment != null ? Collections.singleton(fragment) : Collections.emptySet();
         String result = templateEngine.process(templateName, fragments,  ctx);
         return result;
     }

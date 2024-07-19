@@ -58,6 +58,6 @@ public class FrontendResourceAssetController extends AbstractFileController impl
             return;
         }
 
-        services.file.getFileContentAndPrepareResponse(f, download, response);
+        services.file.getFileContentAndPrepareResponse(f, download, true, response);
     }
 }

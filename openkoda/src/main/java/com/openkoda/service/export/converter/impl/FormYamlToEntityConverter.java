@@ -22,6 +22,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package com.openkoda.service.export.converter.impl;
 
 import com.openkoda.controller.ComponentProvider;
+import com.openkoda.core.helper.PrivilegeHelper;
 import com.openkoda.model.component.Form;
 import com.openkoda.service.export.converter.YamlToEntityConverter;
 import com.openkoda.service.export.converter.YamlToEntityParentConverter;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static com.openkoda.model.Privilege.valueOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
@@ -42,7 +42,7 @@ public class FormYamlToEntityConverter extends ComponentProvider implements Yaml
     public Form convertAndSave(FormConversionDto dto, String filePath) {
         debug("[convertAndSave]");
         Form form = getForm(dto, loadResourceAsString(dto.getCode()));
-        repositories.unsecure.entityUnrelatedQueries.createTableIfNotExists(form.getTableName());
+        services.dynamicEntity.createDynamicTableIfNotExists(form.getTableName());
         return repositories.secure.form.saveOne(form);
     }
 
@@ -50,23 +50,29 @@ public class FormYamlToEntityConverter extends ComponentProvider implements Yaml
     public Form convertAndSave(FormConversionDto dto, String filePath, Map<String, String> resources) {
         debug("[convertAndSave]");
         Form form = getForm(dto, resources.get(dto.getCode()));
-        repositories.unsecure.entityUnrelatedQueries.createTableIfNotExists(form.getTableName());
+        services.dynamicEntity.createDynamicTableIfNotExists(form.getTableName());
         form = repositories.secure.form.saveOne(form);
         return form;
     }
 
     @NotNull
     private Form getForm(FormConversionDto dto, String code) {
-        Form form = new Form();
-        form.setName(dto.getName());
-        form.setReadPrivilege(isNotBlank(dto.getReadPrivilege()) ? valueOf(dto.getReadPrivilege()) : null);
-        form.setWritePrivilege(isNotBlank(dto.getWritePrivilege()) ? valueOf(dto.getWritePrivilege()) : null);
+        Form form = repositories.unsecure.form.findByName(dto.getName());
+        if(form == null) {
+            form = new Form();
+            form.setName(dto.getName());
+        }
+        form.setReadPrivilege(isNotBlank(dto.getReadPrivilege()) ? PrivilegeHelper.getInstance().valueOfString(dto.getReadPrivilege()) : null);
+        form.setWritePrivilege(isNotBlank(dto.getWritePrivilege()) ? PrivilegeHelper.getInstance().valueOfString(dto.getWritePrivilege()) : null);
         form.setRegisterApiCrudController(dto.isRegisterApiCrudController());
         form.setRegisterHtmlCrudController(dto.isRegisterHtmlCrudController());
+        form.setShowOnOrganizationDashboard(dto.isShowOnOrganizationDashboard());
         form.setTableColumns(dto.getTableColumns());
+        form.setFilterColumns(dto.getFilterColumns());
         form.setModuleName(dto.getModule());
         form.setTableName(dto.getTableName());
         form.setOrganizationId(dto.getOrganizationId());
+        form.setTableView(dto.getTableView());
         form.setCode(code);
         return form;
     }

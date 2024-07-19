@@ -41,6 +41,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -69,15 +70,9 @@ public class UtilServices implements LoggingComponent {
     public LocalDate parseDate(String s) {
         return LocalDate.parse(s);
     }
-    @Autocomplete(doc="Parse time string to time object")
+    @Autocomplete(doc="Parse time string (eg. 23:12) to time object")
     public LocalTime parseTime(String s) {
         return LocalTime.parse(s);
-    }
-    @Autocomplete(doc="Parse date time string to date time object")
-    public LocalDateTime parseDateTime(String s, String t) {
-        LocalTime time = LocalTime.parse(t);
-        LocalDate date = LocalDate.parse(s);
-        return date.atTime(time);
     }
     @Autocomplete(doc="Get string value of the object")
     public String toString(Object o) {
@@ -127,7 +122,8 @@ public class UtilServices implements LoggingComponent {
     }
     @Autocomplete(doc="Export data to CSV file")
     public File toCSV(String filename, List<Object[]> data, String... headers) throws IOException, SQLException {
-        return csvService.createCSV(filename, data, headers);
+        return csvService.createCSV(filename, data.stream().map(Arrays::asList)
+                .toList(), headers);
     }
     @Autocomplete(doc="Compute MD5 hash of string")
     public String md5(String value) {

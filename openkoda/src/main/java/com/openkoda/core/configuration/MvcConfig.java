@@ -33,7 +33,7 @@ import com.openkoda.core.helper.UrlHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.model.MutableUserInOrganization;
-import com.openkoda.service.export.ComponentImportService;
+import com.openkoda.service.export.ClasspathComponentImportService;
 import jakarta.inject.Inject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +93,7 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
     private SlashEndingUrlInterceptor slashEndingUrlInterceptor;
 
     @Inject
-    public ComponentImportService componentImportService;
+    public ClasspathComponentImportService classpathComponentImportService;
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
@@ -142,7 +142,7 @@ public class MvcConfig implements URLConstants, WebMvcConfigurer  {
         FrontendResourceOrClassLoaderTemplateResolver templateResolver = new FrontendResourceOrClassLoaderTemplateResolver(
                 queryExecutor,
                 frontendResourceService,
-                componentImportService,
+                classpathComponentImportService,
                 frontendResourceLoadAlwaysFromResources,
                 frontendResourceCreateIfNotExist,
                 filteringProcessor);

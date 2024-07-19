@@ -33,9 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -212,7 +215,7 @@ public class FileService extends ComponentProvider {
     
     //public for access in tests in FileServiceTest, because this method was in FileService
     //and creating test class for this controller creates problem with setting FileService.storageType in test cases
-    public HttpServletResponse getFileContentAndPrepareResponse(File f, boolean download, HttpServletResponse response) throws IOException, SQLException {
+    public HttpServletResponse getFileContentAndPrepareResponse(File f, boolean download, boolean allowCache, HttpServletResponse response) throws IOException, SQLException {
         debug("[getFileContentAndPrepareResponse] fileId: {}", f.getId());
         response.addHeader("Content-Type", f.getContentType());
         response.addHeader("Content-Length", Long.toString(f.getSize()));
@@ -223,7 +226,7 @@ public class FileService extends ComponentProvider {
         StorageType storageType = f.getStorageType();
         if (storageType == filesystem || storageType == database) {
             response.addHeader("Accept-Ranges", "bytes");
-            response.addHeader("Cache-Control", "max-age=604800, public");            
+            response.addHeader("Cache-Control", allowCache ? "max-age=604800, public" : "no-store, no-cache, must-revalidate");
         }
         
         if (storageType == filesystem) {
@@ -239,7 +242,7 @@ public class FileService extends ComponentProvider {
     }
 
     private void handleFilesystemRead(File f, OutputStream os) {
-        var ioResult = tryIOOperation( () -> {
+         var ioResult = tryIOOperation( () -> {
             try (InputStream is = f.getContentStream()) {
                 IOUtils.copy(is, os);
             }
@@ -323,5 +326,85 @@ public class FileService extends ComponentProvider {
         }
         
         return result;
+    }
+    
+    private class MockMultipartFile implements MultipartFile {
+
+        private final String name;
+
+        private final String originalFilename;
+
+        @Nullable
+        private final String contentType;
+
+        private final byte[] content;
+
+        public MockMultipartFile(String name, @Nullable byte[] content) {
+            this(name, "", null, content);
+        }
+
+        public MockMultipartFile(String name, InputStream contentStream) throws IOException {
+            this(name, "", null, FileCopyUtils.copyToByteArray(contentStream));
+        }
+
+        public MockMultipartFile(
+                String name, @Nullable String originalFilename, @Nullable String contentType, @Nullable byte[] content) {
+
+            Assert.hasLength(name, "Name must not be empty");
+            this.name = name;
+            this.originalFilename = (originalFilename != null ? originalFilename : "");
+            this.contentType = contentType;
+            this.content = (content != null ? content : new byte[0]);
+        }
+
+        public MockMultipartFile(
+                String name, @Nullable String originalFilename, @Nullable String contentType, InputStream contentStream)
+                throws IOException {
+
+            this(name, originalFilename, contentType, FileCopyUtils.copyToByteArray(contentStream));
+        }
+
+
+        @Override
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        @NonNull
+        public String getOriginalFilename() {
+            return this.originalFilename;
+        }
+
+        @Override
+        @Nullable
+        public String getContentType() {
+            return this.contentType;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return (this.content.length == 0);
+        }
+
+        @Override
+        public long getSize() {
+            return this.content.length;
+        }
+
+        @Override
+        public byte[] getBytes() throws IOException {
+            return this.content;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return new ByteArrayInputStream(this.content);
+        }
+
+        public void transferTo(java.io.File dest) throws IOException, IllegalStateException {
+            FileCopyUtils.copy(this.content, dest);
+        }
+
     }
 }

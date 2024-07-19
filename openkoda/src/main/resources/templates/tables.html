@@ -13,6 +13,7 @@
                th:value="${page.size}"/>
         <input type="hidden" th:name="${qualifier + '_sort'}"
                th:value="${param.get(qualifier + '_sort')}"/>
+        <th:block th:replace="~{forms::remainingParametersHiddenInputs}"/>
         <div class="input-group mt-1 mb-3 float-right">
             <input type="text" class="form-control simple-control form-neutral" th:name="${qualifier + '_search'}"
                        th:value="${param.get(qualifier + '_search')}" th:placeholder="#{search.placeholder}"/>
@@ -32,11 +33,12 @@
 </nav>
 
 <nav th:fragment="tablenav-base(qualifier, page, paramName, paramValue)" th:if="${page.hasNext() || page.hasPrevious()}">
-    <div th:with="query=${paramName != '' ? '&' + paramName + '=' + paramValue : ''}" class="row justify-content-center pagination-wrapper mt-3">
+    <div th:with="query=${(paramName != '' ? '&' + paramName + '=' + paramValue : '') + @url.filterParams(qualifier, objFilters)}"
+         class="row justify-content-center pagination-wrapper mt-3">
         <ul class="pagination justify-content-center">
             <li th:if="${!page.isFirst()}" class="page-item">
                 <a class="page-link" href="#"
-                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__ + ${query}"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__ + ${query} + ${remainingParameters}"
                    aria-label="Previous">
                     <span aria-hidden="true">&lsaquo;</span>
                     <span class="sr-only">Previous</span>
@@ -45,13 +47,13 @@
 
             <li th:if="${page.isLast() AND page.number > 1}" class="page-item">
                 <a class="page-link"
-                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__ + ${query}"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 2}')}__ + ${query} + ${remainingParameters}"
                    th:text="${page.number-1}">1</a>
             </li>
 
             <li th:if="${page.hasPrevious()}" class="page-item">
                 <a class="page-link"
-                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__ + ${query}"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number - 1}')}__ + ${query} + ${remainingParameters}"
                    th:text="${page.number}">1</a>
             </li>
 
@@ -59,17 +61,17 @@
 
             <li th:if="${page.hasNext() && page.getTotalPages() - 1 - page.number > 0}" class="page-item"><a
                     class="page-link" href="#"
-                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__ + ${query}"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__ + ${query} + ${remainingParameters}"
                     th:text="${page.number + 2}">4</a></li>
 
             <li th:if="${page.hasNext() && page.getTotalPages() - 2 - page.number > 0}" class="page-item"><a
                     class="page-link" href="#"
-                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 2}')}__ + ${query}"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 2}')}__ + ${query} + ${remainingParameters}"
                     th:text="${page.number + 3}">5</a></li>
 
             <li th:if="${page.hasNext() && page.getTotalPages() - 3 - page.number > 0}" class="page-item"><a
                     class="page-link" href="#"
-                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 3}')}__ + ${query}"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 3}')}__ + ${query} + ${remainingParameters}"
                     th:text="${page.number + 4}">6</a></li>
 
             <li th:if="${page.hasNext() && page.getTotalPages() - 4 - page.number > 0}" class="page-item d-none d-sm-block"><a
@@ -79,11 +81,11 @@
 
             <li th:if="${page.hasNext() && page.getTotalPages() - 5 - page.number > 0}" class="page-item d-none d-sm-block"><a
                     class="page-link" href="#"
-                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 5}')}__ + ${query}"
+                    th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 5}')}__ + ${query} + ${remainingParameters}"
                     th:text="${page.number + 6}">8</a></li>
             <li th:if="${!page.isLast()}" class="page-item">
                 <a class="page-link" href="#"
-                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__ + ${query}"
+                   th:href="__${ @url.createThymeleafExpressionForPagination(qualifier, '${page.number + 1}')}__ + ${query} + ${remainingParameters}"
                    aria-label="Next">
                     <span aria-hidden="true">&rsaquo;</span>
                     <span class="sr-only">Next</span>
@@ -92,7 +94,7 @@
         </ul>
         <th:block th:if="${page.getTotalPages() > 3}">
             <div class=" col-6 col-lg-2">
-                <form method="get" class="form-inline search-form d-block">
+                <form method="get" th:attr="entityKey=${qualifier}" class="form-inline search-form d-block">
                     <div class="input-group float-left">
                         <input type="hidden" th:name="${qualifier + '_search'}"
                                th:value="${searchTerm}"/>
@@ -102,6 +104,7 @@
                                th:value="${#strings.replace(page.sort, ': ', ',')}"/>
                         <input type="hidden" th:name="${qualifier + '_page'}"
                                th:value="${page.number}"/>
+                        <th:block th:replace="~{forms::remainingParametersHiddenInputs}"/>
                         <div class="input-group float-right">
                             <input id="goto" type="text" class="form-control simple-control bg-gray-200 border-0"
                                    th:placeholder="${'1-' + (page.getTotalPages())}" th:min="1" th:max="${page.getTotalPages()}"/>
@@ -117,7 +120,7 @@
 </nav>
 
 <th th:fragment="asort(property, label, qualifier, page)" th:classappend="${property}">
-    <a th:href="${ @url.pageableParams(property, qualifier, page, searchTerm) }"
+    <a th:href="${ @url.sortParams(property, qualifier, page, searchTerm, objFilters, remainingParameters) }"
        th:id="|sort_${property}|">
         <th:block th:text="${label}"></th:block>
         <i th:if="${@url.isOrder(page, property)}" class="fa"
@@ -158,7 +161,7 @@
                                 <a class="w-10-ch d-inline-flex" th:if="${!organizationView}" th:href="${@url.organizationSettings(ur.organizationId)}"
                                        th:text="${ur.organizationName}"></a>
                                 <th:block th:if="${isGlobalAdmin || (isOrgAdmin && !@auth.isItYou(a.id))}">
-                                    <block th:replace="~{forms::single-dropdown-post-form-class('userRole_'+${ur.id}, 'userRoleName', ${ur.roleName} , 'organizationRoles', ${@url.organizationModifyMemberRole(ur.organizationId, ur.userId)}, 'app.refreshView', 'd-inline simple-control w-auto mt-1 mb-1')}" />
+                                    <block th:replace="~{forms::single-dropdown-post-form-class('userRole_'+${ur.id}, 'userRoleName', ${ur.roleName} , '__datalist_organizationRoles', ${@url.organizationModifyMemberRole(ur.organizationId, ur.userId)}, 'app.refreshView', 'd-inline simple-control w-auto mt-1 mb-1')}" />
                                 </th:block>
                                 <th:block th:unless="${isGlobalAdmin || (isOrgAdmin && !@auth.isItYou(a.id))}">
                                     <div class="badge badge-light font-weight-normal" th:text="${ @messages.get('label.role.' + ur.roleName)}"/>
@@ -250,6 +253,56 @@
         </div>
     </div>
     <nav th:replace="~{tables::tablenav('role', ${rolePage})}"></nav>
+</div>
+
+<div th:fragment="privileges(privilegePage, title)" class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row">
+        <div class="card-header-buttons">
+            <a th:if="${@auth.hasGlobalPrivilege('canManageBackend')}" class="btn-primary btn btn-sm" th:href="${@url.newPrivilege()}" th:text="#{template.new}">New</a>
+        </div>
+    </div>
+
+   <div class="card-body pt-0">
+        <nav th:replace="~{tables::search('privilege', ${privilegePage})}"></nav>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th th:replace="~{tables::asort('id', #{template.id}, 'privilege', ${privilegePage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'privilege', ${privilegePage})}">Message</th>
+                    <th>Label</th>
+                    <th>Category</th>
+                    <th>Group</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${privilegePage.content}" th:class="${!a.removable}? 'font-italic'">
+                    <td><span th:text="${a.id}">1</span></td>
+                    <td><span th:text="${a.name()}">Coca-Cola</span></td>
+                    <td><span th:text="${a.getLabel()}">Coca-Cola</span></td>
+                    <td><span th:text="${a.getCategory()}">Coca-Cola</span></td>
+                    <td><span th:text="${a.getGroup() != null ? a.getGroup().getLabel() : '' }">Coca-Cola</span></td>
+                    <td>
+                        <div class="table-row-btns">
+                            <a th:if="${a.removable && @auth.hasGlobalPrivilege('canManageBackend')}" 
+                                class="" th:href="${@url.privilegeSettings(a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
+                                <i class="fas fa-pen-to-square text-primary"></i>
+                            </a>
+                            <form th:if="${a.removable && @auth.hasGlobalPrivilege('canManageBackend')}" method="POST" th:action="${a.id} + '/remove'">
+                                <button th:replace="~{forms::icon-submit-and-callback-inline(
+                                    'fas fa-trash text-danger',
+                                    #{template.remove},
+                                    'app.showMessage(\'Removing privilege ' + ${a.name} + '.\')')}"/>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav th:replace="~{tables::tablenav('privilege', ${privilegePage})}"></nav>
 </div>
 
 <div th:fragment="organizations(organizationPage, title)" class="card shadow mb-4">
@@ -380,16 +433,16 @@
     </div>
 
     <div class="card-body pt-0">
-        <nav th:replace="tables::search('obj', ${organizationRelatedEntityPage})"></nav>
+        <nav th:replace="tables::search('frontendresource', ${organizationRelatedEntityPage})"></nav>
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th th:replace="~{tables::asort('id', #{template.id}, 'obj', ${organizationRelatedEntityPage})}"></th>
-                    <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
-                    <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
-                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'obj', ${organizationRelatedEntityPage})}">Access Level</th>
-                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'obj', ${organizationRelatedEntityPage})}">Organization ID</th>
+                    <th th:replace="~{tables::asort('id', #{template.id}, 'frontendresource', ${organizationRelatedEntityPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'frontendresource', ${organizationRelatedEntityPage})}">Name</th>
+                    <th th:replace="~{tables::asort('type', 'Type', 'frontendresource', ${organizationRelatedEntityPage})}">Type</th>
+                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'frontendresource', ${organizationRelatedEntityPage})}">Access Level</th>
+                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'frontendresource', ${organizationRelatedEntityPage})}">Organization ID</th>
                     <th>Required Privilege</th>
                     <th></th>
                     <th></th>
@@ -413,32 +466,6 @@
                             <a th:href="${@url.getFrontendResourcePreviewUrl(a, false, true)}" class="version-hash badge badge-light" th:text="#{template.resource} + ' ' + ${resourceHashSuffix}"
                                   data-toggle="tooltip" data-placement="top" th:title="${@frontendResource.getResourceURL(a)}"></a>
                         </th:block>
-<!--                        <div class="dropdown" th:with="resourceExists=${@frontendResource.resourceExists(a)}">-->
-<!--                            <a class="btn btn-sm btn-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink"-->
-<!--                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >-->
-<!--                                    <th:block th:if="${resourceExists}">-->
-<!--                                        <th:block th:utext="${'Version: '}"></th:block>-->
-<!--                                        <span class="version-hash" th:text="${resourceHashSuffix}"></span>-->
-<!--                                    </th:block>-->
-<!--                                    <th:block th:if="${!resourceExists}">-->
-<!--                                        <th:block th:utext="${'No content'}"></th:block>-->
-<!--                                    </th:block>-->
-<!--                            </a>-->
-<!--                            <div class="dropdown-menu dropdown-menu-right shadow animated&#45;&#45;fade-in"-->
-<!--                                 aria-labelledby="dropdownMenuLink">-->
-<!--&lt;!&ndash;                                <a class="dropdown-item" th:classappend="${resourceExists} ? '' : 'href-disabled'" target="_blank"&ndash;&gt;-->
-<!--&lt;!&ndash;                                   th:href="${a.name == '' ? '' : '/' + a.name + '?resource'}" th:text="#{template.view}">View</a>&ndash;&gt;-->
-<!--                                <a class="dropdown-item"  th:classappend="${resourceExists} ? '' : 'href-disabled'">-->
-<!--                                    <th:block th:replace="~{forms::single-button-post-form-with-confirm-callback-class(-->
-<!--                                        ${@url.reloadFrontendResourceToDraft(a.id)},-->
-<!--                                        #{frontendResource.pushToDraft},-->
-<!--                                        #{template.confirmationPrompt},-->
-<!--                                        'a => app.showMessageAndReload(\'Content reloaded from resources and pushed to draft.\')',-->
-<!--                                        'btn-link btn-simple p-0' )}"/>-->
-<!--                                </a>-->
-
-<!--                            </div>-->
-<!--                        </div>-->
                     </td>
                     <td class="align-left">
                         <th:block th:if="${a.draft}">
@@ -454,12 +481,32 @@
                     </td>
                     <td>
                         <div class="table-row-btns">
-                            <form th:replace="~{forms::single-icon-post-form-with-confirm-callback(
-                                   ${@url.deleteFrontendResource(a.id)},
-                                   'fas fa-trash text-danger',
-                                   #{template.remove},
-                                    #{template.confirmationPrompt}, 'a => app.showMessageAndReload(\'Frontend Resource entry is deleted.\')')}" />
-                            <th:block th:unless="${a.name == '' || !a.draft}"></th:block>
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLinkRemove"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   data-toggle-second="tooltip" data-placement="top" th:title="#{template.edit}">
+                                    <i class="fas fa-trash text-danger"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                     aria-labelledby="dropdownMenuLink">
+                                    <th:block th:unless="${a.name == '' || !a.contentExists}">
+                                        <form th:replace="~{forms::single-link-post-form-with-confirm-callback-with-class(
+                                           ${@url.deleteFrontendResource(a.id)},
+                                           #{template.cms.remove.all},
+                                           #{template.confirmationPrompt},
+                                           'a => app.showMessageAndReload(\'Frontend Resource entry is deleted.\')',
+                                           'dropdown-item m-0 text-dark')}" />
+                                    </th:block>
+                                    <th:block th:unless="${a.name == '' || !a.draft}">
+                                        <form th:replace="~{forms::single-link-post-form-with-confirm-callback-with-class(
+                                           ${@url.deleteFrontendResourceDraft(a.id)},
+                                           #{template.cms.remove.draft},
+                                           #{template.confirmationPrompt},
+                                           'a => app.showMessageAndReload(\'Frontend Resource entry draft is deleted.\')',
+                                           'dropdown-item m-0 text-dark')}" />
+                                    </th:block>
+                                </div>
+                            </div>
                             <form th:replace="~{forms::single-icon-post-form-with-confirm-callback-with-disable(
                                    ${@url.publishFrontendResource(a.id)},
                                    'fas fa-arrow-up-from-bracket text-primary ',
@@ -476,12 +523,39 @@
                                data-toggle="tooltip" data-placement="top" th:title="#{template.exportToYaml}">
                                 <i class="fas fa-download text-primary"></i>
                             </a>
-                            <a class="" th:href="${@url.frontendResourceSettings(a.id)}" data-toggle="tooltip" data-placement="top" th:title="#{template.edit}">
+                            <div class="dropdown no-arrow">
+                                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLinkEdit"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   data-toggle-second="tooltip" data-placement="top" th:title="#{template.copy}">
+                                    <i class="fas fa-copy text-primary"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                     aria-labelledby="dropdownMenuLink">
+                                    <th:block th:unless="${a.name == '' || !a.contentExists}">
+                                        <th:block th:if="${a.draft}">
+                                            <form th:replace="~{forms::single-link-post-form-with-confirm-with-class(
+                                               ${@url.frontendResourceCopyLiveToDraft(a.id)},
+                                               #{template.cms.copy.live},
+                                               #{template.confirmationPrompt},
+                                               'dropdown-item m-0 text-dark')}" />
+                                        </th:block>
+                                        <th:block th:if="${@frontendResource.resourceExists(a)}">
+                                            <form th:replace="~{forms::single-link-post-form-with-confirm-with-class(
+                                               ${@url.frontendResourceCopyResourceToDraft(a.id)},
+                                               #{template.cms.copy.resource},
+                                               #{template.confirmationPrompt},
+                                               'dropdown-item m-0 text-dark')}" />
+                                        </th:block>
+                                    </th:block>
+                                </div>
+                            </div>
+                            <a class="" th:href="${@url.frontendResourceSettings(a.id)}" data-toggle="tooltip" data-placement="top" th:title="${a.draft} ? #{template.cms.edit.draft} : #{template.cms.edit.live}">
                                 <i class="fas fa-pen-to-square text-primary"></i>
                             </a>
                             <div class="dropdown no-arrow">
                                 <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                   data-toggle-second="tooltip" data-placement="top" th:title="#{template.view}">
                                     <i class="fas fa-eye text-primary"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
@@ -502,7 +576,7 @@
             </table>
         </div>
     </div>
-    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+    <nav th:replace="~{tables::tablenav('frontendresource', ${organizationRelatedEntityPage})}"></nav>
 </div>
 
 <div th:fragment="frontend-element(organizationRelatedEntityPage, title)" class="card shadow mb-4">
@@ -514,16 +588,16 @@
     </div>
 
     <div class="card-body pt-0">
-        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
+        <nav th:replace="~{tables::search('webEndpoint', ${organizationRelatedEntityPage})}"></nav>
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th th:replace="~{tables::asort('id', #{template.id}, 'obj', ${organizationRelatedEntityPage})}"></th>
-                    <th th:replace="~{tables::asort('name', 'Name', 'obj', ${organizationRelatedEntityPage})}">Name</th>
-                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'obj', ${organizationRelatedEntityPage})}">Organization ID</th>
-                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'obj', ${organizationRelatedEntityPage})}">Access Level</th>
-                    <th th:replace="~{tables::asort('type', 'Type', 'obj', ${organizationRelatedEntityPage})}">Type</th>
+                    <th th:replace="~{tables::asort('id', #{template.id}, 'webEndpoint', ${organizationRelatedEntityPage})}"></th>
+                    <th th:replace="~{tables::asort('name', 'Name', 'webEndpoint', ${organizationRelatedEntityPage})}">Name</th>
+                    <th th:replace="~{tables::asort('organizationId', 'Organization ID', 'webEndpoint', ${organizationRelatedEntityPage})}">Organization ID</th>
+                    <th th:replace="~{tables::asort('accessLevel', 'Access Level', 'webEndpoint', ${organizationRelatedEntityPage})}">Access Level</th>
+                    <th th:replace="~{tables::asort('type', 'Type', 'webEndpoint', ${organizationRelatedEntityPage})}">Type</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -554,72 +628,7 @@
             </table>
         </div>
     </div>
-    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
-</div>
-
-<div th:fragment="frontend-element-dashboard(organizationRelatedEntityPage, title)" class="card shadow mb-4">
-    <div class="card-header py-3 d-flex flex-row ">
-        <h6 class="m-0 font-weight-bold" th:text="${title}">Frontend Element</h6>
-    </div>
-    <div class="card-body pt-0">
-        <nav th:replace="~{tables::search('obj', ${organizationRelatedEntityPage})}"></nav>
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                <tr>
-                    <th th:replace="~{tables::asort('name', #{frontendResource.name.label}, 'obj', ${organizationRelatedEntityPage})}">
-                        URL Path
-                    </th>
-                    <th th:replace="~{tables::asort('organizationId', #{frontendResource.organizationId.label}, 'obj', ${organizationRelatedEntityPage})}">
-                        Organization ID
-                    </th>
-                    <th th:text="#{template.preview}">Preview</th>
-                    <th th:replace="~{tables::asort('accessLevel', #{frontendResource.accessLevel}, 'obj', ${organizationRelatedEntityPage})}">
-                        Access Level
-                    </th>
-                    <th th:text="#{template.endpoints}">Number of web endpoints</th>
-                    <th th:replace="~{tables::asort('createdOn', #{template.updatedOn}, 'obj', ${organizationRelatedEntityPage})}">
-                        updated On
-                    </th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="a : ${organizationRelatedEntityPage.content}">
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.name}"></a></td>
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.organizationId}"></a></td>
-                    <td><a th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"
-                           th:target="_blank"
-                           th:text="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"></a>
-                    </td>
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}" th:text="${a.accessLevel}"></a></td>
-                    <td th:text="${@AllRepositories.unsecure.controllerEndpoint.findByFrontendResourceId(a.id).size()}">
-                        0
-                    </td>
-                    <td><a th:href="${@url.UIComponentSettings(a.id)}"
-                           th:text="${@dates.formatDateTimeLocaleEN(a.getUpdatedOn)}"></a>
-                    </td>
-
-                    <td>
-                        <div class="table-row-btns">
-                            <th:block th:if="${@auth.hasGlobalPrivilege('readFrontendResource')}">
-                                <a class="btn btn-sm btn-primary btn-simple text-nowrap"
-                                   th:href="${@url.UIComponentSettings(a.id)}"
-                                   th:text="#{template.settings}"></a>
-                            </th:block>
-                            <a class="btn btn-sm btn-primary btn-simple text-nowrap"
-                               th:target="_blank"
-                               th:href="${@url.getUiComponentPreviewUrl(organizationEntityId,a.name,a.accessLevel)}"
-                               th:text="#{template.preview}"></a>
-                        </div>
-                    </td>
-
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <nav th:replace="~{tables::tablenav('obj', ${organizationRelatedEntityPage})}"></nav>
+    <nav th:replace="~{tables::tablenav('webEndpoint', ${organizationRelatedEntityPage})}"></nav>
 </div>
 
 <div th:fragment="event(eventListenerPage, title)" class="card shadow mb-4">

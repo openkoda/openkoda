@@ -26,8 +26,6 @@ import com.openkoda.core.repository.common.UnsecuredFunctionalRepositoryWithLong
 import com.openkoda.core.security.HasSecurityRules;
 import com.openkoda.model.OpenkodaModule;
 import com.openkoda.model.component.FrontendResource;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -51,12 +49,10 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
     @Query("select c from FrontendResource c where c.unsecured = TRUE and c.isPage = TRUE and c.includeInSitemap = TRUE and c.type = 'HTML'")
     Collection<FrontendResource> getEntriesToSitemap();
 
-    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
     @Query("select dbFrontendResource from FrontendResource dbFrontendResource where dbFrontendResource.name = :name and " +
             "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
     FrontendResource findByName(@Param("name") String name);
 
-    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
     @Query("select dbFrontendResource from FrontendResource dbFrontendResource " +
             "where dbFrontendResource.name = :urlPath and " +
             "(:orgId is null and dbFrontendResource.organizationId is null or :orgId is not null and dbFrontendResource.organizationId = :orgId) and " +
@@ -69,13 +65,25 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
     @Query("select c from FrontendResource c where c.name = :name")
     FrontendResource findByNameUnsecured(@Param("name") String name);
 
-    @Cacheable(cacheNames = FRONTEND_RESOURCES, key = "#p0", unless = "#result == null")
-    @Query("select dbFrontendResource from FrontendResource dbFrontendResource where dbFrontendResource.isPage = TRUE and " +
-            "((:urlPath is not null and dbFrontendResource.name = :urlPath) or (:frontendResourceId is not null and dbFrontendResource.id = :frontendResourceId)) " +
-            "and dbFrontendResource.accessLevel = :accessLevel " +
-            "and (dbFrontendResource.organizationId = :orgId or dbFrontendResource.organizationId is null ) and " +
-            "( dbFrontendResource.unsecured = TRUE OR " + CHECK_CAN_MANAGE_FRONTEND_RESOURCES_OR_HAS_REQUIRED_PRIVILEGE_JPQL + ")")
-    Page<FrontendResource> findByUrlPathAndAccessLevelAndOrganizationId(@Param("urlPath") String urlPath,
+    @Query("""
+            select dbFrontendResource,
+            case 
+                when dbFrontendResource.accessLevel = 'PUBLIC' and dbFrontendResource.organizationId is not null then 1
+                when dbFrontendResource.accessLevel = 'PUBLIC' and dbFrontendResource.organizationId is null then 2
+                when dbFrontendResource.accessLevel = 'GLOBAL' and dbFrontendResource.organizationId is not null then 1
+                when dbFrontendResource.accessLevel = 'GLOBAL' and dbFrontendResource.organizationId is null then 2
+                when dbFrontendResource.accessLevel = 'ORGANIZATION' and dbFrontendResource.organizationId is not null then 1
+                when dbFrontendResource.accessLevel = 'ORGANIZATION' and dbFrontendResource.organizationId is null then 2
+                when dbFrontendResource.accessLevel = 'GLOBAL' and 'ORGANIZATION' = cast(:accessLevel as text) and dbFrontendResource.organizationId is not null then 3
+                when dbFrontendResource.accessLevel = 'GLOBAL' and 'ORGANIZATION' = cast(:accessLevel as text) and dbFrontendResource.organizationId is null then 4
+                else 10 end as priority
+            from FrontendResource dbFrontendResource where dbFrontendResource.isPage = TRUE and
+                ((:urlPath is not null and dbFrontendResource.name = :urlPath) or (:frontendResourceId is not null and dbFrontendResource.id = :frontendResourceId))
+                and (dbFrontendResource.accessLevel = :accessLevel or dbFrontendResource.accessLevel = 'GLOBAL' and 'ORGANIZATION' = :#{#accessLevel.name()})
+                and (dbFrontendResource.organizationId = :orgId or dbFrontendResource.organizationId is null ) and
+                ( dbFrontendResource.unsecured = TRUE OR ((?#{principal.hasGlobalPrivilege('readFrontendResource') OR principal.hasGlobalPrivilege('manageFrontendResource')}) = TRUE OR dbFrontendResource.requiredPrivilege IN ?#{principal.globalPrivileges}))
+            """)
+    Page<Object[]> findByUrlPathAndAccessLevelAndOrganizationId(@Param("urlPath") String urlPath,
                                                                         @Param("frontendResourceId") Long frontendResourceId,
                                                                         @Param("accessLevel") FrontendResource.AccessLevel accessLevel,
                                                                         @Param("orgId") Long organizationId,
@@ -93,6 +101,7 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
     Page<FrontendResource> findByType(FrontendResource.Type type, Pageable pageable);
 
     Page<FrontendResource> findByResourceType(FrontendResource.ResourceType resourceType, Pageable pageable);
+    Page<FrontendResource> findByResourceTypeAndIndexStringContainingIgnoreCase(FrontendResource.ResourceType resourceType, String search, Pageable pageable);
 
     List<FrontendResource> findByTypeOrderByCreatedOnDesc(FrontendResource.Type type);
 
@@ -101,7 +110,6 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
         @Query(value = "update frontend_resource set content = :content where id = :id and ( " + CHECK_CAN_READ_FRONTEND_RESOURCES_JPQL + ") ", nativeQuery = true)
     Integer updateContent(@Param("id") Long id, @Param("content") String content);
 
-    @CacheEvict(cacheNames = FRONTEND_RESOURCES, key = "#result.name")
     default FrontendResource evictOne(Long id) {
         return findOne(id);
     }
@@ -120,6 +128,11 @@ public interface FrontendResourceRepository extends UnsecuredFunctionalRepositor
 
     @Query("select fr FROM FrontendResource fr where fr.id = :id and fr.resourceType = 'DASHBOARD'")
     FrontendResource findDashboardDefinition(@Param("id") Long id);
+
+    @Query("select fr FROM FrontendResource fr where fr.name = :name and fr.resourceType = 'DASHBOARD'")
+    FrontendResource findDashboardDefinitionByName(@Param("name") String name);
+
+    FrontendResource findByNameAndAccessLevelAndOrganizationId(String name, FrontendResource.AccessLevel accessLevel, Long organizationId);
 
     @Modifying
     @Query("delete from FrontendResource where module = :module")

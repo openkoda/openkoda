@@ -35,10 +35,14 @@ import org.hibernate.annotations.Formula;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table (name = "server_js")
 public class ServerJs extends ComponentEntity {
+
+    final static List<String> contentProperties = Arrays.asList("code", "model", "arguments");
 
     @Column
     private String name;
@@ -128,5 +132,10 @@ public class ServerJs extends ComponentEntity {
     @Override
     public String getRequiredWritePrivilege() {
         return requiredWritePrivilege;
+    }
+
+    @Override
+    public Collection<String> contentProperties() {
+        return contentProperties;
     }
 }
