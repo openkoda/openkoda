@@ -19,9 +19,9 @@ services:
       INIT_EXTERNAL_SCRIPT: ${INIT_EXTERNAL_SCRIPT}
       FILE_STORAGE_FILESYSTEM_PATH: ${FILE_STORAGE_FILESYSTEM_PATH:-/data}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-openkoda}
-      SECURE_COOKIE : ${SECURE_COOKIE:-true}
       STORAGE_TYPE: ${STORAGE_TYPE:-database}
       SPRING_CONFIG_LOCATION: ${SPRING_CONFIG_LOCATION:-classpath:/,/config/}
+      SECURE_COOKIE : ${SECURE_COOKIE:-true}
     links:
         - postgres
     depends_on:
@@ -34,9 +34,10 @@ services:
     environment:
       POSTGRES_DB: openkoda
       POSTGRES_USER: postgres
+      PGUSER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}","-d", "${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
