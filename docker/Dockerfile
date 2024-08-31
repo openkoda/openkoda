@@ -1,5 +1,5 @@
 # First stage: Build the JAR file
-FROM maven:3.9.0-openjdk-17 AS build
+FROM eclipse-temurin:17-jdk AS build
 
 # Set the working directory inside the container
 WORKDIR /app
