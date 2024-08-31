@@ -1,3 +1,16 @@
+# First stage: Build the JAR file
+FROM maven:3.9.0-openjdk-17 AS build
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the Maven project files
+COPY openkoda/pom.xml ./openkoda/
+COPY openkoda/src ./openkoda/src
+
+# Build the JAR file
+RUN mvn -f openkoda/pom.xml clean install spring-boot:repackage -DskipTests
+
 # Use an official OpenJdk runtime as a parent image
 FROM eclipse-temurin:17-jdk
 #Set jar file
