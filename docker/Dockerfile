@@ -30,7 +30,7 @@ RUN mkdir /data /var/log/openkoda /config
 COPY --from=build /app/openkoda/target/openkoda.jar /app/application.jar
 
 # Copy the entry script
-COPY /docker/entrypoint.sh /app/
+COPY /app/openkoda/docker/entrypoint.sh /app/
 
 # Make the entry script executable
 RUN chmod +x entrypoint.sh
