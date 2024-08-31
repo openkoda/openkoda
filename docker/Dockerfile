@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy the Maven project files
 COPY openkoda/pom.xml ./openkoda/
-COPY openkoda/src ./openkoda/src
+COPY openkoda/src/ ./openkoda/src
 COPY docker/entrypoint.sh ./docker/
 
 # Build the JAR file
