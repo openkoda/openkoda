@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy the Maven project files
 COPY openkoda/pom.xml ./openkoda/
 COPY openkoda/src ./openkoda/src
-COPY entrypoint.sh ./docker/
+COPY docker/entrypoint.sh ./docker/
 
 # Build the JAR file
 RUN mvn -f openkoda/pom.xml clean install spring-boot:repackage -DskipTests
