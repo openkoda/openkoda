@@ -29,6 +29,3 @@ jobs:
           context: ./docker
           push: true
           tags: almbolonzi/openkoda:latest
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
