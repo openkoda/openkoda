@@ -128,6 +128,13 @@ If you want to run a development/test instance of Openkoda without https and not
 * Then proceed as described here: https://github.com/openkoda/openkoda?tab=readme-ov-file#docker-compose
 
 
+#### Resolving installation issues
+
+If you encounter any issues during the installation or when running Openkoda for the first time, please:
+
+* Review the existing GitHub tickets, as a similar problem may have been reported before.
+* If not, raise a new ticket, including steps to reproduce the issue and relevant logs—our development team regularly reviews reported issues.
+
 ### ✅ Out-of-the-box features
 
 To significantly reduce development time and effort, Openkoda offers pre-built functionality and out-of-the-box features.
