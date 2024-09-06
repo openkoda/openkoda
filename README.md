@@ -117,6 +117,17 @@ A simpler option may be to use the Docker Compose scripts located in the: `./doc
 curl https://raw.githubusercontent.com/openkoda/openkoda/main/docker/docker-compose.yaml | docker compose -f - up
 ```
 
+#### Running dev/test instance without https
+
+Openkoda uses strict secure cookies setting to increase security.
+
+If you want to run a development/test instance of Openkoda without https and not using localhost then you need to disable secure cookies setting by:
+
+* Set the SECURE_COOKIE environment variable to false before starting docker compose, eg. SET SECURE_COOKIE=false (windows), SECURE_COOKIE=false (linux)
+* You may need to delete your locally cached Openkoda docker images with docker rmi
+* Then proceed as described here: https://github.com/openkoda/openkoda?tab=readme-ov-file#docker-compose
+
+
 ### ✅ Out-of-the-box features
 
 To significantly reduce development time and effort, Openkoda offers pre-built functionality and out-of-the-box features.
