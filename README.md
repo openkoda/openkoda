@@ -3,7 +3,7 @@
 </p>
 
 <div align="center">
-  <h3>Ready-to-use development platform that accelerates the process of building business applications and internal tools.</h3>
+  <h3>Development platform that accelerates the process of building business applications and internal tools.</h3>
 </div>
 
 <div align="center">
@@ -15,7 +15,7 @@
 
 <br/>
 
-* **Reduce development time and effort**. Use pre-built functionalities and out-of-the-box features.
+* **Reduce development time and effort**. Use industry-specific application templates, pre-built functionalities and out-of-the-box features.
 * **Adopt a flexible and scalable approach**. Build applications with dynamic entities. Choose from multiple multi-tenancy models.
 * **Use technology you already know**: Java, Spring Boot, JavaScript, HTML, Hibernate, PostgreSQL
 * **Extend as you wish**. Openkoda offers unlimited customization and integration options.
@@ -25,9 +25,9 @@
 
 ### 📌Contents
 
-🧩 [Integrations](#-integrations)\
 🚀 [How to start](#-getting-started)\
 ✅ [Out-of-the-box features](#-out-of-the-box-features)\
+🧩 [Integrations](#-integrations)\
 👨‍💻 [Tech stack](#-tech-stack)\
 💡 [Sample applications](#-sample-applications)\
 💡 [Application screenshots](#-application-screenshots)\
@@ -35,40 +35,7 @@
 📜 [Release notes](#️-release-notes)\
 🤝 [Partners](#-partners)
 
-### 🧩 Integrations
-
-Enhance your application by adding integrations.
-
-#### Open Source
-
-<div>
-    <img height="60" alt="logo-slack" src="https://github.com/openkoda/openkoda/assets/14223954/bffafc23-6a72-4a8b-86cf-4a073cfe9c3b"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-discord" src="https://github.com/openkoda/openkoda/assets/14223954/f3b72e42-04c1-42c1-b268-76ef524a805c"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-basecamp" src="https://github.com/openkoda/openkoda/assets/14223954/d26eccd9-39f2-4cc5-af86-e3e74bad95cf"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-github" src="https://github.com/openkoda/openkoda/assets/14223954/ba648de4-4cbf-4007-aff4-82c94942a65d"/>&nbsp;&nbsp;
-    <img height="40" alt="logo-jira" src="https://github.com/openkoda/openkoda/assets/14223954/e45c0174-e07e-49dc-bdf5-2c1415538682">&nbsp;&nbsp;
-    <img height="60" alt="logo-trello" src="https://github.com/openkoda/openkoda/assets/14223954/f18841b5-e6ad-4807-9b9c-f0d5622300f7">&nbsp;&nbsp;
-</div>
-
-
-#### Enterprise
-
-<div>
-    <img height="60" alt="logo-google" src="https://github.com/openkoda/openkoda/assets/14223954/ae5cb4fd-4fb2-43ab-9a4a-3ca1deaf1aaf"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-facebook" src="https://github.com/openkoda/openkoda/assets/14223954/42620407-eb57-4a04-a67e-6bc7bbbb4e7c"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-stripe" src="https://github.com/openkoda/openkoda/assets/14223954/33594d22-07f6-4a20-ad71-f18cbb428fc4"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-ms-teams" src="https://github.com/openkoda/openkoda/assets/14223954/61b60851-b821-4f94-8fe5-e7af910017ce"/>&nbsp;&nbsp;
-    <img height="60" alt="logo-ldap" src="https://github.com/openkoda/openkoda/assets/14223954/47058144-3584-4059-9239-42d7192b475a"/>&nbsp;&nbsp;
-</div>
-
-### 👨‍💻 Tech stack
-* Java (17+)
-* Spring Boot 3.x
-* Hibernate
-* PostgreSQL
-* GraalVM
-
-### 🚀 Getting started
+## 🚀 Getting started
 
 #### Installation
 
@@ -135,81 +102,190 @@ If you encounter any issues during the installation or when running Openkoda for
 * Review the existing GitHub tickets, as a similar problem may have been reported before.
 * If not, raise a new ticket, including steps to reproduce the issue and relevant logs—our development team regularly reviews reported issues.
 
-### ✅ Out-of-the-box features
+## ✅ Out-of-the-box features
 
 To significantly reduce development time and effort, Openkoda offers pre-built functionality and out-of-the-box features.
 
-#### 🔀 Dynamic entities: 
-Create database table, CRUD functionality, form, and overview with no need of re-compilation
+(*enterprise options)
 
-#### 🛠️ Application admin panel:
-* **App Configurations**: Manage email settings, roles, privileges, and HTML templates.
-* **Audit Screen**: Track changes to data for accountability.
-* **System Logs**: Review logs for activity insights and troubleshooting.
-* **System Health**: Get a quick overview of system performance and status.
+### 🧑‍💻Solid Application Foundation
 
-#### 👤User Management
-* Invite users to the organization
-* Set roles globally and within the organization context
-* Access user profile settings
-* Spoof user (available in admin mode)
+Build your application without losing time on functionality every application always needs. Start with authentication, user management, multitenancy, and admin dashboard already in place.
 
-#### 🔑 Roles and Privileges
-* Create global or organization-specific roles
-* Assign privileges from a list to each role
+#### Openkoda Industry-Specific Application Templates
 
-#### 🏢 Organization management
-* Separate organization data
-* Implement security rules for data access
-* Customize your own dashboard 
-* Assign organizational roles, such as member or admin, to users.
+Start with our pre-built domain-specific Openkoda application templates giving you a solid base to build your custom applications. Get an enterprise foundation with a predefined data model, useful dashboards, and ready-to-use business features.
 
-#### 📝 CMS
-* Modify HTML templates
-* Edit draft versions of resources
-* Introduce new public resources
+#### Customize and Extend Using Open-Source Java, JavaScript, and PostgreSQL
 
-#### 🗂️ Resource Management
-* Manage file overview
-* Resize images
-* Set files to public access
+Extend your application with open-source, scalable, and high-performance Java and JavaScript (back-end), HTML/CSS (front-end), and PostgreSQL (database).
 
-#### 🔊 Event Listeners: 
-Respond to application events (e.g., user creation, login, application start) with built-in Openkoda handlers (e.g., messaging, push notifications).
+#### *Data Model Builder: Customize Your Data Model and Views with Development Kit UI
 
-#### 💾 Backups: 
-Embedded database backup routines
+Easily update, rename, and create new tables and attributes in your custom data model using our Development Kit UI. Use our intelligent editor with an autocomplete feature to choose from a variety of data types, create dropdowns, multiselect, or conditional types of fields. All inputs are validated, and your changes are applied immediately to both UI and the database.
 
-#### 📥 Import and export: 
-Export components from current app and easily import them into another Openkoda Core instance
+Dynamically configure your data screens – decide which attributes should be presented on the entity’s UI screen and which ones should be used as filters.
 
-#### 🗄️ Multiple Multi-tenancy models: 
-Openkoda supports the following multi-tenancy setups:
-* Single Database / Single Schema
-* Single Database / Many Schemas
-* Multiple Databases / Many Schemas
+#### Dashboard Builder: Create Your Own Data Dashboards with Drag & Drop
+
+Create useful dashboards for different user types and different organizations using pre-built widgets. Design custom views by combining widgets, images, and data tables in our drag & drop visual editor.
+
+#### Modify Look & Feel of Your Application with Custom HTML/CSS
+
+Craft a unique user experience by customizing HTML/CSS of your Openkoda application.
+
+#### *Custom Business Logic
+
+Define custom business logic from the UI using server-side JavaScript.
+
+### 📊Smart Reporting
+
+#### SQL Reporting
+
+Build reports and query your data using SQL. Define your periodic reports directly within Openkoda. Save and share useful reports and summaries across your coworkers.
+
+#### *Reporting AI
+
+Use natural language to create reports or query your application data ad-hoc. Iterate and update your prompt to adjust the results. Run AI-generated SQL queries without sharing your data outside the system. Save the report to run periodically or download it to Excel to share with your coworkers.
+
+#### *Data Visualization
+
+Visualize report data with a custom chart. Use ChartJs to visualize reports and embed it in dashboards and custom application screens.
+
+### ⚙️Automations
+
+#### Email Sender
+
+Send emails to users, administrators or co-workers. Set up an email address for sending notifications, updates, and other communications.
+
+#### In-App Notifications
+
+Programmatically send in-app notifications to a specific user, to users in a specific organization, or globally within the application.
+
+#### *Business Processes Automations
+Use Custom Events and Event Listeners and automate your business processes and trigger specific actions, like: send a reminder to your client about overdue payment or alert your sales team about specific opportunities. Use Job Scheduler to define how often the system should trigger the event.
+
+#### *Custom Automation Logic
+Define custom business rules from the UI using server-side Javascript.
+
+Automate your business processes and trigger specific actions, for example: "find contracts about to expire and send notification to the relevant parties, or send reminders for overdue payments", or "generate and send attachments for a new contract".
+
+### 🔄Custom Integrations
+
+#### Automatically Updated REST API
+
+Connect other applications to an automatically generated secure REST API for standard data model operations and endpoints implemented in your Openkoda application.
+
+#### Custom Integrations
+
+Use open-source Java or other standard programming languages to extend your system with custom integrations.
+
+#### Integrations with External Applications
+
+Enhance your application by integrating your application with the systems you already use, like: Slack, Discord, Basecamp, GitHub, Jira, Trello.
+
+#### *Custom Integrations from the UI
+
+Seamlessly connect with other systems and extend functionality with custom integration using intelligent server-side Javascript code editor.
+
+### 👥Advanced Security and User Management
+
+#### Advanced User Management
+
+Manage users across multiple organizations: invite new users, define user settings, apply roles globally and within organization context, manage passwords.
+
+#### Role-Based Security Model
+
+Define and manage user roles based on access privileges defined on the application, organization, table, individual object attribute, application view or at any other level. Create a precisely secured environment for your coworkers, customers and partners.
+
+#### Custom Privileges
+
+Define your custom access privileges types from UI to configure even more adjusted and secured environment.
+
+### 🏢Scalable Multitenancy
+
+#### Multiple Organizations Support
+
+Create as many organizations, co-existing within a single Openkoda instance, as you want (organizations in a single database). Personalize the organizations with different logos and color palette.
+
+#### *Advanced Multitenancy for Multiple Organizations Support
+Introduce physical data separation and increase application scalability with advanced multi-tenancy models: organizations in separate schemas and organizations in separate databases.
+
+#### Clustering
+High-availability, high-reliability clustering deployment options.
 
 See [multitenancy setup](https://github.com/openkoda/openkoda/blob/main/openkoda/doc/installation.md#multitenancy-setup) for more details
 
-#### 🔄 Job Requests
-Schedule jobs to be performed in time intervals
-Process jobs with event listeners
+### 🗂️ Flexible File Management
 
-#### 🔔 Notifications
+#### File & Resource Management
 
-Synchronize your application with notifications channels:
-Email
-Slack
-Jira
-GitHub
-Trello
-Basecamp
+Centralize and efficiently manage all your files and resources stored in a database or local filesystem. Simplify access for your users to your digital assets. Store and manage your documents, images and files within your Openkoda application. Select database or local filesystem for physical storage. Simplify access to your digital assets.
 
-#### ✉️ Email Sender
-Customize email templates via CMS
-Schedule emails
+#### *Advanced File & Resource Management
+Store and manage your documents, images and files within your Openkoda application. Select database, local filesystem or Amazon S3 for physical storage. Simplify access to your digital assets. Centralize and efficiently manage all your files and resources in one location. Simplify access for your users to your digital assets.
 
-### 💡 Sample applications
+### 📥Import/Export your Data and Customizations
+
+#### Export Data to CSV/Excel
+Easily download your filtered data directly to Excel/CSV for further analysis.
+
+#### *Import Data from CSV/Excel
+Upload your CSV/Excel file to create new and update existing records. Ensure data quality with built-in import validation.
+
+#### Components Import & Export
+Simplify application management process. Upgrade your system easily by importing new application components (including: dashboards, forms, views, web endpoints, event listeners, schedulers, server side code) from a single ZIP file. Export and move your customizations across Openkoda instances.
+
+#### *Maven Project Package
+The exported ZIP archive with your Openkoda application contains a ready to use Maven project, so that you easily set up your local Java development environment and start extending your application with your favourite IDE.
+
+### 🛠️Control and Maintenance
+
+#### Full Audit Trail
+
+Automatically track all changes made to any data within the application. Audit trail logs detailed records of modifications, ensuring transparency and accountability for all user actions.
+
+#### Application & Data Backup System
+
+Automatically backup your application and data to ensure security and recovery. Easily schedule and manage the backup process to protect your system against data loss and system failures.
+
+#### System Health & System Logs
+Monitor the actual health and performance of your system with real-time insights. Access detailed system logs to track events, diagnose issues, and ensure optimal operation.
+
+## 🧩 Integrations
+
+Enhance your application by adding integrations.
+
+#### Open Source
+
+<div>
+    <img height="60" alt="logo-slack" src="https://github.com/openkoda/openkoda/assets/14223954/bffafc23-6a72-4a8b-86cf-4a073cfe9c3b"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-discord" src="https://github.com/openkoda/openkoda/assets/14223954/f3b72e42-04c1-42c1-b268-76ef524a805c"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-basecamp" src="https://github.com/openkoda/openkoda/assets/14223954/d26eccd9-39f2-4cc5-af86-e3e74bad95cf"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-github" src="https://github.com/openkoda/openkoda/assets/14223954/ba648de4-4cbf-4007-aff4-82c94942a65d"/>&nbsp;&nbsp;
+    <img height="40" alt="logo-jira" src="https://github.com/openkoda/openkoda/assets/14223954/e45c0174-e07e-49dc-bdf5-2c1415538682">&nbsp;&nbsp;
+    <img height="60" alt="logo-trello" src="https://github.com/openkoda/openkoda/assets/14223954/f18841b5-e6ad-4807-9b9c-f0d5622300f7">&nbsp;&nbsp;
+</div>
+
+
+#### Enterprise
+
+<div>
+    <img height="60" alt="logo-google" src="https://github.com/openkoda/openkoda/assets/14223954/ae5cb4fd-4fb2-43ab-9a4a-3ca1deaf1aaf"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-facebook" src="https://github.com/openkoda/openkoda/assets/14223954/42620407-eb57-4a04-a67e-6bc7bbbb4e7c"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-stripe" src="https://github.com/openkoda/openkoda/assets/14223954/33594d22-07f6-4a20-ad71-f18cbb428fc4"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-ms-teams" src="https://github.com/openkoda/openkoda/assets/14223954/61b60851-b821-4f94-8fe5-e7af910017ce"/>&nbsp;&nbsp;
+    <img height="60" alt="logo-ldap" src="https://github.com/openkoda/openkoda/assets/14223954/47058144-3584-4059-9239-42d7192b475a"/>&nbsp;&nbsp;
+</div>
+
+## 👨‍💻 Tech stack
+* Java (17+)
+* Spring Boot 3.x
+* Hibernate
+* PostgreSQL
+* GraalVM
+
+## 💡 Sample applications
 
 Openkoda Application Templates are sample applications built with Openkoda.
 
@@ -241,7 +317,7 @@ A sample application that provides weather forecast for selected vacation spots.
 Watch the short video to see the building process:
 [![How to build a weather app in less than 20 minutes?](https://github.com/openkoda/openkoda/assets/10715247/19c670f1-281f-463c-b93c-0715ebef6402)](https://youtu.be/gob4j072Isg)
 
-### 💡 Application screenshots
+## 💡 Application screenshots
 
 CMS
 
@@ -277,18 +353,18 @@ How to contribute:
 
 [**Detailed contribution rules**](https://github.com/openkoda/openkoda/blob/main/openkoda/CONTRIBUTING.md)
 
-### 📢 Follow, learn, and spread the word 
+## 📢 Follow, learn, and spread the word 
 
 [Openkoda Community](https://github.com/orgs/openkoda/repositories): Become a part of Openkoda\
 [YouTube](https://www.youtube.com/channel/UCN0LzuxOYIDdKDX9W0sGFlg): Learn how to use Openkoda\
 [LinkedIn](https://www.linkedin.com/company/openkoda): Stay up to date\
 [About us](https://openkoda.com/about-us/): Let us introduce ourselves
 
-### 🗃️ Release notes
+## 🗃️ Release notes
 
 Openkoda is constantly evolving. Check out the changelog:
 
-#### Openkoda 1.7.1. 🚀
+### Openkoda 1.7.1. 🚀
 
 * Support for dynamic privileges management
 * Optimize custom dashboard view
@@ -299,7 +375,7 @@ Openkoda is constantly evolving. Check out the changelog:
 * Update Insurance App components .zip
 * Fix issues and bugs
 
-#### Openkoda 1.5.
+### Openkoda 1.5.
 
 * **Dynamic Entities**: Now create database tables, perform full CRUD operations and generate forms.
 * **New Dashboard UI**: Enhanced for better readability and smoother navigation flow.
@@ -307,7 +383,7 @@ Openkoda is constantly evolving. Check out the changelog:
 * **Organization-Level Email Configuration**: Customize email settings at the organization level.
 * **Bug Fixes**: Various fixes for improved app stability and performance.
 
-#### Openkoda 1.4.3. 
+### Openkoda 1.4.3. 
 
 * **Page Builder**: Introducing a tool for creating custom dashboards.
 * **Web Forms Assistance**: Streamlined web form creation based on your data model definitions.
@@ -315,7 +391,7 @@ Openkoda is constantly evolving. Check out the changelog:
 * **Dashboard UI**: Upgrades for an improved dashboard interface.
 * **Updates & Security**: Minor adjustments and security fixes.
 
-### 🤝 Partners
+## 🤝 Partners
 
 **Openkoda source code is completely free and is available under the [MIT license](https://github.com/openkoda/openkoda/blob/main/LICENSE).​**
 
@@ -323,7 +399,7 @@ Join us as a partner in transforming the software development market by deliveri
 
 Learn more about [Openkoda Partner Program](https://openkoda.com/partners/).
 
-#### ☁️ Managed Cloud
+### ☁️ Managed Cloud
 
 Our enterprise managed cloud allows for easy deployment and scaling of your Openkoda applications. [Contact us](https://openkoda.com/contact/) for more information.
 
