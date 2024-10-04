@@ -4,7 +4,7 @@
 </p>
 
 <div align="center">
-  <h3>Development platform that accelerates the process of building enterprise systems, SaaS applications and and internal tools.</h3>
+  <h3>Platform that speeds up building enterprise systems, SaaS applications, and internal tools.</h3>
 </div>
 
 <div align="center">
