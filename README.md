@@ -38,7 +38,7 @@
 ### Contents
 
 🚀 [Quick start](#-quick-start)\
-🚀 [Installation](#-quick-start)\
+💾 [Installation](#-installation)\
 ✅ [Features](#-out-of-the-box-features)\
 🧩 [Integrations](#-integrations)\
 👨‍💻 [Tech stack](#-tech-stack)\
