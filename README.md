@@ -39,7 +39,7 @@
 
 🚀 [Quick start](#-quick-start)\
 💾 [Installation](#-installation)\
-✅ [Features](#-out-of-the-box-features)\
+✅ [Features](#-features)\
 🧩 [Integrations](#-integrations)\
 👨‍💻 [Tech stack](#-tech-stack)\
 💡 [Sample applications](#-sample-applications)\
@@ -150,7 +150,7 @@ To significantly reduce development time and effort, Openkoda offers pre-built f
 
 (*enterprise options)
 
-### 🧑‍💻Solid Application Foundation
+### 🧑‍💻 Enterprise Application Foundation
 
 Build your application without losing time on functionality every application always needs. Start with authentication, user management, multitenancy, and admin dashboard already in place.
 
@@ -180,7 +180,7 @@ Craft a unique user experience by customizing HTML/CSS of your Openkoda applicat
 
 Define custom business logic from the UI using server-side JavaScript.
 
-### 📊Smart Reporting
+### 📊 Smart Reporting
 
 #### SQL Reporting
 
@@ -204,6 +204,10 @@ Send emails to users, administrators or co-workers. Set up an email address for 
 
 Programmatically send in-app notifications to a specific user, to users in a specific organization, or globally within the application.
 
+#### *Data-driven PDF, Word and Excel Document Generation
+
+Generate PDF, Word and Excel documents and attachments based on data-driven dynamic placeholders, calculated fields (including multi-row and multi-column tables), and conditional selection of your visual document templates.
+
 #### *Business Processes Automations
 Use Custom Events and Event Listeners and automate your business processes and trigger specific actions, like: send a reminder to your client about overdue payment or alert your sales team about specific opportunities. Use Job Scheduler to define how often the system should trigger the event.
 
@@ -212,7 +216,7 @@ Define custom business rules from the UI using server-side Javascript.
 
 Automate your business processes and trigger specific actions, for example: "find contracts about to expire and send notification to the relevant parties, or send reminders for overdue payments", or "generate and send attachments for a new contract".
 
-### 🔄Custom Integrations
+### 🔄 Custom Integrations
 
 #### Automatically Updated REST API
 
@@ -230,7 +234,7 @@ Enhance your application by integrating your application with the systems you al
 
 Seamlessly connect with other systems and extend functionality with custom integration using intelligent server-side Javascript code editor.
 
-### 👥Advanced Security and User Management
+### 👥 Advanced Security and User Management
 
 #### Advanced User Management
 
