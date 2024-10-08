@@ -21,7 +21,13 @@
 * **Build new applications & replace legacy systems.**
 * **Deliver enterprise and SaaS applications 60% faster thanks to ready-to-use features.**
 * **Unlimited users. No proprietary technologies. No vendor lock-in.**
-* **Pre-built application templates: Embedded Insurance, Claim Management, Policy Management, plus Property Management and Time Tracking.**
+* **Pre-built application templates:** 
+	 - **Embedded Insurance**
+	 - **Claim Management** 
+	 - **Policy Management** 
+	 - **Property Management** 
+	 - **Time Tracking**
+
 
 
 ### When to choose Openkoda
