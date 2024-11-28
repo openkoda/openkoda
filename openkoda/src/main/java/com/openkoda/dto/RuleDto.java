@@ -75,10 +75,16 @@ public class RuleDto {
     //TODO Rule 5.5: DTO should not have code
     private Set<String> splitValues(Map<Long, Map<StatementKey, Object>> statements) {
         Set<String> values = new HashSet();
-        Set<List<String>> collect = statements.values().stream().map(statementKeyObjectMap -> statementKeyObjectMap.get(StatementKey.Value))
-                .filter(Objects::nonNull).map(o -> o.toString().split(",")).map(Arrays::asList).collect(Collectors.toSet());
-        collect.forEach(strings -> values.addAll(strings));
+        extractValuesLists(statements).forEach(strings -> values.addAll(strings));
         return values;
     }
 
+    private Set<List<String>> extractValuesLists(Map<Long, Map<StatementKey, Object>> statements) {
+        return statements.values().stream()
+                .map(statementKeyObjectMap -> statementKeyObjectMap.get(StatementKey.Value))
+                .filter(Objects::nonNull)
+                .map(o -> o.toString().split(","))
+                .map(Arrays::asList)
+                .collect(Collectors.toSet());
+    }
 }

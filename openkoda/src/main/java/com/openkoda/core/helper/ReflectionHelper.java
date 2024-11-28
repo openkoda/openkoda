@@ -83,9 +83,9 @@ public class ReflectionHelper {
             ParameterizedType pType = (ParameterizedType) type;
             List<String> replaces = new ArrayList<>();
             replaces.add(((Class<?>) pType.getRawType()).getPackageName());
-            for(Type t : pType.getActualTypeArguments()){
-                if(t instanceof Class<?>) {
-                    replaces.add(((Class<?>) t).getPackageName());
+            for(Type typeArgument : pType.getActualTypeArguments()){
+                if(typeArgument instanceof Class<?>) {
+                    replaces.add(((Class<?>) typeArgument).getPackageName());
                 }
             }
             result = type.getTypeName();
