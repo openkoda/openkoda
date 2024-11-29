@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.helper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
@@ -28,44 +29,21 @@ import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.join;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
-
 @Component
 public class ReflectionHelper {
 
+    @Autowired
+    private MethodParameterHelper methodParameterHelper;
+
     public String getNameWithParamNames(Method method){
-        return method.getName() + "(" + getParameterNames(method) + ")";
+        return method.getName() + "(" + methodParameterHelper.getParameterNames(method) + ")";
     }
 
     public String getNameWithParamNamesAndTypes(Method method){
-        return  method.getName() + "(" + getParameterNamesAndTypes(method) + ")";
+        return  method.getName() + "(" + methodParameterHelper.getParameterNamesAndTypes(method) + ")";
     }
     public String getNameWithParamNamesAndTypesAndReturnType(Method method, String methodPrefix){
-        return getShortName(method.getGenericReturnType()) + " " + methodPrefix + method.getName() + "(" + getParameterNamesAndTypes(method) + ")";
-    }
-
-    private String getParameterNames(Method method){
-        return stream(method.getParameters())
-                .map(Parameter::getName)
-                .collect(joining(","));
-    }
-
-    private String getParameterTypes(Method method) {
-        return stream(method.getGenericParameterTypes())
-                .map(this::getShortName)
-                .collect(joining(","));
-    }
-
-    private String getParameterNamesAndTypes(Method method) {
-        Parameter[] names = method.getParameters();
-        Type[] types = method.getGenericParameterTypes();
-        String[] namesAndTypes = new String[names.length];
-        for(int i = 0; i < names.length; i++){
-            namesAndTypes[i] = getShortName(types[i]) + " " + names[i].getName();
-        }
-        return join(", ", namesAndTypes);
+        return getShortName(method.getGenericReturnType()) + " " + methodPrefix + method.getName() + "(" + methodParameterHelper.getParameterNamesAndTypes(method) + ")";
     }
 
     /**
