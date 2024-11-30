@@ -27,6 +27,9 @@ import com.openkoda.dto.system.EventListenerDto;
 import com.openkoda.model.component.event.Consumer;
 import com.openkoda.model.component.event.Event;
 import com.openkoda.model.component.event.EventListenerEntry;
+
+import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 
@@ -59,6 +62,8 @@ public class EventListenerForm extends AbstractOrganizationRelatedEntityForm<Eve
         assert(parameters.length > n);
         return parameters[n];
     }
+
+    protected Function <String, String> nullOnEmpty = ((String s) -> !s.isEmpty() ? s : null);
 
     @Override
     protected EventListenerEntry populateTo(EventListenerEntry entity) {

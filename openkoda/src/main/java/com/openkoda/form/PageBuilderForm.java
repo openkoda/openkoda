@@ -28,6 +28,8 @@ import com.openkoda.core.form.AbstractOrganizationRelatedEntityForm;
 import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.model.component.FrontendResource;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 
 import static com.openkoda.controller.common.URLConstants.FRONTENDRESOURCEREGEX;
@@ -35,6 +37,8 @@ import static com.openkoda.core.form.FrontendMappingDefinition.createFrontendMap
 import static com.openkoda.form.FrontendMappingDefinitions.PAGE_BUILDER_FORM;
 import static com.openkoda.model.Privilege.manageFrontendResource;
 import static com.openkoda.model.Privilege.readFrontendResource;
+
+import java.util.function.Function;
 
 /**
  * @author Martyna Litkowska (mlitkowska@stratoflow.com)
@@ -48,6 +52,7 @@ public class PageBuilderForm<CD extends FrontendResourceDto> extends AbstractOrg
 
     );
 
+    private Function <String, String> nullIfBlank = ((String s) -> StringUtils.defaultIfBlank(s, null));
 
     public PageBuilderForm() {
         super(null, (CD)new FrontendResourceDto(), null, pageBuilderForm);
