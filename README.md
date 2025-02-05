@@ -116,8 +116,8 @@ Prerequisites:
 
 Git, Java 17, Maven 3.8+, PostgreSQL 14+
 
-1. [Create an empty PostgreSQL database](https://github.com/openkoda/openkoda.git)
-2. Clone or download this Git repository
+1. Create an empty PostgreSQL database
+2. [Clone or download this Git repository](https://github.com/openkoda/openkoda.git)
 3. Build application with maven:
 ```
 mvn -f openkoda/pom.xml clean install spring-boot:repackage -DskipTests
