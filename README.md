@@ -114,7 +114,7 @@ curl https://raw.githubusercontent.com/openkoda/openkoda/main/docker/docker-comp
 
 Prerequisites:
 
-Git, Java 17+, Maven 3.8+, PostgreSQL 14+
+Git, Java 17, Maven 3.8+, PostgreSQL 14+
 
 1. [Create an empty PostgreSQL database](https://github.com/openkoda/openkoda.git)
 2. Clone or download this Git repository
@@ -124,11 +124,11 @@ mvn -f openkoda/pom.xml clean install spring-boot:repackage -DskipTests
 ```
 4. Initialize the database in a first run:
 ```
-java -Dloader.path=/BOOT-INF/classes -Dspring.profiles.active=openkoda,drop_and_init_database -jar openkoda.jar --server.port=<http port>
+java -Dloader.path=/BOOT-INF/classes -Dspring.profiles.active=openkoda,drop_and_init_database -jar build/openkoda.jar --server.port=<http port>
 ```
 5. Run Openkoda 
 ```
-java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar openkoda.jar --spring.profiles.active=openkoda --server.port=<http port>
+java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar build/openkoda.jar --spring.profiles.active=openkoda --server.port=<http port>
 ```
 
 Detailed instructions can be found in the [Installation](https://github.com/openkoda/openkoda/blob/main/openkoda/doc/installation.md) manual.
