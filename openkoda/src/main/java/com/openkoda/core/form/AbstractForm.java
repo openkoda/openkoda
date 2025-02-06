@@ -293,10 +293,7 @@ public abstract class AbstractForm<D> extends Form implements DtoAndEntity<D, Lo
         throw new RuntimeException(String.format("Can't write field %s", fieldName));
     }
 
-    protected Function <String, String> nullOnEmpty = ((String s) -> !s.isEmpty() ? s : null);
-    protected Function <String, String> nullIfBlank = ((String s) -> StringUtils.defaultIfBlank(s, null));
     protected Function <String, String> emptyOnNull = ((String s) -> StringUtils.defaultString(s));
-    protected Function <String, String> emptyIfBlank = ((String s) -> StringUtils.defaultIfBlank(s, ""));
 
     private Object getField(String fieldName) {
         //FIXME: refactor name generation
