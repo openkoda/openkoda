@@ -235,16 +235,17 @@ public class RuleSpelHelper {
                 );
             } else {
 //                    contains operator => like
+                String cleanedAstValue =  ast.getChild(0).toStringAST().replaceAll(VALUE_APOSTROPHE, "");
                 ruleParts.get(index).put(RuleDto.StatementKey.Field, fieldName);
                 ruleParts.get(index).put(RuleDto.StatementKey.Operator, Operator.valueOf(method.getName()));
-                ruleParts.get(index).put(RuleDto.StatementKey.Value, ast.getChild(0).toStringAST().replaceAll(VALUE_APOSTROPHE, ""));
+                ruleParts.get(index).put(RuleDto.StatementKey.Value, cleanedAstValue);
                 return Tuples.of(
                         ruleParts,
                         entityManager != null ?
                                 entityManager.getCriteriaBuilder()
                                         .like(
                                                 root.get(fieldName),
-                                                "%" + ast.getChild(0).toStringAST().replaceAll(VALUE_APOSTROPHE, "") + "%")
+                                                "%" + cleanedAstValue + "%")
                                 : null);
             }
         }

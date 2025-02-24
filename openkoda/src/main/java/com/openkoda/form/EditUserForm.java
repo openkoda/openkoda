@@ -24,6 +24,10 @@ package com.openkoda.form;
 import com.openkoda.core.form.AbstractEntityForm;
 import com.openkoda.dto.user.EditUserDto;
 import com.openkoda.model.User;
+
+import java.util.function.Function;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 
 /**
@@ -31,7 +35,7 @@ import org.springframework.validation.BindingResult;
  * @since 2019-01-23
  */
 public class EditUserForm extends AbstractEntityForm<EditUserDto, User> {
-
+    private Function <String, String> emptyIfBlank = ((String s) -> StringUtils.defaultIfBlank(s, ""));
 
     public EditUserForm() {
         super(FrontendMappingDefinitions.editUserForm);

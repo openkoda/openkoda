@@ -30,6 +30,9 @@ import com.openkoda.core.form.FrontendMappingDefinition;
 import com.openkoda.core.service.FrontendResourceService;
 import com.openkoda.dto.system.FrontendResourceDto;
 import com.openkoda.model.component.FrontendResource;
+
+import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.BindingResult;
 
@@ -38,6 +41,7 @@ import org.springframework.validation.BindingResult;
  * @since 2019-02-19
  */
 public class FrontendResourceForm<CD extends FrontendResourceDto> extends AbstractOrganizationRelatedEntityForm<CD, FrontendResource> {
+    private Function <String, String> nullIfBlank = ((String s) -> StringUtils.defaultIfBlank(s, null));
 
 
     public FrontendResourceForm() {
