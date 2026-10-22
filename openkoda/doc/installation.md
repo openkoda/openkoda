@@ -116,7 +116,7 @@ Openkoda has a dedicated Spring profile to generate the application database obj
 
 The first run should be manually executed to initialize the data model:
 
-<pre><code>java -Dloader.path=/BOOT-INF/classes -Dspring.profiles.active=openkoda,<b>drop_and_init_database</b> -jar openkoda.jar --server.port=8030</code></pre>
+<pre><code>java -jar openkoda/target/openkoda-1.7.1.jar --spring.profiles.active=openkoda,<b>drop_and_init_database</b> --server.port=8030</code></pre>
 
 Once the execution is completed, the data model should be populated and the database is ready for the first production run.
 
@@ -136,7 +136,7 @@ Scripts to run after the database init are available in `/etc` folder:
 
 ### Run Openkoda application
 ```
-java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar openkoda.jar --spring.profiles.active=openkoda --server.port=8030
+java -Dsecure.cookie=false -jar openkoda/target/openkoda-1.7.1.jar --spring.profiles.active=openkoda --server.port=8030
 ```
 
 ## Multitenancy Setup

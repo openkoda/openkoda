@@ -121,11 +121,11 @@ mvn -f openkoda/pom.xml clean install spring-boot:repackage -DskipTests
 ```
 4. Initialize the database in a first run:
 ```
-java -Dloader.path=/BOOT-INF/classes -Dspring.profiles.active=openkoda,drop_and_init_database -jar build/openkoda.jar --server.port=<http port>
+java -jar openkoda/target/openkoda-1.7.1.jar --spring.profiles.active=openkoda,drop_and_init_database --server.port=<http port>
 ```
 5. Run Openkoda 
 ```
-java -Dloader.path=/BOOT-INF/classes -Dsecure.cookie=false -jar build/openkoda.jar --spring.profiles.active=openkoda --server.port=<http port>
+java -Dsecure.cookie=false -jar openkoda/target/openkoda-1.7.1.jar --spring.profiles.active=openkoda --server.port=<http port>
 ```
 
 Detailed instructions can be found in the [Installation](https://github.com/openkoda/openkoda/blob/main/openkoda/doc/installation.md) manual.
