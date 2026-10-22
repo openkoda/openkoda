@@ -21,6 +21,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.openkoda.core.lifecycle;
 
+import com.openkoda.core.helper.PrivilegeUtils;
 import com.openkoda.core.helper.SpringProfilesHelper;
 import com.openkoda.core.multitenancy.QueryExecutor;
 import com.openkoda.core.tracker.LoggingComponentWithRequestId;
@@ -31,7 +32,6 @@ import com.openkoda.repository.SecureRepository;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Formula;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -97,22 +97,11 @@ public class SearchViewCreator implements LoggingComponentWithRequestId {
                 (isTimestamped ? ModelConstants.CREATED_ON : "null \\:\\: timestamp"),
                 (isTimestamped ? ModelConstants.UPDATED_ON : "null \\:\\: timestamp"),
                 gsa.searchIndexFormula(),
-                getRequiredReadPrivilege(c),
+                PrivilegeUtils.getRequiredReadPrivilege(c),
                 urlFormula,
                 ModelConstants.INDEX_STRING_COLUMN,
                 tableName);
     }
 
 
-    private String getRequiredReadPrivilege(Class c){
-        String requiredReadPrivilege = "null";
-        if(EntityWithRequiredPrivilege.class.isAssignableFrom(c)){
-           try {
-               requiredReadPrivilege = c.getDeclaredField("requiredReadPrivilege").getAnnotation(Formula.class).value();
-           } catch (NoSuchFieldException e) {
-               e.printStackTrace();
-           }
-        }
-        return requiredReadPrivilege;
-    }
 }
