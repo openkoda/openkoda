@@ -4,7 +4,7 @@
 </p>
 
 <div align="center">
-  <h3>Platform that speeds up building enterprise systems, SaaS applications, and internal tools.</h3>
+  <h3>Insurance platform that helps carriers, MGAs, and insurtechs launch policy administration, claims, and embedded insurance systems faster, without vendor lock-in.</h3>
 </div>
 
 <div align="center">
@@ -17,23 +17,21 @@
 <br/>
 
 
-* **Open-source, MIT license**
-* **Build new applications & replace legacy systems.**
-* **Deliver enterprise and SaaS applications 60% faster thanks to ready-to-use features.**
+* **Build new insurance applications & replace legacy systems.**
 * **Unlimited users. No proprietary technologies. No vendor lock-in.**
-* **Pre-built application templates:** 
+* **Pre-built application modules:** 
 	 - **Embedded Insurance**
 	 - **Claim Management** 
-	 - **Policy Management**
-   	 - **Property Management** 
-   	 - **Time Tracking** 
+	 - **Policy Administration**
+   	 - **Underwriting Software** 
+   	 - **Insurance Reporting & Dahsboards** 
 
 
 ### When to choose Openkoda
 
-* **Enterprise foundation**. Start with authentication, role-based security, advanced user management, multitenancy, multiple organizations support, SQL reporting, REST API, file & resource management, full audit trail, application & data automated backup, and admin dashboard already in place.
-* **Reduce development time and effort**. Use industry-specific application templates, pre-built functionalities and ready to use features.
-* **Adopt a flexible and scalable approach**. Build applications with dynamic entities. Choose from multiple multi-tenancy models.
+* **Start with insurance building blocks.** Use ready-made modules for policy administration, claims management, and embedded insurance, then adapt them to your products instead of building from scratch.
+* **Skip the enterprise groundwork.** Authentication, role-based security, user management, multitenancy, multi-organization support, SQL reporting, REST API, file and resource management, full audit trail, automated backups, and an admin dashboard are already in place.
+* **Model your own products and data.** Define new entities dynamically and choose the multitenancy model that fits your setup, whether that's one carrier, several MGAs, or white-label partners.
 * **Use technology you already know**: Java, Spring Boot, JavaScript, HTML, Hibernate, PostgreSQL
 * **Extend as you wish**. Openkoda offers unlimited customization and integration options.
 
