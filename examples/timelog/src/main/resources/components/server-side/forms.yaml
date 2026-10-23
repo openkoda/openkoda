@@ -1,6 +1,0 @@
----
-!!com.openkoda.service.export.dto.ServerJsConversionDto
-name: "forms"
-arguments: ""
-code: "code/server-side/forms.js"
-model: "{}"

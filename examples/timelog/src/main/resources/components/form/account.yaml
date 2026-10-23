@@ -1,9 +1,0 @@
----
-!!com.openkoda.service.export.dto.FormConversionDto
-name: "account"
-readPrivilege: "canAccessGlobalSettings"
-writePrivilege: "canAccessGlobalSettings"
-registerApiCrudController: true
-registerHtmlCrudController: true
-tableColumns: "name,contactPersonName,contactPersonEmail"
-code: "code/form/account.js"
